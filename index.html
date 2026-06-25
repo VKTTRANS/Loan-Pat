@@ -71,6 +71,9 @@
     .action-icon:hover { opacity: 0.8; }
     .icon-edit { background: #eab308; color: #000 !important; }
     .icon-delete { background: #f43f5e; color: #fff !important; }
+    
+    /* สไตล์ประวัติรับชำระล่าสุด */
+    .history-card { background: #0f172a; border-left: 4px solid #10b981; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -130,10 +133,14 @@
         </div>
       </div>
 
-      <div class="row g-3 mb-4">
+      <div class="row g-3 mb-3">
         <div class="col-6"><button onclick="openModal('modalPay')" class="btn-action bg-primary w-100 shadow py-3"><i class="fa-solid fa-wallet d-block mb-2 fs-3"></i> บันทึกรับเงิน</button></div>
         <div class="col-6"><button onclick="openModal('modalCreate')" class="btn-action bg-success w-100 shadow py-3"><i class="fa-solid fa-user-plus d-block mb-2 fs-3"></i> ปล่อยยอดกู้</button></div>
       </div>
+      
+      <button onclick="openModal('modalRecentPays')" class="btn-action w-100 shadow py-3 mb-4" style="background-color: #0ea5e9;">
+        <i class="fa-solid fa-clock-rotate-left me-2"></i> ดูประวัติรับชำระเงินล่าสุด
+      </button>
 
       <h5 class="fw-bold mb-3 text-warning"><i class="fa-solid fa-bell me-2"></i>ใกล้ครบกำหนด / เกินกำหนด</h5>
       <div id="dashAlertContainer"></div>
@@ -173,9 +180,20 @@
       </div>
 
       <input class="form-control mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นหาชื่อผู้กู้..." onkeyup="applyFilters()">
-      
       <div id="loanContainer"></div>
     </div>
+  </div>
+</div>
+
+<div id="modalRecentPays" class="modal-overlay">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-3">
+      <h5 class="fw-bold m-0 text-white"><i class="fa-solid fa-money-bill-transfer me-2"></i>ประวัติรับเงินล่าสุด</h5>
+      <i class="fa-solid fa-circle-xmark text-danger fs-3" onclick="closeModal('modalRecentPays')" style="cursor:pointer"></i>
+    </div>
+    
+    <div id="recentPaysContainer">
+      </div>
   </div>
 </div>
 
@@ -311,8 +329,8 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
   let allLoans = [];
   let curPay = null;
-  let loggedInPassword = ''; // เก็บพาสเวิร์ดไว้เช็คตอนแก้/ลบ
-  let pendingAction = null; // เก็บฟังก์ชันที่รอรหัสผ่าน
+  let loggedInPassword = ''; 
+  let pendingAction = null; 
 
   document.getElementById('cStartDate').valueAsDate = new Date();
 
@@ -370,7 +388,7 @@
     toggleL(false);
     
     if(res.success && res.role === 'Admin') {
-      loggedInPassword = pass; // เก็บไว้ใช้ตอนใส่รหัสผ่านแก้ไข/ลบ
+      loggedInPassword = pass; 
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadDash();
@@ -395,16 +413,47 @@
     let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่</option>';
     let datalistHtml = '';
     res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
-    allLoans.forEach(l => { datalistHtml += `<option value="${l.userName}"></option>`; }); // ซ่อนรหัสสัญญาในหน้าแรก
+    allLoans.forEach(l => { datalistHtml += `<option value="${l.userName}"></option>`; }); 
     
     document.getElementById('cUserSelect').innerHTML = optHtml;
     document.getElementById('payLoanOptions').innerHTML = datalistHtml;
     
     renderDashAlerts();
+    renderRecentPays(res.recentPayments); // เรนเดอร์ประวัติรับชำระ
     applyFilters(); 
   }
 
-  // 🌟 เรนเดอร์เฉพาะคนใกล้ครบหรือเลยกำหนดในหน้า Dashboard
+  // 🌟 ฟังก์ชันเรนเดอร์ประวัติรับชำระล่าสุด
+  function renderRecentPays(data) {
+    let html = '';
+    if (!data || data.length === 0) {
+      html = '<div class="text-center text-muted p-4">ไม่มีประวัติการรับชำระเงินในระบบ</div>';
+    } else {
+      data.forEach(p => {
+        let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' 
+          ? `<a href="${p.slipUrl}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill"><i class="fa-solid fa-image me-1"></i>ดูสลิป</a>` 
+          : `<span class="badge bg-secondary">ไม่มีสลิป</span>`;
+
+        html += `
+          <div class="history-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <b class="text-white">👤 ${p.userName} ${p.nickname ? `(${p.nickname})` : ''}</b>
+                <span class="d-block text-muted small mt-1"><i class="fa-regular fa-clock me-1"></i>${p.date} | งวดที่ ${p.no}</span>
+                <span class="d-block text-info small"><i class="fa-solid fa-money-bill-wave me-1"></i>${p.method}</span>
+              </div>
+              <div class="text-end">
+                <b class="text-success fs-5 d-block mb-1">+ ฿${Number(p.totalPaid).toLocaleString()}</b>
+                ${slipBtn}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('recentPaysContainer').innerHTML = html;
+  }
+
   function renderDashAlerts() {
     let alertLoans = allLoans.filter(l => l.daysLeft <= 3);
     let html = '';
@@ -429,7 +478,6 @@
     document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-3">ไม่มีรายการใกล้ครบกำหนด</div>';
   }
 
-  // 🌟 เรนเดอร์หน้ารายการ (List) แบบครบชุดพร้อมปุ่มแก้ไข/ลบ
   function renderList(data) {
     let html = '';
     data.forEach(b => {
@@ -461,7 +509,6 @@
     document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูล</div>';
   }
 
-  // 🌟 ระบบกรองข้อมูล (Filter Dropdowns)
   function applyFilters() {
     let cycleVal = document.getElementById('filterCycle').value;
     let statusVal = document.getElementById('filterStatus').value;
@@ -484,7 +531,6 @@
     renderList(filtered);
   }
 
-  // ==================== ระบบ Password และ Edit/Delete ====================
   function promptPassword(callback) {
     pendingAction = callback;
     document.getElementById('authPassword').value = '';
@@ -529,7 +575,6 @@
         document.getElementById('eName').value = res.userName;
         document.getElementById('eNick').value = res.nickname;
         
-        // หาเบอร์และรายละเอียดจาก allLoans
         let userDetail = allLoans.find(u => u.userId === loan.userId);
         document.getElementById('ePhone').value = userDetail ? userDetail.phone : '';
         document.getElementById('eDetails').value = res.details;
@@ -566,7 +611,6 @@
     }
   }
 
-  // ==================== ระบบ Detail และการชำระเงิน ====================
   async function viewDetails(id) {
     toggleL(true);
     const res = await api({ action: 'getLoanDetails', loanId: id });

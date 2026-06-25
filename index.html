@@ -8,11 +8,9 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* บังคับสีตัวหนังสือ และคอนทราสต์ขั้นสูงเพื่อให้อ่านออกชัดเจน 100% */
     body { font-family: 'Prompt', sans-serif; background-color: #0b1120; color: #ffffff; padding-bottom: 50px; }
     h1, h2, h3, h4, h5, h6, p, span, div, b { color: #ffffff !important; }
     
-    /* สไตล์ของ Label หัวข้อฟอร์ม: ขาว สว่าง ชัดเจน */
     label, .small, .text-muted { color: #f8fafc !important; font-weight: 600 !important; font-size: 0.95rem !important; margin-bottom: 6px; display: block; }
     .text-info { color: #38bdf8 !important; }
     .text-success { color: #4ade80 !important; }
@@ -20,14 +18,9 @@
 
     .glass-card { background: #162032; border: 1px solid #334155; border-radius: 20px; }
     
-    /* ช่อง Input สีตัดกับพื้น ตัวหนังสือขาวสนิท */
     .form-control, .form-select { 
-      background-color: #1e293b !important; 
-      border: 2px solid #475569 !important; 
-      color: #ffffff !important; 
-      border-radius: 12px; 
-      padding: 14px;
-      font-weight: 500;
+      background-color: #1e293b !important; border: 2px solid #475569 !important; color: #ffffff !important; 
+      border-radius: 12px; padding: 14px; font-weight: 500;
     }
     .form-control::placeholder { color: #94a3b8 !important; opacity: 1; }
     .form-control:focus, .form-select:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4) !important; }
@@ -36,14 +29,13 @@
     .btn-action:active { transform: scale(0.95); }
     .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #fff !important; }
     
-    /* ระบบ POPUP (Modal Overlay) */
     .modal-overlay { 
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-      background: rgba(0, 0, 0, 0.85); z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); 
+      z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
     }
     .modal-content-custom {
-      background: #162032; border: 2px solid #38bdf8; border-radius: 20px; 
-      width: 90%; max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+      background: #162032; border: 2px solid #38bdf8; border-radius: 20px; width: 90%; max-width: 550px; 
+      max-height: 90vh; overflow-y: auto; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
     }
 
     .loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display:none; z-index:9999; justify-content:center; align-items:center; flex-direction: column; }
@@ -59,7 +51,7 @@
 
 <div class="loader" id="loader">
   <div class="spinner-border text-info mb-3"></div>
-  <h5 class="text-white fw-bold">กำลังประมวลผลเครือข่ายความปลอดภัย...</h5>
+  <h5 class="text-white fw-bold">กำลังประมวลผลระบบคลาวด์...</h5>
 </div>
 
 <div class="container" style="max-width: 600px; padding: 20px 15px;">
@@ -176,20 +168,24 @@
       </div>
       
       <div class="row g-2 mb-3">
+        <div class="col-12">
+          <label>วันที่จ่าย (ตามสลิป/รับจริง)</label>
+          <input type="date" id="pPayDate" class="form-control">
+        </div>
         <div class="col-6">
           <label>ช่องทางชำระ</label>
           <select id="pMethod" class="form-select">
-            <option value="เงินโอน">เงินโอนผ่านธนาคาร</option>
+            <option value="เงินโอน">เงินโอนธนาคาร</option>
             <option value="เงินสด">เงินสด</option>
           </select>
         </div>
         <div class="col-6">
-          <label>หลักฐานสลิป (ถ้ามี)</label>
+          <label>หลักฐานสลิป</label>
           <input type="file" id="pSlip" class="form-control">
         </div>
       </div>
       
-      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3 fs-5 mt-2 shadow">ยืนยันและให้ระบบคำนวณตัดยอด</button>
+      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3 fs-5 mt-2 shadow">ยืนยันการรับชำระ</button>
     </div>
   </div>
 </div>
@@ -440,6 +436,7 @@
 
   function quickPay(id){
     document.getElementById('loanIdInput').value = id;
+    document.getElementById('pPayDate').valueAsDate = new Date(); // ใส่วันที่ปัจจุบันเป็นค่าเริ่มต้น
     openModal('modalPay');
     fetchPreview();
   }
@@ -454,7 +451,7 @@
       curPay = res;
       document.getElementById('payDetails').style.display = 'block';
       document.getElementById('pName').innerText = `👤 ${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`;
-      document.getElementById('pDetailTxt').innerText = `เงินต้นคงเหลือในระบบ: ฿${res.remainingPrincipal.toLocaleString()} | ดอกเบี้ยประจำงวดนี้: ฿${res.expectedInterest.toLocaleString()}`;
+      document.getElementById('pDetailTxt').innerText = `ต้นเหลือในระบบ: ฿${res.remainingPrincipal.toLocaleString()} | ดอกเบี้ยงวดนี้: ฿${res.expectedInterest.toLocaleString()}`;
     } else alert('ระบุรหัสสัญญาไม่ถูกต้อง หรือไม่มีสัญญานี้');
   }
 
@@ -466,13 +463,14 @@
     const slipBase64 = await getBase64(document.getElementById('pSlip').files[0]);
     
     curPay.action = 'submitPay';
-    curPay.totalPaidAmount = totalPaidVal; // ส่งแค่ยอดรวมทั้งหมด
+    curPay.totalPaidAmount = totalPaidVal; 
+    curPay.payDate = document.getElementById('pPayDate').value; // ดึงวันที่จ่ายส่งไปหลังบ้าน
     curPay.slipBase64 = slipBase64;
     curPay.method = document.getElementById('pMethod').value;
     
     await api(curPay);
     toggleL(false);
-    alert('บันทึกการชำระเงินและให้ระบบตัดยอดอัตโนมัติสำเร็จแล้ว');
+    alert('บันทึกการชำระเงินและตัดยอดอัตโนมัติสำเร็จแล้ว');
     closeModal('modalPay');
     loadDash();
   }

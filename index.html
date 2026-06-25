@@ -3,44 +3,34 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LMS Dashboard 2026</title>
+  <title>LMS Advanced 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     :root { --bg: #090d16; --card: #151e2e; --accent: #38bdf8; }
-    body { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; background: var(--bg); color: #f1f5f9; }
+    body { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; background: var(--bg); color: #f1f5f9; padding-bottom: 50px;}
     .glass { background: var(--card); border: 1px solid rgba(255,255,255,0.05); border-radius: 20px; }
     
-    /* แก้ไขปัญหา Input อ่านไม่ออก */
     .form-control, .form-select { 
-      background-color: #1e293b !important; 
-      border: 1px solid #475569 !important; 
-      color: #ffffff !important; 
-      border-radius: 12px;
-      padding: 14px;
-      font-size: 0.95rem;
+      background-color: #1e293b !important; border: 1px solid #475569 !important; color: #ffffff !important; border-radius: 12px; padding: 14px;
     }
-    .form-control::placeholder { color: #94a3b8 !important; opacity: 1; }
-    .form-control:focus, .form-select:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important; }
+    .form-control::placeholder { color: #64748b !important; }
+    .form-control:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important; }
     
     .btn-action { border-radius: 16px; padding: 20px; border: none; font-weight: 700; transition: 0.3s; }
     .btn-action:active { transform: scale(0.98); }
     .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .profile-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; background: #334155; }
     
     .loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(9,13,22,0.9); display:none; z-index:9999; justify-content:center; align-items:center; flex-direction: column; }
-    
-    /* Schedule List Box */
-    .schedule-box { background: rgba(0,0,0,0.2); border: 1px solid #334155; border-radius: 12px; max-height: 200px; overflow-y: auto; }
-    .schedule-item { border-bottom: 1px solid #334155; padding: 10px; display: flex; justify-content: space-between; font-size: 0.85rem; }
-    .schedule-item:last-child { border-bottom: none; }
   </style>
 </head>
 <body>
 
 <div class="loader" id="loader">
   <div class="spinner-border text-info mb-3"></div>
-  <small class="text-white fw-bold">กำลังประมวลผลข้อมูล...</small>
+  <small class="text-white fw-bold">กำลังประมวลผลระบบคลาวด์...</small>
 </div>
 
 <div class="container" style="max-width: 600px; padding: 20px 15px;">
@@ -59,18 +49,8 @@
     </div>
 
     <div class="glass p-4 mb-4 text-center">
-      <small class="text-muted">ยอดปล่อยกู้รวมทั้งหมด (Active)</small>
+      <small class="text-muted">เงินต้นคงเหลือในระบบทั้งหมด</small>
       <h1 class="fw-bold text-info mt-1">฿<span id="mTotal">0.00</span></h1>
-      <div class="row mt-3 pt-3 border-top" style="border-color: #334155 !important;">
-        <div class="col-6 border-end" style="border-color: #334155 !important;">
-          <small class="d-block text-muted">สัญญาที่ทำงานอยู่</small>
-          <b class="fs-5" id="mActive">0</b>
-        </div>
-        <div class="col-6">
-          <small class="d-block text-muted">ใกล้/เลยกำหนดชำระ</small>
-          <b class="text-danger fs-5" id="mAlert">0</b>
-        </div>
-      </div>
     </div>
 
     <div class="row g-3 mb-4">
@@ -81,90 +61,105 @@
       </div>
       <div class="col-6">
         <button onclick="showSection('create')" class="btn-action bg-success text-white w-100 shadow">
-          <i class="fa-solid fa-file-signature d-block mb-2 fs-3"></i> สร้างผู้กู้/ปล่อยยอด
+          <i class="fa-solid fa-file-signature d-block mb-2 fs-3"></i> สร้างคนกู้/ปล่อยยอด
         </button>
       </div>
     </div>
 
     <div id="section-list">
-      <h6 class="fw-bold mb-3 text-muted">รายการสัญญาที่กำลังทำงาน</h6>
+      <h6 class="fw-bold mb-3 text-muted">รายการสัญญาและสถานะการจ่าย</h6>
+      <input class="form-control mb-3" list="loanOptions" id="searchLoan" placeholder="🔍 ค้นหาชื่อเล่น, ชื่อจริง หรือรหัสสัญญา..." onchange="quickPay(this.value)">
+      <datalist id="loanOptions"></datalist>
+
       <div id="loanContainer"></div>
     </div>
 
     <div id="section-pay" class="glass p-4 mb-4" style="display:none">
       <div class="d-flex justify-content-between mb-4">
-        <h6 class="fw-bold m-0 text-info">ดึงยอดชำระอัตโนมัติ</h6>
+        <h6 class="fw-bold m-0 text-info">บันทึกรับชำระเงิน</h6>
         <i class="fa-solid fa-xmark text-muted fs-5" onclick="showSection('list')" style="cursor:pointer"></i>
       </div>
+      
       <div class="input-group mb-3">
-        <input type="text" id="loanIdInput" class="form-control" placeholder="ใส่รหัสสัญญา (เช่น L12345)">
-        <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold px-3">ดึงข้อมูล</button>
+        <input type="text" id="loanIdInput" class="form-control" placeholder="ใส่รหัสสัญญา Lxxxx">
+        <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold px-3">ตรวจสอบ</button>
       </div>
       
       <div id="payDetails" style="display:none">
-        <div class="p-3 rounded-3 mb-3" style="background: rgba(0,0,0,0.3); border: 1px dashed #475569;">
-          <small class="text-muted d-block mb-1">ยอดรวมที่ต้องชำระงวดที่ <span id="pNo" class="text-white"></span></small>
-          <h2 class="text-success fw-bold m-0">฿<span id="pAmount">0.00</span></h2>
+        <div class="d-flex align-items-center mb-3 p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
+          <img id="pPhoto" src="" class="profile-img me-3">
+          <div>
+            <h6 class="m-0 text-white" id="pName"></h6>
+            <small class="text-info" id="pDetailTxt"></small>
+          </div>
         </div>
-        <label class="small text-muted mb-2">ช่องทางการรับชำระ</label>
-        <select id="pMethod" class="form-select mb-4">
-          <option value="เงินโอน">โอนเงินเข้าบัญชี</option>
-          <option value="เงินสด">ชำระด้วยเงินสด</option>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <label class="small text-muted mb-1">ตัดดอกเบี้ย (บาท)</label>
+            <input type="number" id="pInt" class="form-control text-warning fw-bold">
+          </div>
+          <div class="col-6">
+            <label class="small text-muted mb-1">ตัดเงินต้น (บาท)</label>
+            <input type="number" id="pPrin" class="form-control text-success fw-bold">
+          </div>
+        </div>
+
+        <label class="small text-muted mb-1">ช่องทางและสลิป</label>
+        <select id="pMethod" class="form-select mb-2">
+          <option value="เงินโอน">เงินโอน</option>
+          <option value="เงินสด">เงินสด</option>
         </select>
-        <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3">ยืนยันรับชำระเงิน</button>
+        <input type="file" id="pSlip" class="form-control mb-4">
+
+        <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3">ยืนยันการรับชำระและหักยอด</button>
       </div>
     </div>
 
     <div id="section-create" class="glass p-4 mb-4" style="display:none">
       <div class="d-flex justify-content-between mb-4">
-        <h6 class="fw-bold m-0 text-success">สร้างข้อมูลผู้กู้ / ปล่อยยอดกู้</h6>
+        <h6 class="fw-bold m-0 text-success">ข้อมูลผู้กู้ & ปล่อยยอด</h6>
         <i class="fa-solid fa-xmark text-muted fs-5" onclick="showSection('list')" style="cursor:pointer"></i>
       </div>
       
-      <label class="small text-muted mb-2">ผู้กู้ (เลือกคนเก่า หรือ สร้างใหม่)</label>
+      <label class="small text-muted mb-2">ค้นหาผู้กู้เดิม หรือ พิมพ์ชื่อเพื่อสร้างใหม่</label>
       <select id="cUserSelect" class="form-select mb-3" onchange="toggleNewUserForm()">
-        <option value="NEW">➕ สร้างผู้กู้คนใหม่</option>
-        </select>
+        <option value="NEW">➕ สร้างบัญชีผู้กู้คนใหม่</option>
+      </select>
       
       <div id="newUserFormBox" class="p-3 mb-3 rounded-3" style="background: rgba(255,255,255,0.02); border: 1px solid #334155;">
-        <input type="text" id="cName" class="form-control mb-2" placeholder="ชื่อ - นามสกุล">
-        <input type="text" id="cPhone" class="form-control" placeholder="เบอร์โทรศัพท์ (เป็นรหัสผ่านในตัว)">
+        <input type="text" id="cName" class="form-control mb-2" placeholder="ชื่อ - นามสกุลจริง">
+        <input type="text" id="cNick" class="form-control mb-2" placeholder="ชื่อเล่น">
+        <input type="text" id="cPhone" class="form-control mb-2" placeholder="เบอร์โทรศัพท์">
+        <input type="text" id="cWork" class="form-control mb-2" placeholder="สถานที่ทำงาน">
+        <label class="small text-muted mb-1 mt-2">รูปถ่ายผู้กู้ (ถ้ามี)</label>
+        <input type="file" id="cPhoto" class="form-control">
       </div>
 
-      <div class="row g-2 mb-3">
+      <div class="row g-2 mb-3 mt-3 border-top pt-3" style="border-color: #334155 !important;">
         <div class="col-6">
-          <label class="small text-muted mb-1">จำนวนเงินยืม (฿)</label>
-          <input type="number" id="cAmount" class="form-control" placeholder="10000" oninput="generateSchedule()">
+          <label class="small text-muted mb-1">เงินต้น (฿)</label>
+          <input type="number" id="cAmount" class="form-control" placeholder="10000">
         </div>
         <div class="col-6">
-          <label class="small text-muted mb-1">ดอกเบี้ยรวม (%)</label>
-          <input type="number" id="cRate" class="form-control" placeholder="5" oninput="generateSchedule()">
+          <label class="small text-muted mb-1">ดอกเบี้ยต่อรอบ (%)</label>
+          <input type="number" id="cRate" class="form-control" placeholder="5">
         </div>
-      </div>
-      
-      <div class="row g-2 mb-3">
         <div class="col-6">
           <label class="small text-muted mb-1">รอบการชำระ</label>
-          <select id="cCycle" class="form-select" onchange="generateSchedule()">
-            <option value="1">ทุก 1 วัน (รายวัน)</option>
+          <select id="cCycle" class="form-select">
+            <option value="1">ทุก 1 วัน</option>
             <option value="15">ทุก 15 วัน</option>
-            <option value="30">ทุก 1 เดือน (30 วัน)</option>
+            <option value="30">ทุก 30 วัน</option>
           </select>
         </div>
         <div class="col-6">
-          <label class="small text-muted mb-1">แบ่งจ่ายกี่งวด?</label>
-          <input type="number" id="cInstallments" class="form-control" value="1" min="1" oninput="generateSchedule()">
+          <label class="small text-muted mb-1">จำนวนงวด</label>
+          <input type="number" id="cInstallments" class="form-control" value="1">
         </div>
       </div>
 
-      <div class="mb-4">
-        <label class="small text-muted mb-2">แสดงรายการยอดชำระตามรอบ (Preview)</label>
-        <div class="schedule-box" id="schedulePreview">
-          <div class="text-center text-muted p-3 small">กรอกข้อมูลเพื่อดูตารางชำระ...</div>
-        </div>
-      </div>
-
-      <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold">บันทึกข้อมูลการปล่อยกู้</button>
+      <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold mt-2">สร้างสัญญาการกู้ยืม</button>
     </div>
 
   </div>
@@ -194,30 +189,28 @@
 
   async function loadDash(){
     const res = await api({action:'getDashboard'});
-    
-    // อัปเดตตัวเลข
     document.getElementById('mTotal').innerText = res.metrics.total.toLocaleString();
-    document.getElementById('mActive').innerText = res.metrics.active;
-    document.getElementById('mAlert').innerText = res.metrics.alert;
     
-    // อัปเดต Dropdown รายชื่อ
-    let optHtml = '<option value="NEW">➕ สร้างผู้กู้คนใหม่</option>';
-    res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name}</option>`; });
+    let optHtml = '<option value="NEW">➕ สร้างบัญชีผู้กู้คนใหม่</option>';
+    res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     document.getElementById('cUserSelect').innerHTML = optHtml;
-    toggleNewUserForm(); // เช็คแสดงกล่องพิมพ์ชื่อ
+    toggleNewUserForm();
     
-    // แสดงรายการสัญญา (แยกตามสัญญา ไม่ได้แยกตามคน ทำให้ 1 คนเห็นได้หลายสัญญา)
     let html = '';
+    let datalistHtml = '';
     res.activeLoans.forEach(b => {
       let statusClass = b.daysLeft <= 0 ? 'bg-danger' : (b.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
       let statusText = b.daysLeft < 0 ? `เลยกำหนด ${Math.abs(b.daysLeft)} วัน` : (b.daysLeft === 0 ? 'ครบกำหนดวันนี้!' : `อีก ${b.daysLeft} วัน`);
       
+      // เพิ่มข้อมูลลงใน Datalist สำหรับค้นหา
+      datalistHtml += `<option value="${b.loanId}">${b.nickname || b.userName} - ${b.userName} [เหลือ ฿${b.amount}]</option>`;
+
       html += `
         <div class="glass p-3 mb-2 d-flex justify-content-between align-items-center" style="border-left: 4px solid ${b.daysLeft <= 3 ? '#f43f5e' : '#3b82f6'}">
           <div>
-            <div class="fw-bold text-white mb-1">${b.userName}</div>
-            <small class="text-muted d-block">รหัสสัญญา: ${b.loanId}</small>
-            <small class="text-muted">฿${b.amount.toLocaleString()} | Due: ${b.dueDate}</small>
+            <div class="fw-bold text-white mb-1">${b.nickname ? `(${b.nickname}) ` : ''}${b.userName}</div>
+            <small class="text-muted d-block">รหัส: ${b.loanId}</small>
+            <small class="text-info">ต้นเหลือ ฿${b.amount.toLocaleString()} | Due: ${b.dueDate}</small>
           </div>
           <div class="text-end">
             <span class="status-badge ${statusClass} d-block mb-2">${statusText}</span>
@@ -226,69 +219,56 @@
         </div>`;
     });
     document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-3">ไม่มีสัญญาทำงานอยู่</div>';
+    document.getElementById('loanOptions').innerHTML = datalistHtml;
   }
 
   function showSection(s){
     ['list','pay','create'].forEach(id => document.getElementById('section-'+id).style.display = id===s?'block':'none');
   }
 
-  // ซ่อน/โชว์ กล่องกรอกชื่อคนใหม่
   function toggleNewUserForm(){
-    const val = document.getElementById('cUserSelect').value;
-    document.getElementById('newUserFormBox').style.display = (val === 'NEW') ? 'block' : 'none';
+    document.getElementById('newUserFormBox').style.display = (document.getElementById('cUserSelect').value === 'NEW') ? 'block' : 'none';
   }
 
-  // คำนวณตารางเวลาสดๆ ในหน้าจอ (จำลอง)
-  function generateSchedule(){
-    const amount = Number(document.getElementById('cAmount').value) || 0;
-    const rate = Number(document.getElementById('cRate').value) || 0;
-    const cycle = Number(document.getElementById('cCycle').value);
-    const inst = Number(document.getElementById('cInstallments').value) || 1;
-    const box = document.getElementById('schedulePreview');
-    
-    if(amount === 0){ box.innerHTML = '<div class="text-center text-muted p-3 small">กรอกข้อมูลให้ครบ...</div>'; return; }
-
-    const totalInt = amount * (rate/100);
-    const payPerPeriod = (amount + totalInt) / inst;
-    let html = '';
-    const today = new Date();
-
-    for(let i=1; i<=inst; i++){
-      let due = new Date(today.getTime() + (i * cycle * 24 * 60 * 60 * 1000));
-      html += `
-        <div class="schedule-item">
-          <div><b class="text-info">งวดที่ ${i}</b><br><small class="text-muted">${due.toLocaleDateString('th-TH')}</small></div>
-          <div class="text-end fw-bold text-white mt-2">฿${payPerPeriod.toLocaleString(undefined, {minimumFractionDigits:2})}</div>
-        </div>
-      `;
-    }
-    box.innerHTML = html;
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = () => resolve(reader.result);
+      reader.onerror = error => reject(error);
+    });
   }
 
   async function saveLoan(){
     const uId = document.getElementById('cUserSelect').value;
     const name = document.getElementById('cName').value;
+    const nick = document.getElementById('cNick').value;
     const phone = document.getElementById('cPhone').value;
+    const work = document.getElementById('cWork').value;
     const amount = document.getElementById('cAmount').value;
-    const rate = document.getElementById('cRate').value;
-    const cycle = document.getElementById('cCycle').value;
-    const inst = document.getElementById('cInstallments').value;
+    const photoFile = document.getElementById('cPhoto').files[0];
 
-    if(uId === 'NEW' && (!name || !phone)){ alert('กรุณากรอกชื่อและเบอร์โทรให้ครบ'); return; }
+    if(uId === 'NEW' && (!name)){ alert('กรุณากรอกชื่อ-นามสกุล'); return; }
     if(!amount){ alert('กรุณาระบุจำนวนเงินกู้'); return; }
 
     toggleL(true);
-    await api({ action:'saveLoan', userId: uId, name: name, phone: phone, amount: amount, rate: rate, cycle: cycle, installments: inst });
+    let photoBase64 = photoFile ? await getBase64(photoFile) : "";
+    
+    await api({ 
+      action:'saveLoan', userId: uId, name: name, nickname: nick, phone: phone, workplace: work, photoBase64: photoBase64,
+      amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value 
+    });
     toggleL(false);
     
     alert('สร้างสัญญากู้ยืมสำเร็จ!');
-    document.getElementById('cAmount').value = '';
-    document.getElementById('schedulePreview').innerHTML = '';
     showSection('list');
     loadDash();
   }
 
   function quickPay(id){
+    if(!id) return;
+    // เคลียร์ค่าค้นหา
+    document.getElementById('searchLoan').value = ''; 
     document.getElementById('loanIdInput').value = id;
     showSection('pay');
     fetchPreview();
@@ -302,8 +282,13 @@
     if(res.success){
       curPay = res;
       document.getElementById('payDetails').style.display = 'block';
-      document.getElementById('pNo').innerText = res.nextNo;
-      document.getElementById('pAmount').innerText = Number(res.payAmount).toLocaleString(undefined, {minimumFractionDigits:2});
+      document.getElementById('pPhoto').src = res.photoUrl || 'https://via.placeholder.com/50?text=USER';
+      document.getElementById('pName').innerText = `${res.nickname ? `(${res.nickname}) ` : ''}${res.userName}`;
+      document.getElementById('pDetailTxt').innerText = `ต้นเหลือ: ฿${res.remainingPrincipal.toLocaleString()} | งวดที่: ${res.nextNo}`;
+      
+      // Auto-fill ดอกเบี้ย และ เงินต้น (ค่าเริ่มต้นให้หักดอกอย่างเดียว หรือหักยอดตามตกลง แอดมินแก้ได้)
+      document.getElementById('pInt').value = res.expectedInterest;
+      document.getElementById('pPrin').value = 0; // ปกติช่องต้นจะให้กรอกเองว่าหักเท่าไหร่
     } else {
       document.getElementById('payDetails').style.display = 'none';
       alert('ไม่พบรหัสสัญญานี้ในระบบ');
@@ -312,11 +297,18 @@
 
   async function submitPay(){
     toggleL(true);
+    const slipFile = document.getElementById('pSlip').files[0];
+    let slipBase64 = slipFile ? await getBase64(slipFile) : "";
+
     curPay.action = 'submitPay';
     curPay.method = document.getElementById('pMethod').value;
+    curPay.prinPaid = document.getElementById('pPrin').value || 0;
+    curPay.intPaid = document.getElementById('pInt').value || 0;
+    curPay.slipBase64 = slipBase64;
+
     await api(curPay);
     toggleL(false);
-    alert('บันทึกการรับชำระสำเร็จ!');
+    alert('บันทึกรับชำระและหักยอดสำเร็จ!');
     document.getElementById('loanIdInput').value = '';
     document.getElementById('payDetails').style.display = 'none';
     showSection('list');

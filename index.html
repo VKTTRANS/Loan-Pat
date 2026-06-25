@@ -37,8 +37,8 @@
     }
     
     .modal-content-custom {
-      background: #162032; border: 2px solid #38bdf8; border-radius: 16px; width: 95%; 
-      max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+      background: #162032; border: 2px solid #38bdf8; border-radius: 16px; width: 95%; max-width: 500px; 
+      max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
     }
 
     .loader { 
@@ -46,7 +46,6 @@
       display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; 
     }
 
-    /* 🌟 ย่อขนาดการ์ดให้อ่านง่ายบนมือถือ/iPad */
     .borrower-card { 
       background: #1e293b; border-left: 5px solid #38bdf8; border-radius: 10px; margin-bottom: 12px; 
       padding: 12px; cursor: pointer; transition: 0.2s; border-top: 1px solid #334155; 
@@ -72,6 +71,8 @@
     .action-icon:hover { opacity: 0.8; }
     .icon-edit { background: #eab308; color: #000 !important; }
     .icon-delete { background: #f43f5e; color: #fff !important; }
+    
+    .history-card { background: #0f172a; border-left: 4px solid #10b981; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -136,6 +137,10 @@
         <div class="col-6"><button onclick="openModal('modalCreate')" class="btn-action bg-success w-100 shadow py-2"><i class="fa-solid fa-user-plus d-block mb-1 fs-4"></i> ปล่อยยอด</button></div>
       </div>
 
+      <button onclick="openModal('modalRecentPays')" class="btn-action w-100 shadow py-2 mb-4" style="background-color: #0ea5e9;">
+        <i class="fa-solid fa-clock-rotate-left me-2"></i> ดูประวัติรับชำระเงินล่าสุด
+      </button>
+
       <h6 class="fw-bold mb-2 text-warning"><i class="fa-solid fa-bell me-1"></i>ใกล้ครบกำหนด / เกินกำหนด</h6>
       <div id="dashAlertContainer"></div>
     </div>
@@ -180,6 +185,16 @@
   </div>
 </div>
 
+<div id="modalRecentPays" class="modal-overlay">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-3">
+      <h6 class="fw-bold m-0 text-white"><i class="fa-solid fa-money-bill-transfer me-2"></i>ประวัติรับเงินล่าสุด</h6>
+      <i class="fa-solid fa-circle-xmark text-danger fs-3" onclick="closeModal('modalRecentPays')" style="cursor:pointer"></i>
+    </div>
+    <div id="recentPaysContainer"></div>
+  </div>
+</div>
+
 <div id="modalDetails" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-2 border-bottom border-secondary pb-2">
@@ -199,7 +214,7 @@
         <div class="col-4 border-end border-secondary">
           <label class="text-muted d-block small">จ่ายแล้ว</label>
           <b class="text-success fs-6" id="dPaid">0</b>
-          <small class="text-info d-block" style="font-size: 0.65rem;">(ดอก: ฿<span id="dIntPaid">0</span>)</small>
+          <small class="text-info d-block mt-1" style="font-size: 0.70rem;">(ดอก: ฿<span id="dIntPaid">0</span>)</small>
         </div>
         <div class="col-4">
           <label class="text-muted d-block small">คงเหลือ</label>
@@ -214,7 +229,7 @@
     </div>
     
     <div id="dHistory" style="max-height: 250px; overflow-y: auto;"></div>
-    <div id="dSchedule" style="max-height: 250px; overflow-y: auto; display: none; padding-right: 10px;"></div>
+    <div id="dSchedule" style="max-height: 250px; overflow-y: auto; display: none; padding-right: 15px;"></div>
   </div>
 </div>
 
@@ -347,19 +362,17 @@
 
   document.getElementById('cStartDate').valueAsDate = new Date();
 
-  // 🌟 ระบบจำ Login 3 วัน (LocalStorage)
   window.onload = () => {
     let authData = localStorage.getItem('fintechAuthData');
     if(authData) {
       let parsed = JSON.parse(authData);
-      // เช็คว่าเวลาที่เซฟไว้ ห่างจากตอนนี้ไม่เกิน 3 วัน (3 * 24 * 60 * 60 * 1000)
       if(Date.now() - parsed.timestamp < 259200000) {
         loggedInPassword = parsed.pass;
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         loadDash();
       } else {
-        localStorage.removeItem('fintechAuthData'); // หมดอายุ ลบทิ้ง
+        localStorage.removeItem('fintechAuthData');
       }
     }
   };
@@ -372,7 +385,6 @@
 
   // 🌟 ฟังก์ชันล้างฟอร์ม (Auto-Reset)
   function clearForms() {
-    // ล้างข้อมูลในหน้าสร้างสัญญา
     document.getElementById('cName').value = '';
     document.getElementById('cNick').value = '';
     document.getElementById('cPhone').value = '';
@@ -383,7 +395,6 @@
     document.getElementById('cUserSelect').value = 'NEW';
     toggleNewUserForm();
     
-    // ล้างข้อมูลหน้าจ่ายเงิน
     document.getElementById('loanIdInput').value = '';
     document.getElementById('pTotalPaidInput').value = '';
     document.getElementById('pSlip').value = '';
@@ -434,7 +445,6 @@
     
     if(res.success && res.role === 'Admin') {
       loggedInPassword = pass; 
-      // 🌟 บันทึกลง LocalStorage
       localStorage.setItem('fintechAuthData', JSON.stringify({ userId: userId, pass: pass, timestamp: Date.now() }));
       
       document.getElementById('loginPage').style.display = 'none';
@@ -446,7 +456,7 @@
   }
 
   function logout() {
-    localStorage.removeItem('fintechAuthData'); // ล้างประวัติเมื่อกดออก
+    localStorage.removeItem('fintechAuthData'); 
     location.reload();
   }
 
@@ -472,7 +482,38 @@
     document.getElementById('payLoanOptions').innerHTML = datalistHtml;
     
     renderDashAlerts();
+    renderRecentPays(res.recentPayments);
     applyFilters(); 
+  }
+
+  function renderRecentPays(data) {
+    let html = '';
+    if (!data || data.length === 0) {
+      html = '<div class="text-center text-muted p-4">ไม่มีประวัติการรับชำระเงิน</div>';
+    } else {
+      data.forEach(p => {
+        let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' 
+          ? `<a href="${p.slipUrl}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill"><i class="fa-solid fa-image me-1"></i>สลิป</a>` 
+          : `<span class="badge bg-secondary">ไม่มีสลิป</span>`;
+
+        html += `
+          <div class="history-card">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                <b class="text-white">👤 ${p.userName} ${p.nickname ? `(${p.nickname})` : ''}</b>
+                <span class="d-block text-muted small mt-1"><i class="fa-regular fa-clock me-1"></i>${p.date} | งวดที่ ${p.no}</span>
+                <span class="d-block text-info small"><i class="fa-solid fa-money-bill-wave me-1"></i>${p.method}</span>
+              </div>
+              <div class="text-end">
+                <b class="text-success fs-5 d-block mb-1">+ ฿${Number(p.totalPaid).toLocaleString()}</b>
+                ${slipBtn}
+              </div>
+            </div>
+          </div>
+        `;
+      });
+    }
+    document.getElementById('recentPaysContainer').innerHTML = html;
   }
 
   function renderDashAlerts() {
@@ -643,8 +684,8 @@
       document.getElementById('dPrin').innerText = `฿${Number(res.principal).toLocaleString()}`;
       document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid).toLocaleString()}`;
       
-      // 🌟 อัปเดตยอดดอกเบี้ยที่รับแล้ว
-      document.getElementById('dIntPaid').innerText = Number(res.totalIntPaid).toLocaleString();
+      // 🌟 ดึงค่า totalIntPaid โดยเพิ่ม fallback ไม่ให้เจอคำว่า NaN
+      document.getElementById('dIntPaid').innerText = Number(res.totalIntPaid || 0).toLocaleString();
       
       document.getElementById('dRemain').innerText = `฿${Number(res.remaining).toLocaleString()}`;
       
@@ -654,7 +695,7 @@
       } else {
         res.payments.forEach(p => {
           hHtml += `
-            <div class="p-2 mb-2 rounded" style="background: #1e293b; border-left: 3px solid #10b981;">
+            <div class="p-3 mb-2 rounded" style="background: #1e293b; border-left: 4px solid #10b981;">
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <b class="text-white small">งวดที่ ${p.no} (${p.date})</b>
@@ -748,7 +789,7 @@
     await api(payload);
     toggleL(false);
     
-    clearForms(); // 🌟 ล้างฟอร์ม
+    clearForms();
     showAlert('สร้างสัญญากู้สำเร็จ!');
     closeModal('modalCreate');
     loadDash();
@@ -796,8 +837,8 @@
     });
     toggleL(false);
     
-    clearForms(); // 🌟 ล้างฟอร์ม
-    showAlert('บันทึกรับเงินและตัดยอดสำเร็จ!');
+    clearForms();
+    showAlert('บันทึกการชำระเงินสำเร็จ!');
     closeModal('modalPay');
     loadDash();
   }

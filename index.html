@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Fintech Admin 2026</title>
+  <title>Fintech Admin</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -11,7 +11,7 @@
     /* บังคับสีพื้นหลังและสีตัวหนังสือให้อ่านออก 100% */
     body { font-family: 'Prompt', sans-serif; background-color: #0b1120; color: #ffffff; padding-bottom: 50px; }
     h1, h2, h3, h4, h5, h6, p, span, div { color: #ffffff; }
-    label, .small, .text-muted { color: #e2e8f0 !important; font-weight: 500; font-size: 0.95rem; }
+    label, .small, .text-muted { color: #cbd5e1 !important; font-weight: 500; font-size: 0.95rem; }
     .text-info { color: #38bdf8 !important; }
 
     .glass-card { background: #162032; border: 1px solid #334155; border-radius: 20px; }
@@ -31,7 +31,7 @@
     .btn-action:active { transform: scale(0.95); }
     .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #fff; }
     
-    /* ระบบ POPUP (Modal) ของจริง */
+    /* ระบบ POPUP (Modal) */
     .modal-overlay { 
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
       background: rgba(0, 0, 0, 0.85); 
@@ -47,8 +47,12 @@
     /* ตัวโหลด */
     .loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display:none; z-index:9999; justify-content:center; align-items:center; flex-direction: column; }
     
-    /* สไตล์การ์ดผู้กู้ */
-    .borrower-card { background: #1e293b; border-left: 5px solid #38bdf8; border-radius: 12px; margin-bottom: 15px; padding: 15px; }
+    /* สไตล์การ์ดผู้กู้ - ทำให้คลิกได้ */
+    .borrower-card { 
+      background: #1e293b; border-left: 5px solid #38bdf8; border-radius: 12px; 
+      margin-bottom: 15px; padding: 15px; cursor: pointer; transition: 0.2s;
+    }
+    .borrower-card:hover { background: #293850; transform: translateY(-2px); }
   </style>
 </head>
 <body>
@@ -62,7 +66,7 @@
   
   <div id="loginPage" class="glass-card p-5 text-center mt-5">
     <h2 class="fw-bold mb-4">Fintech <span class="text-info">Admin</span></h2>
-    <label class="d-block text-start mb-1">รหัสผู้ดูแลระบบ</label>
+    <label class="d-block text-start mb-1">รหัสแอดมิน</label>
     <input type="text" id="userId" class="form-control mb-3" placeholder="Admin ID">
     <label class="d-block text-start mb-1">รหัสผ่าน</label>
     <input type="password" id="password" class="form-control mb-4" placeholder="Password">
@@ -70,7 +74,6 @@
   </div>
 
   <div id="mainApp" style="display:none">
-    
     <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
       <h4 class="fw-bold m-0 text-info">Fintech Admin</h4>
       <button onclick="location.reload()" class="btn btn-outline-danger btn-sm rounded-pill px-3">Logout</button>
@@ -103,6 +106,38 @@
   </div>
 </div>
 
+<div id="modalDetails" class="modal-overlay">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-3">
+      <h5 class="fw-bold m-0 text-white"><i class="fa-solid fa-file-invoice me-2"></i>รายละเอียดสัญญา</h5>
+      <i class="fa-solid fa-circle-xmark text-danger fs-3" onclick="closeModal('modalDetails')" style="cursor:pointer"></i>
+    </div>
+    
+    <div class="p-3 mb-3 rounded" style="background: rgba(56, 189, 248, 0.1); border: 1px solid #38bdf8;">
+      <h5 class="fw-bold text-white mb-1" id="dName">ชื่อผู้กู้</h5>
+      <small class="text-info d-block mb-2" id="dLoanId">L12345</small>
+      <div class="row text-center mt-3 border-top border-secondary pt-2">
+        <div class="col-4 border-end border-secondary">
+          <small class="text-muted d-block">ยอดกู้เต็ม</small>
+          <b class="text-white" id="dPrin">0</b>
+        </div>
+        <div class="col-4 border-end border-secondary">
+          <small class="text-muted d-block">ชำระแล้ว</small>
+          <b class="text-success" id="dPaid">0</b>
+        </div>
+        <div class="col-4">
+          <small class="text-muted d-block">คงเหลือ</small>
+          <b class="text-warning fs-5" id="dRemain">0</b>
+        </div>
+      </div>
+    </div>
+
+    <h6 class="fw-bold text-muted mb-2">ประวัติการชำระเงิน</h6>
+    <div id="dHistory" style="max-height: 250px; overflow-y: auto;">
+      </div>
+  </div>
+</div>
+
 <div id="modalPay" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-4 border-bottom border-secondary pb-3">
@@ -118,7 +153,7 @@
     
     <div id="payDetails" style="display:none" class="mt-3">
       <div class="p-3 mb-3 rounded" style="background: #0f172a; border: 1px dashed #475569;">
-        <h5 class="m-0 text-white" id="pName">ชื่อผู้กู้</h5>
+        <h5 class="m-0 text-white fw-bold" id="pName">ชื่อผู้กู้</h5>
         <p class="text-info m-0 mt-1" id="pDetailTxt">รายละเอียด</p>
       </div>
 
@@ -135,7 +170,7 @@
       
       <label>ช่องทางชำระ</label>
       <select id="pMethod" class="form-select mb-3">
-        <option value="เงินโอน">โอนเข้าบัญชีธนาคาร</option>
+        <option value="เงินโอน">โอนเข้าบัญชี</option>
         <option value="เงินสด">เงินสด</option>
       </select>
       
@@ -199,7 +234,6 @@
         <input type="number" id="cInstallments" class="form-control" value="1">
       </div>
     </div>
-    
     <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold fs-5 mt-2">บันทึกสร้างสัญญากู้</button>
   </div>
 </div>
@@ -212,7 +246,6 @@
 
   function toggleL(s){ document.getElementById('loader').style.display = s?'flex':'none'; }
 
-  // ฟังก์ชันควบคุม Popup
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { 
     document.getElementById(id).style.display = 'none'; 
@@ -242,34 +275,74 @@
     const res = await api({action:'getDashboard'});
     document.getElementById('mTotal').innerText = res.metrics.total.toLocaleString();
     
-    // ยัดรายชื่อใส่ Dropdown สร้างคนกู้
     let optHtml = '<option value="NEW">➕ สร้างบัญชีผู้กู้คนใหม่</option>';
     res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     document.getElementById('cUserSelect').innerHTML = optHtml;
     
-    // สร้างลิสต์ผู้กู้ด้านล่าง
     let html = '';
     res.activeLoans.forEach(b => {
       let statusClass = b.daysLeft <= 0 ? 'bg-danger' : (b.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
       let statusText = b.daysLeft < 0 ? `เลยกำหนด ${Math.abs(b.daysLeft)} วัน` : (b.daysLeft === 0 ? 'ครบกำหนดวันนี้!' : `อีก ${b.daysLeft} วัน`);
+      let displayName = b.userName ? b.userName : 'ไม่ระบุชื่อ';
       
+      // การ์ดคลิกได้ (เปิดประวัติ) และปุ่มแยกต่างหาก (เปิดรับชำระ)
       html += `
-        <div class="borrower-card loan-item" data-name="${b.userName} ${b.nickname} ${b.loanId}">
+        <div class="borrower-card loan-item" data-name="${displayName} ${b.nickname} ${b.loanId}" onclick="viewDetails('${b.loanId}')">
           <div class="d-flex justify-content-between align-items-start">
             <div>
-              <h6 class="fw-bold mb-1">${b.nickname ? `(${b.nickname}) ` : ''}${b.userName}</h6>
-              <p class="mb-0 text-muted small">รหัสสัญญา: <span class="text-white">${b.loanId}</span></p>
-              <p class="mb-0 text-info fw-bold">ยอดค้าง: ฿${b.amount.toLocaleString()}</p>
+              <h4 class="fw-bold mb-1 text-white">👤 ${displayName} ${b.nickname ? `(${b.nickname})` : ''}</h4>
+              <p class="mb-1 text-muted small">รหัสสัญญา: <span class="text-info">${b.loanId}</span></p>
+              <p class="mb-0 text-info fw-bold fs-5">ยอดค้าง: ฿${Number(b.amount).toLocaleString()}</p>
               <p class="mb-0 text-muted small">ดิวจ่าย: ${b.dueDate}</p>
             </div>
             <div class="text-end">
               <span class="status-badge ${statusClass} d-block mb-2">${statusText}</span>
-              <button class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold" onclick="quickPay('${b.loanId}')">กดชำระ</button>
+              <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow" onclick="event.stopPropagation(); quickPay('${b.loanId}')">กดชำระ</button>
             </div>
           </div>
         </div>`;
     });
     document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-3">ไม่มีข้อมูลผู้กู้ในระบบ</div>';
+  }
+
+  // ดูรายละเอียดและประวัติ
+  async function viewDetails(id) {
+    toggleL(true);
+    const res = await api({action: 'getLoanDetails', loanId: id});
+    toggleL(false);
+    if(res.success) {
+      document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`;
+      document.getElementById('dLoanId').innerText = `รหัส: ${res.loanId} | สถานะ: ${res.status}`;
+      document.getElementById('dPrin').innerText = `฿${Number(res.principal).toLocaleString()}`;
+      document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid).toLocaleString()}`;
+      document.getElementById('dRemain').innerText = `฿${Number(res.remaining).toLocaleString()}`;
+      
+      let hHtml = '';
+      if(res.payments.length === 0) {
+        hHtml = '<div class="text-center text-muted small p-2">ยังไม่มีประวัติการชำระเงิน</div>';
+      } else {
+        res.payments.forEach(p => {
+          hHtml += `
+            <div class="p-2 mb-2 rounded" style="background: #1e293b; border-left: 3px solid #10b981;">
+              <div class="d-flex justify-content-between align-items-center">
+                <div>
+                  <b class="text-white small">งวดที่ ${p.no}</b>
+                  <small class="text-muted d-block" style="font-size:0.75rem;">${p.date} | ${p.method}</small>
+                </div>
+                <div class="text-end">
+                  <b class="text-success">฿${Number(p.totalPaid).toLocaleString()}</b>
+                  ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<br><a href="${p.slipUrl}" target="_blank" class="small text-info text-decoration-none">ดูสลิป</a>` : ''}
+                </div>
+              </div>
+            </div>
+          `;
+        });
+      }
+      document.getElementById('dHistory').innerHTML = hHtml;
+      openModal('modalDetails');
+    } else {
+      alert('ไม่สามารถดึงข้อมูลได้');
+    }
   }
 
   function filterLoans() {
@@ -286,7 +359,7 @@
   }
 
   function getBase64(file) {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       if(!file) resolve("");
       const reader = new FileReader();
       reader.readAsDataURL(file);

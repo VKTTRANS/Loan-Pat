@@ -115,6 +115,21 @@
 
     <div id="viewDash">
       <div class="glass-card p-3 mb-3 shadow-sm">
+        
+        <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
+          <label class="fw-bold m-0 text-info"><i class="fa-solid fa-calendar-days me-1"></i> ตัวกรองสรุปยอด</label>
+          <div class="d-flex gap-2">
+            <select id="dashFilterYear" class="form-select form-select-sm" style="width: auto;" onchange="updateDashMetrics()"></select>
+            <select id="dashFilterMonth" class="form-select form-select-sm" style="width: auto;" onchange="updateDashMetrics()">
+              <option value="all">ทุกเดือน</option>
+              <option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option>
+              <option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option>
+              <option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option>
+              <option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+            </select>
+          </div>
+        </div>
+
         <div class="row text-center mb-2">
           <div class="col-6">
             <label class="text-muted fw-bold d-block mb-1">ยอดปล่อยกู้รวม</label>
@@ -355,12 +370,21 @@
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
-  let allLoans = [];
+  let allLoans = []; // ใช้กับหน้า List
+  let rawAllTimeLoans = []; // 🌟 เก็บข้อมูลสัญญาทั้งหมดเพื่อใช้กับ Filter หน้า Dash
   let curPay = null;
   let loggedInPassword = ''; 
   let pendingAction = null; 
 
   document.getElementById('cStartDate').valueAsDate = new Date();
+
+  // สร้าง Option ปี ให้เลือก (ปีปัจจุบัน ถอยหลัง และล่วงหน้า)
+  let currentYear = new Date().getFullYear() + 543;
+  let yearHtml = '<option value="all">ทุกปี</option>';
+  for(let y = currentYear - 2; y <= currentYear + 2; y++) {
+    yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
+  }
+  document.getElementById('dashFilterYear').innerHTML = yearHtml;
 
   window.onload = () => {
     let authData = localStorage.getItem('fintechAuthData');
@@ -383,7 +407,6 @@
     document.getElementById(id).style.display = 'none'; 
   }
 
-  // 🌟 ฟังก์ชันล้างฟอร์ม (Auto-Reset)
   function clearForms() {
     document.getElementById('cName').value = '';
     document.getElementById('cNick').value = '';
@@ -463,15 +486,9 @@
   async function loadDash() {
     const res = await api({ action: 'getDashboard' });
     allLoans = res.activeLoans;
+    rawAllTimeLoans = res.allTimeLoans; // 🌟 เก็บข้อมูลสัญญาทั้งหมดไว้ใช้กับตัวกรอง
     
-    document.getElementById('mTotalLoan').innerText = Math.round(res.metrics.totalLoan).toLocaleString();
-    document.getElementById('mTotalRemain').innerText = Math.round(res.metrics.totalRemain).toLocaleString();
-    document.getElementById('m1Loan').innerText = Math.round(res.metrics.type1.loan).toLocaleString();
-    document.getElementById('m1Remain').innerText = Math.round(res.metrics.type1.remain).toLocaleString();
-    document.getElementById('m15Loan').innerText = Math.round(res.metrics.type15.loan).toLocaleString();
-    document.getElementById('m15Remain').innerText = Math.round(res.metrics.type15.remain).toLocaleString();
-    document.getElementById('m30Loan').innerText = Math.round(res.metrics.type30.loan).toLocaleString();
-    document.getElementById('m30Remain').innerText = Math.round(res.metrics.type30.remain).toLocaleString();
+    updateDashMetrics(); // 🌟 อัปเดตยอด Dashboard 
     
     let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่</option>';
     let datalistHtml = '';
@@ -484,6 +501,51 @@
     renderDashAlerts();
     renderRecentPays(res.recentPayments);
     applyFilters(); 
+  }
+
+  // 🌟 ฟังก์ชันอัปเดตตัวเลขหน้า Dashboard เมื่อเปลี่ยนตัวกรอง ปี/เดือน
+  function updateDashMetrics() {
+    let fYear = document.getElementById('dashFilterYear').value;
+    let fMonth = document.getElementById('dashFilterMonth').value;
+    
+    let mTotalLoan = 0, mTotalRemain = 0;
+    let m1Loan = 0, m1Remain = 0;
+    let m15Loan = 0, m15Remain = 0;
+    let m30Loan = 0, m30Remain = 0;
+
+    rawAllTimeLoans.forEach(l => {
+      let d = new Date(l.startDate);
+      let y = d.getFullYear() + 543;
+      let m = d.getMonth() + 1;
+      
+      let matchY = (fYear === 'all' || fYear == y.toString());
+      let matchM = (fMonth === 'all' || fMonth == m.toString());
+      
+      if (matchY && matchM) {
+        mTotalLoan += Number(l.originalPrincipal);
+        if(l.status === 'Active') mTotalRemain += Number(l.remainingPrincipal);
+        
+        if (l.cycle === '1') {
+          m1Loan += Number(l.originalPrincipal);
+          if(l.status === 'Active') m1Remain += Number(l.remainingPrincipal);
+        } else if (l.cycle === '15') {
+          m15Loan += Number(l.originalPrincipal);
+          if(l.status === 'Active') m15Remain += Number(l.remainingPrincipal);
+        } else if (l.cycle === '30') {
+          m30Loan += Number(l.originalPrincipal);
+          if(l.status === 'Active') m30Remain += Number(l.remainingPrincipal);
+        }
+      }
+    });
+
+    document.getElementById('mTotalLoan').innerText = Math.round(mTotalLoan).toLocaleString();
+    document.getElementById('mTotalRemain').innerText = Math.round(mTotalRemain).toLocaleString();
+    document.getElementById('m1Loan').innerText = Math.round(m1Loan).toLocaleString();
+    document.getElementById('m1Remain').innerText = Math.round(m1Remain).toLocaleString();
+    document.getElementById('m15Loan').innerText = Math.round(m15Loan).toLocaleString();
+    document.getElementById('m15Remain').innerText = Math.round(m15Remain).toLocaleString();
+    document.getElementById('m30Loan').innerText = Math.round(m30Loan).toLocaleString();
+    document.getElementById('m30Remain').innerText = Math.round(m30Remain).toLocaleString();
   }
 
   function renderRecentPays(data) {
@@ -684,7 +746,6 @@
       document.getElementById('dPrin').innerText = `฿${Number(res.principal).toLocaleString()}`;
       document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid).toLocaleString()}`;
       
-      // 🌟 ดึงค่า totalIntPaid โดยเพิ่ม fallback ไม่ให้เจอคำว่า NaN
       document.getElementById('dIntPaid').innerText = Number(res.totalIntPaid || 0).toLocaleString();
       
       document.getElementById('dRemain').innerText = `฿${Number(res.remaining).toLocaleString()}`;

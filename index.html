@@ -3,102 +3,233 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LMS Dashboard</title>
+  <title>LMS Premium 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Kanit:wght@300;400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;600;700&family=Prompt:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    body { font-family: 'Kanit', sans-serif; background-color: #f8fafc; }
-    .card-custom { border-radius: 16px; box-shadow: 0 4px 12px rgba(0,0,0,0.05); border: none; }
-    .loading { display: none; text-align: center; color: #0d6efd; margin-top: 10px; font-size: 0.9rem; }
+    :root {
+      --bg-main: #090d16;
+      --glass-bg: rgba(17, 25, 40, 0.65);
+      --glass-border: rgba(255, 255, 255, 0.08);
+      --accent-neon: #38bdf8;
+      --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
+      --accent-success: linear-gradient(135deg, #34d399 0%, #059669 100%);
+      --text-muted: #94a3b8;
+    }
+    body { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; background-color: var(--bg-main); color: #f8fafc; min-height: 100vh; overflow-x: hidden; }
+    .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: all 0.3s ease; }
+    .form-control, .form-select { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); color: #f8fafc; border-radius: 14px; padding: 12px 16px; }
+    .form-control:focus, .form-select:focus { background: rgba(15, 23, 42, 0.8); border-color: var(--accent-neon); color: #f8fafc; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
+    .btn-gradient { background: var(--accent-gradient); color: #ffffff; border: none; border-radius: 14px; font-weight: 600; padding: 12px 24px; transition: transform 0.2s, opacity 0.2s; }
+    .btn-gradient:active { transform: scale(0.98); }
+    .nav-pill-custom { background: rgba(15, 23, 42, 0.8); border-radius: 16px; padding: 6px; display: flex; gap: 4px; }
+    .nav-pill-custom .nav-link { color: var(--text-muted); border-radius: 12px; border: none; font-weight: 600; padding: 10px 16px; font-size: 0.9rem; }
+    .nav-pill-custom .nav-link.active { background: var(--accent-gradient); color: #fff; }
+    .metric-box { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; text-align: center; }
+    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    #loginPage, #mainApp { display: none; }
   </style>
 </head>
 <body>
 
-<div class="container" style="max-width: 500px; margin-top: 50px;">
+<div class="loading-overlay" id="loader">
+  <div class="text-center">
+    <div class="spinner-border text-info mb-2" role="status"></div>
+    <div class="small text-muted">SECURE CONNECTING...</div>
+  </div>
+</div>
+
+<div class="container" style="max-width: 650px; padding: 24px 16px;">
   
-  <div id="loginPage" class="card card-custom p-4 text-center">
-    <h3 class="mb-4 text-primary fw-bold">เข้าสู่ระบบ</h3>
-    <input type="text" id="userId" class="form-control mb-3" placeholder="รหัสผู้ใช้งาน (User ID)">
-    <input type="password" id="password" class="form-control mb-3" placeholder="รหัสผ่าน">
-    <button onclick="login()" class="btn btn-primary w-100 py-2 fw-bold">Login</button>
-    <div id="loginLoad" class="loading">กำลังตรวจสอบข้อมูล...</div>
+  <div id="loginPage" class="glass-card p-4 p-sm-5 text-center my-5" style="display: block;">
+    <div class="mb-5">
+      <div class="d-inline-flex p-3 rounded-circle mb-3" style="background: rgba(56,189,248,0.1);">
+        <i class="fa-solid fa-shield-halved text-info" style="font-size: 48px;"></i>
+      </div>
+      <h2 class="fw-bold tracking-tight">LMS <span style="color: var(--accent-neon)">2026</span></h2>
+      <p class="text-muted small">ระบบบริหารและจัดการความเสี่ยงเงินกู้ดิจิทัล</p>
+    </div>
+    <div class="text-start">
+      <label class="small text-muted mb-2">รหัสผู้ใช้งาน</label>
+      <input type="text" id="userId" class="form-control mb-3" placeholder="Enter User ID" onkeypress="handleLoginEnter(event)">
+      <label class="small text-muted mb-2">รหัสผ่านสำหรับเข้าสู่ระบบ</label>
+      <input type="password" id="password" class="form-control mb-4" placeholder="••••••••" onkeypress="handleLoginEnter(event)">
+      <button onclick="login()" class="btn btn-gradient w-100 py-3">เข้าสู่ระบบความปลอดภัย</button>
+    </div>
   </div>
 
-  <div id="adminPage" style="display: none;">
-    <div class="d-flex justify-content-between mb-4 align-items-center">
-      <h4 class="m-0 fw-bold">ระบบรับชำระเงิน</h4>
-      <button onclick="location.reload()" class="btn btn-sm btn-outline-danger">ออกระบบ</button>
-    </div>
-    
-    <div class="card card-custom p-4 mb-4">
-      <div class="input-group mb-3">
-        <input type="text" id="loanId" class="form-control" placeholder="ค้นหารหัสสัญญา">
-        <button onclick="fetchPreview()" class="btn btn-dark fw-bold">ดึงข้อมูล</button>
+  <div id="mainApp">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+      <div>
+        <small class="text-muted block">ระบบจัดการหลังบ้าน</small>
+        <h5 class="m-0 fw-bold" id="adminName">Admin</h5>
       </div>
-      <div id="previewLoad" class="loading">กำลังดึงข้อมูล...</div>
+      <button onclick="location.reload()" class="btn btn-dark rounded-circle p-2" style="width:42px; height:42px;"><i class="fa-solid fa-power-off text-danger"></i></button>
+    </div>
 
-      <div id="paymentForm" style="display: none;">
-        <div class="alert alert-secondary border-0">
-          <p class="mb-1"><b>รหัสผู้กู้:</b> <span id="lblUserId"></span></p>
-          <p class="mb-2"><b>ชำระงวดที่:</b> <span id="lblNo"></span></p>
-          <hr class="my-2">
-          <p class="mb-1 small">เงินต้น: ฿<span id="lblPrin"></span> | ดอกเบี้ย: ฿<span id="lblInt"></span></p>
-          <h5 class="mt-2 text-danger fw-bold m-0">ยอดรวมชำระ: ฿<span id="lblTotal"></span></h5>
+    <div class="nav-pill-custom mb-4">
+      <button class="nav-link active w-100" id="tab-dash" onclick="switchTab('dash')"><i class="fa-solid fa-chart-pie me-1"></i>สรุป</button>
+      <button class="nav-link w-100" id="tab-pay" onclick="switchTab('pay')"><i class="fa-solid fa-wallet me-1"></i>รับชำระ</button>
+      <button class="nav-link w-100" id="tab-users" onclick="switchTab('users')"><i class="fa-solid fa-user-gear me-1"></i>ผู้ใช้งาน</button>
+    </div>
+
+    <div id="section-dash">
+      <div class="row g-3 mb-4">
+        <div class="col-12">
+          <div class="metric-box" style="background: linear-gradient(180deg, rgba(56,189,248,0.08) 0%, transparent 100%);">
+            <small class="text-muted d-block mb-1">ยอดเงินกู้รวมในระบบ</small>
+            <h2 class="fw-bold m-0 text-info">฿<span id="mTotal">0.00</span></h2>
+          </div>
         </div>
-        
-        <label class="small fw-bold">รูปแบบการชำระเงิน</label>
-        <select id="method" class="form-select mb-3">
-          <option value="เงินโอน">เงินโอน</option>
-          <option value="เงินสด">เงินสด</option>
-        </select>
-        
-        <label class="small fw-bold">แนบหลักฐาน (ถ้ามี)</label>
-        <input type="file" id="slipFile" class="form-control mb-4">
-        
-        <button onclick="submitData()" class="btn btn-success w-100 py-2 fw-bold">บันทึกรับชำระเงิน</button>
-        <div id="submitLoad" class="loading">กำลังบันทึกข้อมูลเข้าสู่ระบบ...</div>
+        <div class="col-6">
+          <div class="metric-box">
+            <small class="text-muted d-block mb-1">สัญญาที่ทำงานอยู่</small>
+            <h4 class="fw-bold m-0" id="mActive">0</h4>
+          </div>
+        </div>
+        <div class="col-6">
+          <div class="metric-box" style="border-color: rgba(244,63,94,0.3);">
+            <small class="text-muted d-block mb-1">ใกล้ครบกำหนดชำระ</small>
+            <h4 class="fw-bold m-0 text-danger" id="mNearDue">0</h4>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
 
+    <div id="section-pay" style="display: none;">
+      <div class="glass-card p-4">
+        <h6 class="fw-bold mb-3">รันระบบงวดชำระอัตโนมัติ</h6>
+        <div class="input-group mb-3">
+          <input type="text" id="loanId" class="form-control" placeholder="ใส่รหัสสัญญาเงินกู้">
+          <button onclick="fetchPreview()" class="btn btn-info px-4 fw-bold text-white" style="border-radius: 0 14px 14px 0;">ดึงสัญญางวด</button>
+        </div>
+
+        <div id="paymentForm" style="display: none;">
+          <div class="p-3 rounded-4 mb-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+            <p class="mb-2"><b>รหัสผู้กู้:</b> <span id="lblUserId" class="text-info"></span></p>
+            <p class="mb-2"><b>เรียกเก็บงวดที่:</b> <span id="lblNo" class="badge bg-primary"></span></p>
+            <hr class="my-2" style="opacity: 0.1;">
+            <div class="d-flex justify-content-between small text-muted mb-1">
+              <span>เงินต้นในงวด:</span><span>฿<span id="lblPrin"></span></span>
+            </div>
+            <div class="d-flex justify-content-between small text-muted mb-2">
+              <span>ดอกเบี้ยในงวด:</span><span>฿<span id="lblInt"></span></span>
+            </div>
+            <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary" style="border-style: dashed !important;">
+              <span class="fw-bold">ยอดสุทธิที่ต้องชำระ:</span><h4 class="m-0 text-success fw-bold">฿<span id="lblTotal"></span></h4>
+            </div>
+          </div>
+          
+          <label class="small text-muted mb-2">ช่องทางการรับชำระ</label>
+          <select id="method" class="form-select mb-3">
+            <option value="เงินโอน">เงินโอนผ่านบัญชีธนาคาร</option>
+            <option value="เงินสด">ชำระด้วยเงินสด</option>
+          </select>
+          
+          <label class="small text-muted mb-2">แนบสลิปหลักฐาน (ไม่บังคับ)</label>
+          <input type="file" id="slipFile" class="form-control mb-4">
+          
+          <button onclick="submitData()" class="btn btn-gradient w-100 py-3" style="background: var(--accent-success);">บันทึกและรันงวดถัดไป</button>
+        </div>
+      </div>
+    </div>
+
+    <div id="section-users" style="display: none;">
+      <div class="glass-card p-4 mb-4">
+        <h6 class="fw-bold mb-3" id="userFormTitle">เพิ่มบัญชีผู้ใช้ใหม่</h6>
+        <input type="hidden" id="isEdit" value="false">
+        <div class="row g-3">
+          <div class="col-6">
+            <input type="text" id="formUserId" class="form-control" placeholder="User ID">
+          </div>
+          <div class="col-6">
+            <input type="text" id="formPassword" class="form-control" placeholder="รหัสผ่าน">
+          </div>
+          <div class="col-12">
+            <input type="text" id="formName" class="form-control" placeholder="ชื่อ-นามสกุล">
+          </div>
+          <div class="col-6">
+            <input type="text" id="formPhone" class="form-control" placeholder="เบอร์โทรศัพท์">
+          </div>
+          <div class="col-6">
+            <select id="formRole" class="form-select">
+              <option value="User">บทบาท: User</option>
+              <option value="Admin">บทบาท: Admin</option>
+            </select>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button onclick="saveUser()" class="btn btn-gradient w-100">บันทึกข้อมูลผู้ใช้</button>
+            <button onclick="clearUserForm()" id="btnCancelEdit" class="btn btn-secondary" style="display: none; border-radius:14px;">ยกเลิก</button>
+          </div>
+        </div>
+      </div>
+
+      <h6 class="fw-bold mb-3">บัญชีผู้ใช้ทั้งหมดในฐานข้อมูล</h6>
+      <div id="userListContainer"></div>
+    </div>
+
+  </div>
 </div>
 
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
   let currentPayData = {};
+  let globalUsersList = [];
+
+  function showLoader(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+  function handleLoginEnter(e) { if(e.key === 'Enter') login(); }
 
   async function callGAS(data) {
-    const res = await fetch(GAS_URL, {
-      method: "POST",
-      body: JSON.stringify(data)
-    });
+    const res = await fetch(GAS_URL, { method: "POST", body: JSON.stringify(data) });
     return await res.json();
   }
 
   async function login() {
-    document.getElementById('loginLoad').style.display = 'block';
+    showLoader(true);
     const userId = document.getElementById('userId').value;
     const pass = document.getElementById('password').value;
     
     const response = await callGAS({ action: 'login', userId: userId, password: pass });
-    document.getElementById('loginLoad').style.display = 'none';
+    showLoader(false);
 
     if (response.success && response.role === 'Admin') {
       document.getElementById('loginPage').style.display = 'none';
-      document.getElementById('adminPage').style.display = 'block';
+      document.getElementById('mainApp').style.display = 'block';
+      document.getElementById('adminName').innerText = response.name;
+      loadDashboardData();
     } else {
-      alert("เข้าสู่ระบบไม่สำเร็จ หรือคุณไม่มีสิทธิ์เข้าถึง");
+      alert("สิทธิ์การเข้าถึงถูกปฏิเสธ หรือข้อมูลไม่ถูกต้อง");
+    }
+  }
+
+  function switchTab(tab) {
+    ['dash', 'pay', 'users'].forEach(t => {
+      document.getElementById('section-' + t).style.display = t === tab ? 'block' : 'none';
+      document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    });
+    if (tab === 'dash' || tab === 'users') loadDashboardData();
+  }
+
+  async function loadDashboardData() {
+    const response = await callGAS({ action: 'getDashboard' });
+    if (response.success) {
+      document.getElementById('mTotal').innerText = response.metrics.totalPrincipal;
+      document.getElementById('mActive').innerText = response.metrics.activeLoans;
+      document.getElementById('mNearDue').innerText = response.metrics.nearDue;
+      globalUsersList = response.users;
+      renderUserList();
     }
   }
 
   async function fetchPreview() {
-    const loanId = document.getElementById('loanId').value;
-    if (!loanId) return;
+    const lId = document.getElementById('loanId').value;
+    if (!lId) return;
     
     document.getElementById('paymentForm').style.display = 'none';
-    document.getElementById('previewLoad').style.display = 'block';
-    const response = await callGAS({ action: 'preview', loanId: loanId });
-    document.getElementById('previewLoad').style.display = 'none';
+    showLoader(true);
+    const response = await callGAS({ action: 'preview', loanId: lId });
+    showLoader(false);
 
     if (response.success) {
       currentPayData = response;
@@ -109,14 +240,13 @@
       document.getElementById('lblInt').innerText = response.interest;
       document.getElementById('lblTotal').innerText = response.total;
     } else {
-      alert("ไม่พบรหัสสัญญานี้ในระบบ");
+      alert("ไม่พบรหัสสัญญากู้ยืมนี้ หรือระบุข้อมูลผิดพลาด");
     }
   }
 
   async function submitData() {
-    document.getElementById('submitLoad').style.display = 'block';
+    showLoader(true);
     const fileInput = document.getElementById('slipFile');
-    
     currentPayData.action = 'submit';
     currentPayData.method = document.getElementById('method').value;
 
@@ -136,13 +266,84 @@
 
   async function sendSubmit() {
     const response = await callGAS(currentPayData);
-    document.getElementById('submitLoad').style.display = 'none';
+    showLoader(false);
     if (response.success) {
-      alert("บันทึกการรับชำระเงินเรียบร้อยแล้ว!");
-      location.reload();
-    } else {
-      alert("เกิดข้อผิดพลาดในการบันทึก");
+      alert("บันทึกรับชำระเงินเรียบร้อยแล้วระบบถูกอัปเดตอัตโนมัติ");
+      switchTab('dash');
     }
+  }
+
+  function renderUserList() {
+    let html = '';
+    globalUsersList.forEach(u => {
+      html += `
+        <div class="glass-card p-3 mb-2 d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.01);">
+          <div>
+            <div class="fw-bold">${u.name} <span class="badge bg-secondary small">${u.role}</span></div>
+            <small class="text-muted">ID: ${u.userId} | โทร: ${u.phone}</small>
+          </div>
+          <div class="d-flex gap-1">
+            <button onclick="editUserTrigger('${u.userId}')" class="btn btn-sm btn-outline-info rounded-3"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="deleteUser('${u.userId}')" class="btn btn-sm btn-outline-danger rounded-3"><i class="fa-solid fa-trash-can"></i></button>
+          </div>
+        </div>`;
+    });
+    document.getElementById('userListContainer').innerHTML = html || '<div class="text-muted text-center py-3">ไม่มีข้อมูลผู้ใช้งานในระบบ</div>';
+  }
+
+  async function saveUser() {
+    const userId = document.getElementById('formUserId').value;
+    const pass = document.getElementById('formPassword').value;
+    const name = document.getElementById('formName').value;
+    const phone = document.getElementById('formPhone').value;
+    const role = document.getElementById('formRole').value;
+    const isEdit = document.getElementById('isEdit').value === 'true';
+
+    if(!userId || !pass || !name) { alert('กรุณากรอกข้อมูลสำคัญให้ครบถ้วน'); return; }
+
+    showLoader(true);
+    const response = await callGAS({ action: 'saveUser', userId, password: pass, name, phone, role, isEdit });
+    showLoader(false);
+
+    if(response.success) {
+      alert('บันทึกข้อมูลผู้ใช้เรียบร้อย');
+      clearUserForm();
+      loadDashboardData();
+    } else { alert(response.error); }
+  }
+
+  function editUserTrigger(userId) {
+    const u = globalUsersList.find(item => item.userId == userId);
+    if(!u) return;
+    document.getElementById('userFormTitle').innerText = "แก้ไขข้อมูลผู้ใช้งาน ID: " + userId;
+    document.getElementById('formUserId').value = u.userId;
+    document.getElementById('formUserId').disabled = true;
+    document.getElementById('formPassword').value = u.password;
+    document.getElementById('formName').value = u.name;
+    document.getElementById('formPhone').value = u.phone;
+    document.getElementById('formRole').value = u.role;
+    document.getElementById('isEdit').value = "true";
+    document.getElementById('btnCancelEdit').style.display = "block";
+  }
+
+  async function deleteUser(userId) {
+    if(!confirm('คุณแน่ใจว่าต้องการลบผู้ใช้งานรหัสนี้ออกใช่หรือไม่?')) return;
+    showLoader(true);
+    const response = await callGAS({ action: 'deleteUser', userId });
+    showLoader(false);
+    if(response.success) { alert('ลบผู้ใช้สำเร็จ'); loadDashboardData(); }
+  }
+
+  function clearUserForm() {
+    document.getElementById('userFormTitle').innerText = "เพิ่มบัญชีผู้ใช้ใหม่";
+    document.getElementById('formUserId').value = "";
+    document.getElementById('formUserId').disabled = false;
+    document.getElementById('formPassword').value = "";
+    document.getElementById('formName').value = "";
+    document.getElementById('formPhone').value = "";
+    document.getElementById('formRole').value = "User";
+    document.getElementById('isEdit').value = "false";
+    document.getElementById('btnCancelEdit').style.display = "none";
   }
 </script>
 </body>

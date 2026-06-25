@@ -45,7 +45,10 @@
 </head>
 <body>
 
-<div class="loader" id="loader"><div class="spinner-border text-info mb-3"></div><h6 class="text-white">กำลังโหลด...</h6></div>
+<div class="loader" id="loader">
+  <div class="spinner-border text-info mb-3"></div>
+  <h6 class="text-white">กำลังโหลด...</h6>
+</div>
 
 <div class="container" style="max-width: 500px;">
   
@@ -63,13 +66,27 @@
     </div>
 
     <div class="row g-2 mb-3">
-      <div class="col-6"><div class="glass-card p-2 text-center"><small class="text-muted">ปล่อยกู้</small><h5 class="m-0">฿<span id="mTotalLoan">0</span></h5></div></div>
-      <div class="col-6"><div class="glass-card p-2 text-center" style="border-color: #38bdf8;"><small class="text-info">คงค้าง</small><h5 class="m-0 text-info">฿<span id="mTotalRemain">0</span></h5></div></div>
+      <div class="col-6">
+        <div class="glass-card p-2 text-center">
+          <small class="text-muted">ปล่อยกู้</small>
+          <h5 class="m-0">฿<span id="mTotalLoan">0</span></h5>
+        </div>
+      </div>
+      <div class="col-6">
+        <div class="glass-card p-2 text-center" style="border-color: #38bdf8;">
+          <small class="text-info">คงค้าง</small>
+          <h5 class="m-0 text-info">฿<span id="mTotalRemain">0</span></h5>
+        </div>
+      </div>
     </div>
 
     <div class="row g-2 mb-3">
-      <div class="col-6"><button onclick="openModal('modalPay')" class="btn-action bg-primary w-100 shadow">บันทึกรับเงิน</button></div>
-      <div class="col-6"><button onclick="openModal('modalCreate')" class="btn-action bg-success w-100 shadow">ปล่อยยอดกู้</button></div>
+      <div class="col-6">
+        <button onclick="openModal('modalPay')" class="btn-action bg-primary w-100 shadow">บันทึกรับเงิน</button>
+      </div>
+      <div class="col-6">
+        <button onclick="openModal('modalCreate')" class="btn-action bg-success w-100 shadow">ปล่อยยอดกู้</button>
+      </div>
     </div>
 
     <div class="filter-btn-group d-flex gap-1 mb-3">
@@ -79,6 +96,7 @@
       <button class="btn-filter" id="f-30" onclick="filterData('30')">รายเดือน</button>
     </div>
     <input class="form-control mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นชื่อ..." onkeyup="filterLoans()">
+    
     <div id="loanContainer"></div>
   </div>
 </div>
@@ -97,7 +115,7 @@
         <div class="col-6"><small class="text-muted">คงเหลือ</small><b class="text-warning" id="dRemain">0</b></div>
       </div>
     </div>
-    <h6 class="fw-bold small mb-2 text-success">ประวัติชำระ</h6>
+    <h6 class="fw-bold small mb-2 text-success">ประวัติชำระเงิน</h6>
     <div id="dHistory" style="max-height: 200px; overflow-y: auto;"></div>
   </div>
 </div>
@@ -108,10 +126,12 @@
       <h6 class="fw-bold text-info">บันทึกรับชำระเงิน</h6>
       <i class="fa-solid fa-times text-danger fs-4" onclick="closeModal('modalPay')"></i>
     </div>
-    <label>เลือกชื่อคนยืม</label>
-    <input list="payList" id="paySearch" class="form-control mb-3" placeholder="พิมพ์ชื่อ...">
-    <datalist id="payList"></datalist>
-    <button onclick="fetchPreview()" class="btn btn-info w-100 fw-bold mb-3">ดึงข้อมูล</button>
+    <label>เลือกชื่อคนยืม / พิมพ์ค้นหา</label>
+    <div class="input-group mb-3">
+      <input list="payList" id="paySearch" class="form-control" placeholder="พิมพ์ชื่อ...">
+      <datalist id="payList"></datalist>
+      <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold px-3">ดึงข้อมูล</button>
+    </div>
     
     <div id="payDetails" style="display:none">
       <div class="p-2 mb-3 rounded border border-secondary" style="background:#0f172a">
@@ -120,9 +140,12 @@
       </div>
       <label>ยอดรับเงินจริง (บาท)</label>
       <input type="number" id="pAmt" class="form-control fw-bold fs-4 mb-3 border-info">
-      <label>วันที่จ่าย</label>
-      <input type="date" id="pDate" class="form-control mb-3">
-      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-2">ยืนยันรับเงินและหักยอด</button>
+      <div class="row g-2">
+        <div class="col-12"><label>วันที่จ่าย (ตามสลิป)</label><input type="date" id="pDate" class="form-control mb-3"></div>
+        <div class="col-6"><label>ช่องทาง</label><select id="pMethod" class="form-select"><option value="เงินโอน">โอนเข้าบัญชี</option><option value="เงินสด">เงินสด</option></select></div>
+        <div class="col-6"><label>แนบสลิป</label><input type="file" id="pSlip" class="form-control"></div>
+      </div>
+      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3 mt-4">ยืนยันรับเงินและหักยอด</button>
     </div>
   </div>
 </div>
@@ -133,21 +156,48 @@
       <h6 class="fw-bold text-success">เปิดสัญญากู้ใหม่</h6>
       <i class="fa-solid fa-times text-danger fs-4" onclick="closeModal('modalCreate')"></i>
     </div>
-    <select id="cUser" class="form-select mb-2" onchange="toggleNewUser()"><option value="NEW">➕ ผู้กู้รายใหม่</option></select>
-    <div id="newUserBox">
-      <input type="text" id="cName" class="form-control mb-2" placeholder="ชื่อ-นามสกุล">
+    <label>เลือกบัญชีผู้กู้ (คนเก่า/สร้างใหม่)</label>
+    <select id="cUser" class="form-select mb-2" onchange="toggleNewUser()">
+      <option value="NEW">➕ สร้างผู้กู้รายใหม่</option>
+    </select>
+    
+    <div id="newUserBox" class="p-3 mb-2 rounded border border-secondary" style="background:#0f172a">
+      <input type="text" id="cName" class="form-control mb-2" placeholder="ชื่อ-นามสกุลจริง">
       <input type="text" id="cNick" class="form-control mb-2" placeholder="ชื่อเล่น">
       <input type="text" id="cPhone" class="form-control mb-2" placeholder="เบอร์โทร">
-      <input type="text" id="cDetails" class="form-control mb-2" placeholder="รายละเอียดเพิ่มเติม (ที่ทำงาน/อื่นๆ)">
+      <input type="text" id="cDetails" class="form-control mb-2" placeholder="รายละเอียด (ที่ทำงาน/อื่นๆ)">
+      <label class="small text-muted mt-2">อัปโหลดรูปถ่าย</label>
+      <input type="file" id="cPhoto" class="form-control">
     </div>
-    <div class="row g-2">
-      <div class="col-12"><label>วันที่เริ่ม</label><input type="date" id="cStart" class="form-control"></div>
-      <div class="col-6"><label>เงินต้น</label><input type="number" id="cAmount" class="form-control"></div>
-      <div class="col-6"><label>ดอก (%)</label><input type="number" id="cRate" class="form-control" value="5"></div>
-      <div class="col-6"><label>รอบ</label><select id="cCycle" class="form-select"><option value="1">รายวัน</option><option value="15">15 วัน</option><option value="30">รายเดือน</option></select></div>
-      <div class="col-6"><label>งวด</label><input type="number" id="cInst" class="form-control" value="1"></div>
+
+    <div class="row g-2 mt-2">
+      <div class="col-12">
+        <label>วันที่เริ่มสัญญา</label>
+        <input type="date" id="cStart" class="form-control">
+      </div>
+      <div class="col-6">
+        <label>ยอดเงินต้น (฿)</label>
+        <input type="number" id="cAmount" class="form-control">
+      </div>
+      <div class="col-6">
+        <label>ดอกเบี้ย (%)</label>
+        <input type="number" id="cRate" class="form-control" value="5">
+      </div>
+      <div class="col-6">
+        <label>รอบชำระ</label>
+        <select id="cCycle" class="form-select">
+          <option value="1">รายวัน</option>
+          <option value="15">ทุก 15 วัน</option>
+          <option value="30">รายเดือน</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label>จำนวนงวด</label>
+        <input type="number" id="cInst" class="form-control" value="1">
+      </div>
     </div>
-    <button onclick="saveLoan()" class="btn btn-success w-100 fw-bold mt-3">บันทึกข้อมูล</button>
+    
+    <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold mt-4 shadow">บันทึกเปิดสัญญา</button>
   </div>
 </div>
 
@@ -156,98 +206,217 @@
   let allLoans = [];
   let curLoan = null;
 
-  function toggleL(s){ document.getElementById('loader').style.display=s?'flex':'none'; }
-  function openModal(id){ document.getElementById(id).style.display='flex'; }
-  function closeModal(id){ document.getElementById(id).style.display='none'; }
-
-  async function api(d){ const r=await fetch(GAS_URL,{method:'POST',body:JSON.stringify(d)}); return await r.json(); }
-
-  async function login(){
-    toggleL(true);
-    const res=await api({action:'login',userId:document.getElementById('userId').value,password:document.getElementById('password').value});
-    toggleL(false);
-    if(res.success){ document.getElementById('loginPage').style.display='none'; document.getElementById('mainApp').style.display='block'; loadDash(); }
-    else alert('ID หรือรหัสผ่านไม่ถูกต้อง');
+  function toggleL(s) { 
+    document.getElementById('loader').style.display = s ? 'flex' : 'none'; 
+  }
+  
+  function openModal(id) { 
+    document.getElementById(id).style.display = 'flex'; 
+    if(id === 'modalCreate') document.getElementById('cStart').valueAsDate = new Date();
+  }
+  
+  function closeModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
   }
 
-  async function loadDash(){
-    const res=await api({action:'getDashboard'});
-    allLoans=res.activeLoans;
-    document.getElementById('mTotalLoan').innerText=Math.round(res.metrics.totalLoan).toLocaleString();
-    document.getElementById('mTotalRemain').innerText=Math.round(res.metrics.totalRemain).toLocaleString();
+  async function api(data) { 
+    const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) }); 
+    return await r.json(); 
+  }
+
+  async function login() {
+    toggleL(true);
+    const userId = document.getElementById('userId').value;
+    const pass = document.getElementById('password').value;
+    const res = await api({ action: 'login', userId: userId, password: pass });
+    toggleL(false);
     
-    let uOpt='<option value="NEW">➕ ผู้กู้รายใหม่</option>';
-    let dList='';
-    res.users.forEach(u=>uOpt+=`<option value="${u.id}">${u.name} (${u.nickname})</option>`);
-    allLoans.forEach(l=>dList+=`<option value="${l.loanId}">${l.userName} (${l.nickname})</option>`);
+    if(res.success) { 
+      document.getElementById('loginPage').style.display = 'none'; 
+      document.getElementById('mainApp').style.display = 'block'; 
+      loadDash(); 
+    } else {
+      alert('ID หรือรหัสผ่านไม่ถูกต้อง');
+    }
+  }
+
+  async function loadDash() {
+    const res = await api({ action: 'getDashboard' });
+    allLoans = res.activeLoans;
+    document.getElementById('mTotalLoan').innerText = Math.round(res.metrics.totalLoan).toLocaleString();
+    document.getElementById('mTotalRemain').innerText = Math.round(res.metrics.totalRemain).toLocaleString();
     
-    document.getElementById('cUser').innerHTML=uOpt;
-    document.getElementById('payList').innerHTML=dList;
+    let uOpt = '<option value="NEW">➕ สร้างผู้กู้รายใหม่</option>';
+    let dList = '';
+    
+    res.users.forEach(u => {
+      uOpt += `<option value="${u.id}">${u.name} (${u.nickname})</option>`;
+    });
+    
+    allLoans.forEach(l => {
+      dList += `<option value="${l.loanId}">${l.userName} (${l.nickname})</option>`;
+    });
+    
+    document.getElementById('cUser').innerHTML = uOpt;
+    document.getElementById('payList').innerHTML = dList;
     renderLoans(allLoans);
   }
 
-  function renderLoans(data){
-    let h='';
-    data.forEach(l=>{
-      let cls=l.daysLeft<=0?'bg-danger':(l.daysLeft<=3?'bg-warning text-dark':'bg-primary');
-      h+=`<div class="borrower-card" onclick="viewDetails('${l.loanId}')">
-        <div class="d-flex justify-content-between">
-          <div><h6 class="fw-bold m-0">👤 ${l.userName} (${l.nickname})</h6><p class="m-0 text-info small">ค้าง ฿${Number(l.amount).toLocaleString()}</p></div>
-          <div class="text-end"><span class="status-badge ${cls}">${l.daysLeft<=0?'เลยกำหนด':`อีก ${l.daysLeft} วัน`}</span></div>
-        </div></div>`;
+  function renderLoans(data) {
+    let html = '';
+    data.forEach(l => {
+      let cls = l.daysLeft <= 0 ? 'bg-danger' : (l.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
+      html += `
+        <div class="borrower-card" onclick="viewDetails('${l.loanId}')">
+          <div class="d-flex justify-content-between">
+            <div>
+              <h6 class="fw-bold m-0 text-white">👤 ${l.userName} (${l.nickname})</h6>
+              <p class="m-0 text-info small">ค้าง ฿${Number(l.amount).toLocaleString()}</p>
+            </div>
+            <div class="text-end">
+              <span class="status-badge ${cls}">${l.daysLeft <= 0 ? 'เลยกำหนด' : `อีก ${l.daysLeft} วัน`}</span>
+            </div>
+          </div>
+        </div>`;
     });
-    document.getElementById('loanContainer').innerHTML=h||'<p class="text-center text-muted mt-3">ไม่มีข้อมูล</p>';
+    document.getElementById('loanContainer').innerHTML = html || '<p class="text-center text-muted mt-3">ไม่มีข้อมูล</p>';
   }
 
-  async function viewDetails(id){
+  async function viewDetails(id) {
     toggleL(true);
-    const res=await api({action:'getLoanDetails',loanId:id});
+    const res = await api({ action: 'getLoanDetails', loanId: id });
     toggleL(false);
-    if(res.success){
-      document.getElementById('dName').innerText=`${res.userName} (${res.nickname})`;
-      document.getElementById('dDetails').innerText=res.details||'ไม่มีรายละเอียดเพิ่มเติม';
-      document.getElementById('dPrin').innerText=`฿${Number(res.principal).toLocaleString()}`;
-      document.getElementById('dRemain').innerText=`฿${Number(res.remaining).toLocaleString()}`;
-      let hh='';
-      res.history.forEach(p=>hh+=`<div class="p-2 mb-1 rounded small border border-secondary"><b>${p.date}</b>: จ่าย ฿${Number(p.total).toLocaleString()}</div>`);
-      document.getElementById('dHistory').innerHTML=hh||'<p class="text-center small">ไม่มีประวัติ</p>';
+    
+    if(res.success) {
+      document.getElementById('dName').innerText = `${res.userName} (${res.nickname})`;
+      document.getElementById('dDetails').innerText = res.details || 'ไม่มีรายละเอียดเพิ่มเติม';
+      document.getElementById('dPrin').innerText = `฿${Number(res.principal).toLocaleString()}`;
+      document.getElementById('dRemain').innerText = `฿${Number(res.remaining).toLocaleString()}`;
+      
+      let hh = '';
+      res.history.forEach(p => {
+        hh += `
+          <div class="p-2 mb-2 rounded small border border-secondary" style="background:#1e293b;">
+            <b>${p.date}</b>: ยอดโอนมา <b>฿${Number(p.total).toLocaleString()}</b>
+          </div>`;
+      });
+      document.getElementById('dHistory').innerHTML = hh || '<p class="text-center small text-muted">ไม่มีประวัติ</p>';
       openModal('modalDetails');
     }
   }
 
-  function filterData(c){
-    document.querySelectorAll('.btn-filter').forEach(b=>b.classList.remove('active'));
-    document.getElementById('f-'+c).classList.add('active');
-    renderLoans(c==='all'?allLoans:allLoans.filter(l=>l.cycle.toString()===c));
+  function filterData(type) {
+    document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
+    document.getElementById('f-'+type).classList.add('active');
+    
+    if(type === 'all') {
+      renderLoans(allLoans);
+    } else {
+      renderLoans(allLoans.filter(l => l.cycle.toString() === type));
+    }
   }
 
-  function filterLoans(){
-    let v=document.getElementById('searchLoan').value.toLowerCase();
-    renderLoans(allLoans.filter(l=>(l.userName+l.nickname).toLowerCase().includes(v)));
+  function filterLoans() {
+    let val = document.getElementById('searchLoan').value.toLowerCase();
+    renderLoans(allLoans.filter(l => (l.userName + l.nickname).toLowerCase().includes(val)));
   }
 
-  function toggleNewUser(){ document.getElementById('newUserBox').style.display=document.getElementById('cUser').value==='NEW'?'block':'none'; }
+  function toggleNewUser() { 
+    document.getElementById('newUserBox').style.display = document.getElementById('cUser').value === 'NEW' ? 'block' : 'none'; 
+  }
 
-  async function saveLoan(){
+  // 🌟 ฟังก์ชันแปลงรูปที่หายไป กลับมาแล้วครับ!
+  function getBase64(file) {
+    return new Promise((resolve, reject) => {
+      if(!file) resolve("");
+      else {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+      }
+    });
+  }
+
+  // 🌟 ฟังก์ชันบันทึกการกู้ที่สมบูรณ์ โชว์โครงสร้างครบถ้วน
+  async function saveLoan() {
+    const uId = document.getElementById('cUser').value;
+    const amount = document.getElementById('cAmount').value;
+    
+    if(!amount) { alert('กรุณากรอกยอดเงินต้น'); return; }
+    if(uId === 'NEW' && !document.getElementById('cName').value) {
+      alert('กรุณากรอกชื่อผู้กู้'); return;
+    }
+
     toggleL(true);
-    await api({action:'saveLoan',userId:document.getElementById('cUser').value,name:document.getElementById('cName').value,nickname:document.getElementById('cNick').value,phone:document.getElementById('cPhone').value,details:document.getElementById('cDetails').value,amount:document.getElementById('cAmount').value,rate:document.getElementById('cRate').value,cycle:document.getElementById('cCycle').value,installments:document.getElementById('cInst').value,startDate:document.getElementById('cStart').value});
-    toggleL(false); alert('สำเร็จ'); closeModal('modalCreate'); loadDash();
+    let photoBase64 = "";
+    const photoFile = document.getElementById('cPhoto').files[0];
+    if(photoFile) photoBase64 = await getBase64(photoFile);
+
+    const payload = {
+      action: 'saveLoan',
+      userId: uId,
+      name: document.getElementById('cName').value,
+      nickname: document.getElementById('cNick').value,
+      phone: document.getElementById('cPhone').value,
+      details: document.getElementById('cDetails').value,
+      photoBase64: photoBase64,
+      amount: amount,
+      rate: document.getElementById('cRate').value,
+      cycle: document.getElementById('cCycle').value,
+      installments: document.getElementById('cInst').value,
+      startDate: document.getElementById('cStart').value
+    };
+
+    await api(payload);
+    toggleL(false); 
+    alert('บันทึกสัญญากู้สำเร็จ!'); 
+    closeModal('modalCreate'); 
+    loadDash();
   }
 
-  async function fetchPreview(){
-    let v=document.getElementById('paySearch').value;
-    let loan=allLoans.find(l=>l.loanId===v || l.userName===v);
-    if(!loan) return alert('ไม่พบชื่อนี้');
+  async function fetchPreview() {
+    let val = document.getElementById('paySearch').value;
+    let loan = allLoans.find(l => l.loanId === val || l.userName === val);
+    
+    if(!loan) return alert('ค้นหาไม่พบ กรุณาเลือกจาก Dropdown');
+    
     toggleL(true);
-    const res=await api({action:'previewPay',loanId:loan.loanId});
+    const res = await api({ action: 'previewPay', loanId: loan.loanId });
     toggleL(false);
-    if(res.success){ curLoan=res; document.getElementById('payDetails').style.display='block'; document.getElementById('pName').innerText=res.userName; document.getElementById('pInfo').innerText=`ค้าง: ฿${res.remaining.toLocaleString()} | ดอก: ฿${res.interest.toLocaleString()}`; document.getElementById('pDate').valueAsDate=new Date(); }
+    
+    if(res.success) { 
+      curLoan = res; 
+      document.getElementById('payDetails').style.display = 'block'; 
+      document.getElementById('pName').innerText = res.userName; 
+      document.getElementById('pInfo').innerText = `ต้นเหลือ: ฿${res.remaining.toLocaleString()} | ดอกเบี้ยงวดนี้: ฿${res.interest.toLocaleString()}`; 
+      document.getElementById('pDate').valueAsDate = new Date(); 
+    }
   }
 
-  async function submitPay(){
+  async function submitPay() {
+    const amt = document.getElementById('pAmt').value;
+    if(!amt) { alert('กรุณากรอกยอดเงินที่ได้รับจริง'); return; }
+
     toggleL(true);
-    await api({action:'submitPay',loanId:curLoan.loanId,amount:document.getElementById('pAmt').value,payDate:document.getElementById('pDate').value,method:document.getElementById('pMethod').value});
-    toggleL(false); alert('บันทึกสำเร็จ'); closeModal('modalPay'); loadDash();
+    let slipBase64 = "";
+    const slipFile = document.getElementById('pSlip').files[0];
+    if(slipFile) slipBase64 = await getBase64(slipFile);
+
+    const payload = {
+      action: 'submitPay',
+      loanId: curLoan.loanId,
+      amount: amt,
+      payDate: document.getElementById('pDate').value,
+      method: document.getElementById('pMethod').value,
+      slipBase64: slipBase64
+    };
+
+    await api(payload);
+    toggleL(false); 
+    alert('บันทึกการจ่ายและตัดยอดอัตโนมัติสำเร็จ!'); 
+    closeModal('modalPay'); 
+    loadDash();
   }
 </script>
 </body>

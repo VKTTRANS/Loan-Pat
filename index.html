@@ -10,24 +10,39 @@
   <style>
     :root {
       --bg-main: #090d16;
-      --glass-bg: rgba(17, 25, 40, 0.65);
-      --glass-border: rgba(255, 255, 255, 0.08);
+      --glass-bg: rgba(17, 25, 40, 0.85);
+      --glass-border: rgba(255, 255, 255, 0.15);
       --accent-neon: #38bdf8;
       --accent-gradient: linear-gradient(135deg, #38bdf8 0%, #0369a1 100%);
       --accent-success: linear-gradient(135deg, #34d399 0%, #059669 100%);
       --text-muted: #94a3b8;
     }
     body { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; background-color: var(--bg-main); color: #f8fafc; min-height: 100vh; overflow-x: hidden; }
-    .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37); transition: all 0.3s ease; }
-    .form-control, .form-select { background: rgba(15, 23, 42, 0.6); border: 1px solid var(--glass-border); color: #f8fafc; border-radius: 14px; padding: 12px 16px; }
-    .form-control:focus, .form-select:focus { background: rgba(15, 23, 42, 0.8); border-color: var(--accent-neon); color: #f8fafc; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2); }
-    .btn-gradient { background: var(--accent-gradient); color: #ffffff; border: none; border-radius: 14px; font-weight: 600; padding: 12px 24px; transition: transform 0.2s, opacity 0.2s; }
+    
+    .glass-card { background: var(--glass-bg); backdrop-filter: blur(20px); border: 1px solid var(--glass-border); border-radius: 24px; box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.5); }
+    
+    /* แก้ไขกล่องข้อความให้มองเห็นชัดเจน */
+    .form-control, .form-select { 
+      background-color: #1e293b !important; 
+      border: 1px solid #475569 !important; 
+      color: #ffffff !important; 
+      border-radius: 14px; 
+      padding: 12px 16px; 
+    }
+    .form-control::placeholder { color: #94a3b8 !important; opacity: 1; }
+    .form-control:focus, .form-select:focus { 
+      background-color: #0f172a !important; 
+      border-color: var(--accent-neon) !important; 
+      box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.25) !important; 
+    }
+    
+    .btn-gradient { background: var(--accent-gradient); color: #ffffff; border: none; border-radius: 14px; font-weight: 600; padding: 12px 24px; transition: transform 0.2s; }
     .btn-gradient:active { transform: scale(0.98); }
-    .nav-pill-custom { background: rgba(15, 23, 42, 0.8); border-radius: 16px; padding: 6px; display: flex; gap: 4px; }
-    .nav-pill-custom .nav-link { color: var(--text-muted); border-radius: 12px; border: none; font-weight: 600; padding: 10px 16px; font-size: 0.9rem; }
+    .nav-pill-custom { background: rgba(15, 23, 42, 0.9); border: 1px solid #334155; border-radius: 16px; padding: 6px; display: flex; gap: 4px; }
+    .nav-pill-custom .nav-link { color: var(--text-muted); border-radius: 12px; border: none; font-weight: 600; padding: 10px 16px; font-size: 0.95rem; }
     .nav-pill-custom .nav-link.active { background: var(--accent-gradient); color: #fff; }
-    .metric-box { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; text-align: center; }
-    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.8); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+    .metric-box { background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); border-radius: 20px; padding: 20px; text-align: center; }
+    .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(9, 13, 22, 0.85); backdrop-filter: blur(8px); display: none; align-items: center; justify-content: center; z-index: 9999; }
     #loginPage, #mainApp { display: none; }
   </style>
 </head>
@@ -36,7 +51,7 @@
 <div class="loading-overlay" id="loader">
   <div class="text-center">
     <div class="spinner-border text-info mb-2" role="status"></div>
-    <div class="small text-muted">SECURE CONNECTING...</div>
+    <div class="small text-white">กำลังประมวลผล...</div>
   </div>
 </div>
 
@@ -48,36 +63,36 @@
         <i class="fa-solid fa-shield-halved text-info" style="font-size: 48px;"></i>
       </div>
       <h2 class="fw-bold tracking-tight">LMS <span style="color: var(--accent-neon)">2026</span></h2>
-      <p class="text-muted small">ระบบบริหารและจัดการความเสี่ยงเงินกู้ดิจิทัล</p>
+      <p class="text-muted small">ระบบบริหารและจัดการเงินกู้ดิจิทัล</p>
     </div>
     <div class="text-start">
-      <label class="small text-muted mb-2">รหัสผู้ใช้งาน</label>
-      <input type="text" id="userId" class="form-control mb-3" placeholder="Enter User ID" onkeypress="handleLoginEnter(event)">
-      <label class="small text-muted mb-2">รหัสผ่านสำหรับเข้าสู่ระบบ</label>
+      <label class="small text-muted mb-2">รหัสสำหรับเข้าสู่ระบบ</label>
+      <input type="text" id="userId" class="form-control mb-3" placeholder="ระบุรหัสของคุณ" onkeypress="handleLoginEnter(event)">
+      <label class="small text-muted mb-2">รหัสผ่าน</label>
       <input type="password" id="password" class="form-control mb-4" placeholder="••••••••" onkeypress="handleLoginEnter(event)">
-      <button onclick="login()" class="btn btn-gradient w-100 py-3">เข้าสู่ระบบความปลอดภัย</button>
+      <button onclick="login()" class="btn btn-gradient w-100 py-3">เข้าสู่ระบบ</button>
     </div>
   </div>
 
   <div id="mainApp">
-    <div class="d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
       <div>
-        <small class="text-muted block">ระบบจัดการหลังบ้าน</small>
+        <small class="text-muted d-block">ระบบจัดการหลังบ้าน</small>
         <h5 class="m-0 fw-bold" id="adminName">Admin</h5>
       </div>
-      <button onclick="location.reload()" class="btn btn-dark rounded-circle p-2" style="width:42px; height:42px;"><i class="fa-solid fa-power-off text-danger"></i></button>
+      <button onclick="location.reload()" class="btn btn-dark rounded-circle p-2" style="width:42px; height:42px; border: 1px solid #475569;"><i class="fa-solid fa-power-off text-danger"></i></button>
     </div>
 
     <div class="nav-pill-custom mb-4">
       <button class="nav-link active w-100" id="tab-dash" onclick="switchTab('dash')"><i class="fa-solid fa-chart-pie me-1"></i>สรุป</button>
       <button class="nav-link w-100" id="tab-pay" onclick="switchTab('pay')"><i class="fa-solid fa-wallet me-1"></i>รับชำระ</button>
-      <button class="nav-link w-100" id="tab-users" onclick="switchTab('users')"><i class="fa-solid fa-user-gear me-1"></i>ผู้ใช้งาน</button>
+      <button class="nav-link w-100" id="tab-users" onclick="switchTab('users')"><i class="fa-solid fa-users me-1"></i>ผู้กู้</button>
     </div>
 
     <div id="section-dash">
       <div class="row g-3 mb-4">
         <div class="col-12">
-          <div class="metric-box" style="background: linear-gradient(180deg, rgba(56,189,248,0.08) 0%, transparent 100%);">
+          <div class="metric-box" style="background: linear-gradient(180deg, rgba(56,189,248,0.1) 0%, transparent 100%);">
             <small class="text-muted d-block mb-1">ยอดเงินกู้รวมในระบบ</small>
             <h2 class="fw-bold m-0 text-info">฿<span id="mTotal">0.00</span></h2>
           </div>
@@ -89,7 +104,7 @@
           </div>
         </div>
         <div class="col-6">
-          <div class="metric-box" style="border-color: rgba(244,63,94,0.3);">
+          <div class="metric-box" style="border-color: rgba(244,63,94,0.4);">
             <small class="text-muted d-block mb-1">ใกล้ครบกำหนดชำระ</small>
             <h4 class="fw-bold m-0 text-danger" id="mNearDue">0</h4>
           </div>
@@ -102,18 +117,18 @@
         <h6 class="fw-bold mb-3">รันระบบงวดชำระอัตโนมัติ</h6>
         <div class="input-group mb-3">
           <input type="text" id="loanId" class="form-control" placeholder="ใส่รหัสสัญญาเงินกู้">
-          <button onclick="fetchPreview()" class="btn btn-info px-4 fw-bold text-white" style="border-radius: 0 14px 14px 0;">ดึงสัญญางวด</button>
+          <button onclick="fetchPreview()" class="btn btn-info px-4 fw-bold text-white" style="border-radius: 0 14px 14px 0; border: 1px solid #38bdf8;">ดึงสัญญางวด</button>
         </div>
 
         <div id="paymentForm" style="display: none;">
-          <div class="p-3 rounded-4 mb-3" style="background: rgba(255,255,255,0.02); border: 1px solid var(--glass-border);">
+          <div class="p-3 rounded-4 mb-3" style="background: rgba(255,255,255,0.05); border: 1px solid var(--glass-border);">
             <p class="mb-2"><b>รหัสผู้กู้:</b> <span id="lblUserId" class="text-info"></span></p>
             <p class="mb-2"><b>เรียกเก็บงวดที่:</b> <span id="lblNo" class="badge bg-primary"></span></p>
-            <hr class="my-2" style="opacity: 0.1;">
-            <div class="d-flex justify-content-between small text-muted mb-1">
+            <hr class="my-2" style="opacity: 0.2;">
+            <div class="d-flex justify-content-between small text-white mb-1">
               <span>เงินต้นในงวด:</span><span>฿<span id="lblPrin"></span></span>
             </div>
-            <div class="d-flex justify-content-between small text-muted mb-2">
+            <div class="d-flex justify-content-between small text-white mb-2">
               <span>ดอกเบี้ยในงวด:</span><span>฿<span id="lblInt"></span></span>
             </div>
             <div class="d-flex justify-content-between align-items-center pt-2 border-top border-secondary" style="border-style: dashed !important;">
@@ -128,7 +143,7 @@
           </select>
           
           <label class="small text-muted mb-2">แนบสลิปหลักฐาน (ไม่บังคับ)</label>
-          <input type="file" id="slipFile" class="form-control mb-4">
+          <input type="file" id="slipFile" class="form-control mb-4" style="background-color: #1e293b !important;">
           
           <button onclick="submitData()" class="btn btn-gradient w-100 py-3" style="background: var(--accent-success);">บันทึกและรันงวดถัดไป</button>
         </div>
@@ -137,11 +152,11 @@
 
     <div id="section-users" style="display: none;">
       <div class="glass-card p-4 mb-4">
-        <h6 class="fw-bold mb-3" id="userFormTitle">เพิ่มบัญชีผู้ใช้ใหม่</h6>
+        <h6 class="fw-bold mb-3" id="userFormTitle">เพิ่มข้อมูลผู้กู้ใหม่</h6>
         <input type="hidden" id="isEdit" value="false">
         <div class="row g-3">
           <div class="col-6">
-            <input type="text" id="formUserId" class="form-control" placeholder="User ID">
+            <input type="text" id="formUserId" class="form-control" placeholder="รหัสผู้กู้">
           </div>
           <div class="col-6">
             <input type="text" id="formPassword" class="form-control" placeholder="รหัสผ่าน">
@@ -154,18 +169,18 @@
           </div>
           <div class="col-6">
             <select id="formRole" class="form-select">
-              <option value="User">บทบาท: User</option>
-              <option value="Admin">บทบาท: Admin</option>
+              <option value="User">บทบาท: ผู้กู้</option>
+              <option value="Admin">บทบาท: ผู้ดูแล (Admin)</option>
             </select>
           </div>
           <div class="col-12 d-flex gap-2">
-            <button onclick="saveUser()" class="btn btn-gradient w-100">บันทึกข้อมูลผู้ใช้</button>
+            <button onclick="saveUser()" class="btn btn-gradient w-100">บันทึกข้อมูลผู้กู้</button>
             <button onclick="clearUserForm()" id="btnCancelEdit" class="btn btn-secondary" style="display: none; border-radius:14px;">ยกเลิก</button>
           </div>
         </div>
       </div>
 
-      <h6 class="fw-bold mb-3">บัญชีผู้ใช้ทั้งหมดในฐานข้อมูล</h6>
+      <h6 class="fw-bold mb-3">รายชื่อผู้กู้ทั้งหมดในระบบ</h6>
       <div id="userListContainer"></div>
     </div>
 
@@ -268,7 +283,9 @@
     const response = await callGAS(currentPayData);
     showLoader(false);
     if (response.success) {
-      alert("บันทึกรับชำระเงินเรียบร้อยแล้วระบบถูกอัปเดตอัตโนมัติ");
+      alert("บันทึกรับชำระเงินเรียบร้อยแล้ว");
+      document.getElementById('loanId').value = "";
+      document.getElementById('paymentForm').style.display = 'none';
       switchTab('dash');
     }
   }
@@ -276,19 +293,20 @@
   function renderUserList() {
     let html = '';
     globalUsersList.forEach(u => {
+      let roleDisplay = u.role === 'Admin' ? 'ผู้ดูแล (Admin)' : 'ผู้กู้';
       html += `
-        <div class="glass-card p-3 mb-2 d-flex justify-content-between align-items-center" style="background: rgba(255,255,255,0.01);">
+        <div class="glass-card p-3 mb-3 d-flex justify-content-between align-items-center" style="background: rgba(30, 41, 59, 0.5); border: 1px solid #334155;">
           <div>
-            <div class="fw-bold">${u.name} <span class="badge bg-secondary small">${u.role}</span></div>
-            <small class="text-muted">ID: ${u.userId} | โทร: ${u.phone}</small>
+            <div class="fw-bold mb-1" style="color: #ffffff;">${u.name} <span class="badge ${u.role === 'Admin' ? 'bg-danger' : 'bg-primary'} small ms-1">${roleDisplay}</span></div>
+            <small style="color: #94a3b8;">รหัส: ${u.userId} | โทร: ${u.phone}</small>
           </div>
-          <div class="d-flex gap-1">
-            <button onclick="editUserTrigger('${u.userId}')" class="btn btn-sm btn-outline-info rounded-3"><i class="fa-solid fa-pen-to-square"></i></button>
-            <button onclick="deleteUser('${u.userId}')" class="btn btn-sm btn-outline-danger rounded-3"><i class="fa-solid fa-trash-can"></i></button>
+          <div class="d-flex gap-2">
+            <button onclick="editUserTrigger('${u.userId}')" class="btn btn-sm btn-outline-info rounded-3 px-3"><i class="fa-solid fa-pen-to-square"></i></button>
+            <button onclick="deleteUser('${u.userId}')" class="btn btn-sm btn-outline-danger rounded-3 px-3"><i class="fa-solid fa-trash-can"></i></button>
           </div>
         </div>`;
     });
-    document.getElementById('userListContainer').innerHTML = html || '<div class="text-muted text-center py-3">ไม่มีข้อมูลผู้ใช้งานในระบบ</div>';
+    document.getElementById('userListContainer').innerHTML = html || '<div class="text-muted text-center py-4">ไม่มีข้อมูลผู้กู้ในระบบ</div>';
   }
 
   async function saveUser() {
@@ -306,7 +324,7 @@
     showLoader(false);
 
     if(response.success) {
-      alert('บันทึกข้อมูลผู้ใช้เรียบร้อย');
+      alert('บันทึกข้อมูลผู้กู้เรียบร้อย');
       clearUserForm();
       loadDashboardData();
     } else { alert(response.error); }
@@ -315,7 +333,7 @@
   function editUserTrigger(userId) {
     const u = globalUsersList.find(item => item.userId == userId);
     if(!u) return;
-    document.getElementById('userFormTitle').innerText = "แก้ไขข้อมูลผู้ใช้งาน ID: " + userId;
+    document.getElementById('userFormTitle').innerText = "แก้ไขข้อมูลผู้กู้รหัส: " + userId;
     document.getElementById('formUserId').value = u.userId;
     document.getElementById('formUserId').disabled = true;
     document.getElementById('formPassword').value = u.password;
@@ -324,18 +342,19 @@
     document.getElementById('formRole').value = u.role;
     document.getElementById('isEdit').value = "true";
     document.getElementById('btnCancelEdit').style.display = "block";
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   }
 
   async function deleteUser(userId) {
-    if(!confirm('คุณแน่ใจว่าต้องการลบผู้ใช้งานรหัสนี้ออกใช่หรือไม่?')) return;
+    if(!confirm('คุณแน่ใจว่าต้องการลบข้อมูลผู้กู้รหัสนี้ออกใช่หรือไม่?')) return;
     showLoader(true);
     const response = await callGAS({ action: 'deleteUser', userId });
     showLoader(false);
-    if(response.success) { alert('ลบผู้ใช้สำเร็จ'); loadDashboardData(); }
+    if(response.success) { alert('ลบข้อมูลสำเร็จ'); loadDashboardData(); }
   }
 
   function clearUserForm() {
-    document.getElementById('userFormTitle').innerText = "เพิ่มบัญชีผู้ใช้ใหม่";
+    document.getElementById('userFormTitle').innerText = "เพิ่มข้อมูลผู้กู้ใหม่";
     document.getElementById('formUserId').value = "";
     document.getElementById('formUserId').disabled = false;
     document.getElementById('formPassword').value = "";

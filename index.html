@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* บังคับสีตัวหนังสือ และคอนทราสต์ขั้นสูงเพื่อให้อ่านออกชัดเจน 100% */
     body { 
       font-family: 'Prompt', sans-serif; 
       background-color: #0b1120; 
@@ -16,9 +15,7 @@
       padding-bottom: 50px; 
     }
     
-    h1, h2, h3, h4, h5, h6, p, span, div, b { 
-      color: #ffffff !important; 
-    }
+    h1, h2, h3, h4, h5, h6, p, span, div, b { color: #ffffff !important; }
     
     label, .small, .text-muted { 
       color: #f8fafc !important; 
@@ -40,7 +37,6 @@
       transition: 0.3s; 
     }
     
-    /* กล่อง Input สีตัดกับพื้น ตัวหนังสือขาวสนิท */
     .form-control, .form-select { 
       background-color: #1e293b !important; 
       border: 2px solid #475569 !important; 
@@ -49,142 +45,60 @@
       padding: 12px; 
       font-weight: 500;
     }
-    .form-control::placeholder { 
-      color: #94a3b8 !important; 
-      opacity: 1 !important; 
-    }
+    .form-control::placeholder { color: #94a3b8 !important; opacity: 1 !important; }
     .form-control:focus, .form-select:focus { 
       border-color: #38bdf8 !important; 
       box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4) !important; 
     }
     
     .btn-action { 
-      border-radius: 12px; 
-      padding: 12px; 
-      border: none; 
-      font-weight: 700; 
-      transition: 0.2s; 
-      color: #fff !important; 
+      border-radius: 12px; padding: 12px; border: none; font-weight: 700; transition: 0.2s; color: #fff !important; 
     }
     .btn-action:active { transform: scale(0.95); }
     
     .status-badge { 
-      padding: 4px 12px; 
-      border-radius: 20px; 
-      font-size: 0.8rem; 
-      font-weight: 600; 
-      color: #fff !important; 
+      padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #fff !important; 
     }
     
-    /* ระบบ POPUP (Modal Overlay) */
     .modal-overlay { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: rgba(0, 0, 0, 0.85); 
-      z-index: 1000; 
-      display: none; 
-      align-items: center; 
-      justify-content: center; 
-      backdrop-filter: blur(5px);
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); 
+      z-index: 1000; display: none; align-items: center; justify-content: center; backdrop-filter: blur(5px);
     }
     
     .modal-content-custom {
-      background: #162032; 
-      border: 2px solid #38bdf8; 
-      border-radius: 20px; 
-      width: 95%; 
-      max-width: 550px; 
-      max-height: 90vh; 
-      overflow-y: auto; 
-      padding: 25px; 
-      box-shadow: 0 10px 40px rgba(0,0,0,0.9);
+      background: #162032; border: 2px solid #38bdf8; border-radius: 20px; width: 95%; 
+      max-width: 550px; max-height: 90vh; overflow-y: auto; padding: 25px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
     }
 
     .loader { 
-      position: fixed; 
-      top: 0; 
-      left: 0; 
-      width: 100%; 
-      height: 100%; 
-      background: rgba(0,0,0,0.9); 
-      display: none; 
-      z-index: 9999; 
-      justify-content: center; 
-      align-items: center; 
-      flex-direction: column; 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
+      display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; 
     }
 
     .borrower-card { 
-      background: #1e293b; 
-      border-left: 6px solid #38bdf8; 
-      border-radius: 12px; 
-      margin-bottom: 15px; 
-      padding: 18px; 
-      cursor: pointer; 
-      transition: 0.2s; 
-      border-top: 1px solid #334155; 
-      border-right: 1px solid #334155; 
-      border-bottom: 1px solid #334155; 
+      background: #1e293b; border-left: 6px solid #38bdf8; border-radius: 12px; margin-bottom: 15px; 
+      padding: 18px; cursor: pointer; transition: 0.2s; border-top: 1px solid #334155; 
+      border-right: 1px solid #334155; border-bottom: 1px solid #334155; 
     }
-    .borrower-card:hover { 
-      background: #293850; 
-      transform: translateY(-2px); 
-    }
+    .borrower-card:hover { background: #293850; transform: translateY(-2px); }
     
-    .top-bar { 
-      display: flex; 
-      justify-content: space-between; 
-      align-items: center; 
-      margin-bottom: 15px; 
-      padding-top: 10px; 
-    }
+    .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-top: 10px; }
 
-    .filter-btn-group { 
-      display: flex; 
-      gap: 8px; 
-      margin-bottom: 20px; 
-      overflow-x: auto; 
-      padding-bottom: 5px; 
-    }
-    
+    .filter-btn-group { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 5px; }
     .btn-filter { 
-      background: #1e293b; 
-      color: #fff !important; 
-      border: 1px solid #334155; 
-      border-radius: 8px; 
-      padding: 8px 16px; 
-      white-space: nowrap; 
-      font-size: 0.9rem; 
-      transition: 0.3s; 
+      background: #1e293b; color: #fff !important; border: 1px solid #334155; border-radius: 8px; 
+      padding: 6px 14px; white-space: nowrap; font-size: 0.85rem; transition: 0.3s; font-weight: 500;
     }
-    .btn-filter.active { 
-      background: #38bdf8; 
-      color: #000 !important; 
-      border-color: #38bdf8; 
-      font-weight: bold;
-    }
+    .btn-filter.active { background: #38bdf8; color: #000 !important; border-color: #38bdf8; font-weight: bold; }
 
-    /* สไตล์สำหรับ Tabs ในหน้ารายละเอียด */
-    .nav-tabs-custom { 
-      border-bottom: 2px solid #334155; 
-      margin-bottom: 15px; 
-      display: flex; 
-    }
-    .nav-tabs-custom div { 
-      padding: 10px 20px; 
-      cursor: pointer; 
-      font-weight: 600; 
-      color: #94a3b8 !important; 
-      border-bottom: 2px solid transparent; 
-      margin-bottom: -2px; 
-    }
-    .nav-tabs-custom div.active { 
-      color: #38bdf8 !important; 
-      border-bottom: 2px solid #38bdf8; 
-    }
+    .nav-tabs-custom { border-bottom: 2px solid #334155; margin-bottom: 15px; display: flex; }
+    .nav-tabs-custom div { padding: 10px 20px; cursor: pointer; font-weight: 600; color: #94a3b8 !important; border-bottom: 2px solid transparent; margin-bottom: -2px; }
+    .nav-tabs-custom div.active { color: #38bdf8 !important; border-bottom: 2px solid #38bdf8; }
+
+    /* ตารางสรุปยอดแยกประเภทใน Dashboard */
+    .summary-grid { display: flex; justify-content: space-between; padding: 10px 0; border-top: 1px solid #334155; }
+    .summary-item { text-align: center; width: 33%; border-right: 1px solid #334155; }
+    .summary-item:last-child { border-right: none; }
   </style>
 </head>
 <body>
@@ -200,7 +114,7 @@
 
 <div class="loader" id="loader">
   <div class="spinner-border text-info mb-3" style="width: 3rem; height: 3rem;"></div>
-  <h5 class="text-white fw-bold">กำลังประมวลผลข้อมูล...</h5>
+  <h5 class="text-white fw-bold">กำลังโหลดข้อมูล...</h5>
 </div>
 
 <div class="container" style="max-width: 600px;">
@@ -220,17 +134,33 @@
       <button onclick="location.reload()" class="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-bold">ออกจากระบบ</button>
     </div>
 
-    <div class="row g-2 mb-4">
-      <div class="col-6">
-        <div class="glass-card p-3 text-center h-100">
-          <label class="text-muted fw-bold d-block mb-1">ยอดเงินปล่อยกู้รวม</label>
-          <h4 class="fw-bold text-white m-0 mt-2">฿<span id="mTotalLoan">0</span></h4>
+    <div class="glass-card p-3 mb-4 shadow-lg">
+      <div class="row text-center mb-3">
+        <div class="col-6">
+          <label class="text-muted fw-bold d-block mb-1">ยอดเงินปล่อยกู้รวมทั้งหมด</label>
+          <h4 class="fw-bold text-white m-0">฿<span id="mTotalLoan">0</span></h4>
+        </div>
+        <div class="col-6 border-start border-secondary">
+          <label class="text-info fw-bold d-block mb-1">ยอดคงค้างปัจจุบันทั้งหมด</label>
+          <h4 class="fw-bold text-info m-0">฿<span id="mTotalRemain">0</span></h4>
         </div>
       </div>
-      <div class="col-6">
-        <div class="glass-card p-3 text-center h-100" style="border-color: #38bdf8;">
-          <label class="text-info fw-bold d-block mb-1">ยอดคงค้างปัจจุบัน</label>
-          <h4 class="fw-bold text-info m-0 mt-2">฿<span id="mTotalRemain">0</span></h4>
+      
+      <div class="summary-grid mt-2">
+        <div class="summary-item">
+          <span class="text-muted d-block small mb-1">ประเภท รายวัน</span>
+          <span class="d-block small">กู้: ฿<span id="m1Loan">0</span></span>
+          <span class="d-block small text-warning">ค้าง: ฿<span id="m1Remain">0</span></span>
+        </div>
+        <div class="summary-item">
+          <span class="text-muted d-block small mb-1">ประเภท 15 วัน</span>
+          <span class="d-block small">กู้: ฿<span id="m15Loan">0</span></span>
+          <span class="d-block small text-warning">ค้าง: ฿<span id="m15Remain">0</span></span>
+        </div>
+        <div class="summary-item">
+          <span class="text-muted d-block small mb-1">ประเภท รายเดือน</span>
+          <span class="d-block small">กู้: ฿<span id="m30Loan">0</span></span>
+          <span class="d-block small text-warning">ค้าง: ฿<span id="m30Remain">0</span></span>
         </div>
       </div>
     </div>
@@ -251,14 +181,23 @@
     <div class="mt-4">
       <h5 class="fw-bold mb-3"><i class="fa-solid fa-users text-info me-2"></i>รายการบัญชีผู้กู้</h5>
       
-      <div class="filter-btn-group">
-        <button class="btn-filter active" id="f-all" onclick="filterData('all')">ทั้งหมด</button>
-        <button class="btn-filter" id="f-1" onclick="filterData('1')">รายวัน</button>
-        <button class="btn-filter" id="f-15" onclick="filterData('15')">15 วัน</button>
-        <button class="btn-filter" id="f-30" onclick="filterData('30')">รายเดือน</button>
+      <div class="d-flex flex-column gap-2 mb-3">
+        <div class="filter-btn-group m-0 pb-1 align-items-center">
+          <span class="text-muted small me-2" style="min-width: 50px;">รอบกู้:</span>
+          <button class="btn-filter active" id="fc-all" onclick="setFilter('cycle', 'all')">ทั้งหมด</button>
+          <button class="btn-filter" id="fc-1" onclick="setFilter('cycle', '1')">รายวัน</button>
+          <button class="btn-filter" id="fc-15" onclick="setFilter('cycle', '15')">15 วัน</button>
+          <button class="btn-filter" id="fc-30" onclick="setFilter('cycle', '30')">รายเดือน</button>
+        </div>
+        <div class="filter-btn-group m-0 pb-1 align-items-center">
+          <span class="text-muted small me-2" style="min-width: 50px;">สถานะ:</span>
+          <button class="btn-filter active" id="fs-all" onclick="setFilter('status', 'all')">ทั้งหมด</button>
+          <button class="btn-filter text-info border-info" id="fs-due" onclick="setFilter('status', 'due')">ใกล้ครบ / วันนี้</button>
+          <button class="btn-filter text-danger border-danger" id="fs-overdue" onclick="setFilter('status', 'overdue')">เกินกำหนด !</button>
+        </div>
       </div>
 
-      <input class="form-control mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นหาชื่อคนกู้ หรือ รหัสสัญญา..." onkeyup="filterLoans()">
+      <input class="form-control mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="filterLoans()">
       
       <div id="loanContainer">
         </div>
@@ -295,13 +234,11 @@
 
     <div class="nav-tabs-custom">
       <div id="tabBtnHistory" class="active" onclick="switchDetailTab('History')">ประวัติรับเงิน</div>
-      <div id="tabBtnSchedule" onclick="switchDetailTab('Schedule')">ตารางงวดคำนวณใหม่</div>
+      <div id="tabBtnSchedule" onclick="switchDetailTab('Schedule')">ตารางงวดชำระ</div>
     </div>
 
-    <div id="dHistory" style="max-height: 250px; overflow-y: auto;">
-      </div>
-    <div id="dSchedule" style="max-height: 250px; overflow-y: auto; display: none;">
-      </div>
+    <div id="dHistory" style="max-height: 250px; overflow-y: auto;"></div>
+    <div id="dSchedule" style="max-height: 250px; overflow-y: auto; display: none;"></div>
   </div>
 </div>
 
@@ -348,7 +285,7 @@
         </div>
       </div>
       
-      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3 fs-5 mt-3 shadow">ยืนยันหักยอดต้น-ดอก อัตโนมัติ</button>
+      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3 fs-5 mt-3 shadow">ยืนยันหักยอดอัตโนมัติ</button>
     </div>
   </div>
 </div>
@@ -407,8 +344,7 @@
     </div>
     
     <label class="mt-4 text-info">ตารางคำนวณงวดล่วงหน้า</label>
-    <div id="cSchedulePreview" class="p-2 rounded mb-3" style="background:#0f172a; max-height: 150px; overflow-y: auto;">
-      </div>
+    <div id="cSchedulePreview" class="p-2 rounded mb-3" style="background:#0f172a; max-height: 150px; overflow-y: auto;"></div>
     
     <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold fs-5 mt-2 shadow-lg">บันทึกและปล่อยยอดกู้</button>
   </div>
@@ -418,17 +354,14 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
   let allLoans = [];
   let curPay = null;
+  
+  // 🌟 ตัวแปรเก็บสถานะการ Filter 
+  let currentFilters = { cycle: 'all', status: 'all', search: '' };
 
   document.getElementById('cStartDate').valueAsDate = new Date();
 
-  function toggleL(s) { 
-    document.getElementById('loader').style.display = s ? 'flex' : 'none'; 
-  }
-
-  function openModal(id) { 
-    document.getElementById(id).style.display = 'flex'; 
-  }
-  
+  function toggleL(s) { document.getElementById('loader').style.display = s ? 'flex' : 'none'; }
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { 
     document.getElementById(id).style.display = 'none'; 
     if(id === 'modalPay') {
@@ -438,7 +371,6 @@
     }
   }
 
-  // 🌟 ฟังก์ชันจัดการ Alert สวยๆ แบบ Fintech
   function showAlert(msg, isError = false) {
     document.getElementById('alertMsg').innerText = msg;
     document.getElementById('alertTitle').innerText = isError ? 'แจ้งเตือน' : 'สำเร็จ';
@@ -446,11 +378,9 @@
     document.getElementById('alertIcon').className = isError ? 'fa-solid fa-circle-xmark text-danger mb-3' : 'fa-solid fa-circle-check text-success mb-3';
     document.querySelector('#customAlert .glass-card').style.borderColor = isError ? '#f43f5e' : '#38bdf8';
     document.getElementById('alertBtn').className = isError ? 'btn btn-danger text-white fw-bold px-4 py-2 w-100 rounded-pill' : 'btn btn-info text-white fw-bold px-4 py-2 w-100 rounded-pill';
-    
     document.getElementById('customAlert').style.display = 'flex';
   }
 
-  // 🌟 ฟังก์ชันสลับ Tab หน้า Details
   function switchDetailTab(tab) {
     document.getElementById('tabBtnHistory').classList.remove('active');
     document.getElementById('tabBtnSchedule').classList.remove('active');
@@ -485,30 +415,34 @@
   async function loadDash() {
     const res = await api({ action: 'getDashboard' });
     allLoans = res.activeLoans;
+    
+    // อัปเดตตัวเลขใน Dashboard (ยอดรวมทั้งหมด)
     document.getElementById('mTotalLoan').innerText = Math.round(res.metrics.totalLoan).toLocaleString();
     document.getElementById('mTotalRemain').innerText = Math.round(res.metrics.totalRemain).toLocaleString();
     
+    // อัปเดตตัวเลขแยกประเภท 1, 15, 30
+    document.getElementById('m1Loan').innerText = Math.round(res.metrics.type1.loan).toLocaleString();
+    document.getElementById('m1Remain').innerText = Math.round(res.metrics.type1.remain).toLocaleString();
+    document.getElementById('m15Loan').innerText = Math.round(res.metrics.type15.loan).toLocaleString();
+    document.getElementById('m15Remain').innerText = Math.round(res.metrics.type15.remain).toLocaleString();
+    document.getElementById('m30Loan').innerText = Math.round(res.metrics.type30.loan).toLocaleString();
+    document.getElementById('m30Remain').innerText = Math.round(res.metrics.type30.remain).toLocaleString();
+    
     let optHtml = '<option value="NEW">➕ สร้างบัญชีผู้กู้คนใหม่</option>';
     let datalistHtml = '';
-    
-    res.users.forEach(u => { 
-      optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; 
-    });
-    
-    allLoans.forEach(l => { 
-      datalistHtml += `<option value="${l.loanId}">${l.userName} (${l.nickname}) [ค้าง ฿${l.amount}]</option>`; 
-    });
+    res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
+    allLoans.forEach(l => { datalistHtml += `<option value="${l.loanId}">${l.userName} (${l.nickname}) [ค้าง ฿${l.amount}]</option>`; });
     
     document.getElementById('cUserSelect').innerHTML = optHtml;
     document.getElementById('payLoanOptions').innerHTML = datalistHtml;
     
-    renderLoans(allLoans);
+    applyFilters(); // เรียกใช้ตัวกรองเพื่อเรนเดอร์รายชื่อ
   }
 
   function renderLoans(data) {
     let html = '';
     data.forEach(b => {
-      let statusClass = b.daysLeft <= 0 ? 'bg-danger' : (b.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
+      let statusClass = b.daysLeft < 0 ? 'bg-danger' : (b.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
       let statusText = b.daysLeft < 0 ? `เลยกำหนด ${Math.abs(b.daysLeft)} วัน` : (b.daysLeft === 0 ? 'ครบดิววันนี้' : `อีก ${b.daysLeft} วัน`);
       let displayName = b.userName ? b.userName : 'ไม่ระบุชื่อ';
       
@@ -517,7 +451,7 @@
           <div class="d-flex justify-content-between align-items-start">
             <div>
               <h5 class="fw-bold mb-1 text-white">👤 ${displayName} ${b.nickname ? `(${b.nickname})` : ''}</h5>
-              <p class="mb-1 text-muted small">รหัสสัญญา: <span class="text-white">${b.loanId}</span></p>
+              <p class="mb-1 text-muted small">รหัส: <span class="text-white">${b.loanId}</span> | รอบ: ${b.cycle} วัน</p>
               <p class="mb-0 text-info fw-bold fs-5 mt-2">ยอดคงค้าง: ฿${Number(b.amount).toLocaleString()}</p>
               <p class="mb-0 text-muted small mt-1">กำหนดจ่าย: ${b.dueDate}</p>
             </div>
@@ -528,30 +462,44 @@
           </div>
         </div>`;
     });
-    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูลบัญชีผู้กู้เงินในระบบ</div>';
+    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูลผู้กู้ตามเงื่อนไขที่ค้นหา</div>';
   }
 
-  function filterData(type) {
-    document.querySelectorAll('.btn-filter').forEach(b => b.classList.remove('active'));
-    document.getElementById('f-'+type).classList.add('active');
-    
-    if(type === 'all') {
-      renderLoans(allLoans);
-    } else {
-      renderLoans(allLoans.filter(l => l.cycle.toString() === type));
-    }
+  // 🌟 ฟังก์ชันจัดการการ Filter (รวมเงื่อนไข)
+  function setFilter(type, value) {
+    currentFilters[type] = value;
+    let prefix = type === 'cycle' ? 'fc-' : 'fs-';
+    document.querySelectorAll(`[id^="${prefix}"]`).forEach(b => b.classList.remove('active'));
+    document.getElementById(prefix + value).classList.add('active');
+    applyFilters();
   }
 
   function filterLoans() {
-    const input = document.getElementById('searchLoan').value.toLowerCase();
-    const items = document.querySelectorAll('.loan-item');
-    items.forEach(item => {
-      const text = item.getAttribute('data-name').toLowerCase();
-      item.style.display = text.includes(input) ? 'block' : 'none';
-    });
+    currentFilters.search = document.getElementById('searchLoan').value.toLowerCase();
+    applyFilters();
   }
 
-  // ดูรายละเอียดและประวัติ
+  function applyFilters() {
+    let filtered = allLoans.filter(l => {
+      // 1. เช็คประเภท Cycle
+      let matchCycle = (currentFilters.cycle === 'all' || l.cycle.toString() === currentFilters.cycle);
+      
+      // 2. เช็คสถานะวัน
+      let matchStatus = true;
+      if (currentFilters.status === 'due') {
+        matchStatus = (l.daysLeft >= 0 && l.daysLeft <= 3); // วันนี้ ถึง อีก 3 วัน
+      } else if (currentFilters.status === 'overdue') {
+        matchStatus = (l.daysLeft < 0); // ติดลบคือเลยกำหนด
+      }
+      
+      // 3. เช็คช่องค้นหา
+      let matchSearch = (l.userName + l.nickname + l.loanId).toLowerCase().includes(currentFilters.search);
+      
+      return matchCycle && matchStatus && matchSearch;
+    });
+    renderLoans(filtered);
+  }
+
   async function viewDetails(id) {
     toggleL(true);
     const res = await api({ action: 'getLoanDetails', loanId: id });
@@ -564,7 +512,6 @@
       document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid).toLocaleString()}`;
       document.getElementById('dRemain').innerText = `฿${Number(res.remaining).toLocaleString()}`;
       
-      // ส่วนประวัติการจ่าย
       let hHtml = '';
       if(res.payments.length === 0) {
         hHtml = '<div class="text-center text-muted small p-3">ยังไม่มีประวัติการทำรายการรับชำระ</div>';
@@ -587,7 +534,6 @@
       }
       document.getElementById('dHistory').innerHTML = hHtml;
 
-      // ส่วนตารางงวด
       let sHtml = '';
       if(res.schedule.length === 0) {
         sHtml = '<div class="text-center text-muted small p-3">ไม่มีข้อมูลตารางชำระ หรือปิดยอดไปแล้ว</div>';
@@ -666,17 +612,10 @@
     if(photoFile) photoBase64 = await getBase64(photoFile);
 
     const payload = {
-      action: 'saveLoan',
-      userId: uId,
-      name: document.getElementById('cName').value,
-      nickname: document.getElementById('cNick').value,
-      phone: document.getElementById('cPhone').value,
-      details: document.getElementById('cDetails').value,
-      photoBase64: photoBase64,
-      amount: amount,
-      rate: document.getElementById('cRate').value,
-      cycle: document.getElementById('cCycle').value,
-      installments: document.getElementById('cInstallments').value,
+      action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value,
+      phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value,
+      photoBase64: photoBase64, amount: amount, rate: document.getElementById('cRate').value,
+      cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value,
       startDate: document.getElementById('cStartDate').value
     };
 
@@ -727,14 +666,9 @@
     if(slipFile) slipBase64 = await getBase64(slipFile);
 
     const payload = {
-      action: 'submitPay',
-      loanId: curPay.loanId,
-      userId: curPay.userId,
-      nextNo: curPay.nextNo,
-      totalPaidAmount: totalPaidVal,
-      payDate: document.getElementById('pPayDate').value,
-      method: document.getElementById('pMethod').value,
-      slipBase64: slipBase64
+      action: 'submitPay', loanId: curPay.loanId, userId: curPay.userId, nextNo: curPay.nextNo,
+      totalPaidAmount: totalPaidVal, payDate: document.getElementById('pPayDate').value,
+      method: document.getElementById('pMethod').value, slipBase64: slipBase64
     };
 
     await api(payload);

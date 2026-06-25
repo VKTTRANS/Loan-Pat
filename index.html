@@ -3,174 +3,204 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>LMS Advanced 2026</title>
+  <title>Fintech Admin 2026</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&family=Prompt:wght@400;600&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    :root { --bg: #0b1120; --card: #1e293b; --accent: #38bdf8; --text: #f8fafc; }
-    body { font-family: 'Plus Jakarta Sans', 'Prompt', sans-serif; background: var(--bg); color: var(--text); padding-bottom: 50px;}
-    .glass { background: var(--card); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; }
+    /* บังคับสีพื้นหลังและสีตัวหนังสือให้อ่านออก 100% */
+    body { font-family: 'Prompt', sans-serif; background-color: #0b1120; color: #ffffff; padding-bottom: 50px; }
+    h1, h2, h3, h4, h5, h6, p, span, div { color: #ffffff; }
+    label, .small, .text-muted { color: #e2e8f0 !important; font-weight: 500; font-size: 0.95rem; }
+    .text-info { color: #38bdf8 !important; }
+
+    .glass-card { background: #162032; border: 1px solid #334155; border-radius: 20px; }
     
-    /* แก้ไขปัญหา Label อ่านไม่ออก */
-    label.small.text-muted { color: #e2e8f0 !important; font-weight: 600; font-size: 0.9rem !important; margin-bottom: 5px; display: block; }
-    
+    /* กล่องข้อความสีสว่างตัดกับพื้น */
     .form-control, .form-select { 
-      background-color: #334155 !important; border: 1px solid #475569 !important; color: #ffffff !important; border-radius: 12px; padding: 14px;
+      background-color: #1e293b !important; 
+      border: 1px solid #475569 !important; 
+      color: #ffffff !important; 
+      border-radius: 12px; 
+      padding: 14px;
     }
-    .form-control:focus { border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.2) !important; }
+    .form-control::placeholder { color: #94a3b8 !important; opacity: 1; }
+    .form-control:focus, .form-select:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.3) !important; }
     
-    .btn-action { border-radius: 16px; padding: 20px; border: none; font-weight: 700; transition: 0.3s; }
-    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; }
+    .btn-action { border-radius: 16px; padding: 20px; border: none; font-weight: 700; transition: 0.2s; color: #fff !important; }
+    .btn-action:active { transform: scale(0.95); }
+    .status-badge { padding: 4px 12px; border-radius: 20px; font-size: 0.8rem; font-weight: 600; color: #fff; }
     
-    /* Custom Popup Styles */
-    #customPopup { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 10000; display: none; width: 90%; max-width: 400px; animation: slideDown 0.4s ease; }
-    @keyframes slideDown { from { top: -100px; opacity: 0; } to { top: 20px; opacity: 1; } }
+    /* ระบบ POPUP (Modal) ของจริง */
+    .modal-overlay { 
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+      background: rgba(0, 0, 0, 0.85); 
+      z-index: 1000; display: none; align-items: center; justify-content: center; 
+      backdrop-filter: blur(5px);
+    }
+    .modal-content-custom {
+      background: #162032; border: 1px solid #38bdf8; border-radius: 20px; 
+      width: 90%; max-width: 500px; max-height: 90vh; overflow-y: auto; padding: 20px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.8);
+    }
+
+    /* ตัวโหลด */
+    .loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.9); display:none; z-index:9999; justify-content:center; align-items:center; flex-direction: column; }
     
-    .loader { position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(9,13,22,0.95); display:none; z-index:9999; justify-content:center; align-items:center; flex-direction: column; }
-    .profile-img { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid var(--accent); }
+    /* สไตล์การ์ดผู้กู้ */
+    .borrower-card { background: #1e293b; border-left: 5px solid #38bdf8; border-radius: 12px; margin-bottom: 15px; padding: 15px; }
   </style>
 </head>
 <body>
 
-<div id="customPopup" class="glass p-3 shadow-lg border-info">
-  <div class="d-flex align-items-center">
-    <i class="fa-solid fa-circle-check text-success fs-3 me-3"></i>
-    <div>
-      <h6 class="m-0 fw-bold text-white">ดำเนินการสำเร็จ</h6>
-      <small id="popupMsg" class="text-info"></small>
-    </div>
-  </div>
-</div>
-
 <div class="loader" id="loader">
   <div class="spinner-border text-info mb-3"></div>
-  <small class="text-white fw-bold">ประมวลผลความปลอดภัย...</small>
+  <h5 class="text-white fw-bold">กำลังประมวลผล...</h5>
 </div>
 
 <div class="container" style="max-width: 600px; padding: 20px 15px;">
   
-  <div id="loginPage" class="glass p-5 text-center mt-5">
-    <h2 class="fw-bold mb-4">LMS <span class="text-info">System</span></h2>
-    <input type="text" id="userId" class="form-control mb-3" placeholder="รหัส Admin ID">
-    <input type="password" id="password" class="form-control mb-4" placeholder="รหัสผ่าน">
+  <div id="loginPage" class="glass-card p-5 text-center mt-5">
+    <h2 class="fw-bold mb-4">Fintech <span class="text-info">Admin</span></h2>
+    <label class="d-block text-start mb-1">รหัสผู้ดูแลระบบ</label>
+    <input type="text" id="userId" class="form-control mb-3" placeholder="Admin ID">
+    <label class="d-block text-start mb-1">รหัสผ่าน</label>
+    <input type="password" id="password" class="form-control mb-4" placeholder="Password">
     <button onclick="login()" class="btn btn-info w-100 py-3 fw-bold text-white shadow-lg">เข้าสู่ระบบ</button>
   </div>
 
   <div id="mainApp" style="display:none">
+    
     <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
-      <h5 class="fw-bold m-0 text-info">Fintech Admin</h5>
+      <h4 class="fw-bold m-0 text-info">Fintech Admin</h4>
       <button onclick="location.reload()" class="btn btn-outline-danger btn-sm rounded-pill px-3">Logout</button>
     </div>
 
-    <div class="glass p-4 mb-4 text-center border-info">
-      <small class="text-muted text-uppercase fw-bold">ยอดคงค้างทั้งหมด</small>
-      <h1 class="fw-bold text-info mt-1">฿<span id="mTotal">0.00</span></h1>
+    <div class="glass-card p-4 mb-4 text-center">
+      <label class="text-muted fw-bold">ยอดเงินกู้คงค้างในระบบทั้งหมด</label>
+      <h1 class="fw-bold text-info mt-2">฿<span id="mTotal">0.00</span></h1>
     </div>
 
     <div class="row g-3 mb-4">
       <div class="col-6">
-        <button onclick="showSection('pay')" class="btn-action bg-primary text-white w-100 shadow-lg">
+        <button onclick="openModal('modalPay')" class="btn-action bg-primary w-100 shadow-lg">
           <i class="fa-solid fa-hand-holding-dollar d-block mb-2 fs-3"></i> รับชำระเงิน
         </button>
       </div>
       <div class="col-6">
-        <button onclick="showSection('create')" class="btn-action bg-success text-white w-100 shadow-lg">
+        <button onclick="openModal('modalCreate')" class="btn-action bg-success w-100 shadow-lg">
           <i class="fa-solid fa-file-signature d-block mb-2 fs-3"></i> สร้างคนกู้
         </button>
       </div>
     </div>
 
-    <div id="section-list">
-      <h6 class="fw-bold mb-3 text-muted">สถานะการจ่ายล่าสุด</h6>
-      <input class="form-control mb-3" list="loanOptions" id="searchLoan" placeholder="🔍 ค้นหาผู้กู้..." onchange="quickPay(this.value)">
-      <datalist id="loanOptions"></datalist>
-      <div id="loanContainer"></div>
-    </div>
-
-    <div id="section-pay" class="glass p-4 mb-4 shadow" style="display:none">
-      <div class="d-flex justify-content-between mb-4">
-        <h6 class="fw-bold m-0 text-info">บันทึกรับชำระ</h6>
-        <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="showSection('list')" style="cursor:pointer"></i>
-      </div>
-      
-      <div class="input-group mb-3">
-        <input type="text" id="loanIdInput" class="form-control" placeholder="ใส่รหัส Lxxxx">
-        <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold">ตรวจ</button>
-      </div>
-      
-      <div id="payDetails" style="display:none">
-        <div class="d-flex align-items-center mb-3 p-3 rounded-3" style="background: rgba(255,255,255,0.05);">
-          <img id="pPhoto" src="" class="profile-img me-3">
-          <div>
-            <h6 class="m-0 text-white" id="pName"></h6>
-            <small class="text-info" id="pDetailTxt"></small>
-          </div>
+    <div class="mt-4">
+      <h5 class="fw-bold mb-3"><i class="fa-solid fa-users text-info me-2"></i>รายชื่อผู้กู้ทั้งหมด</h5>
+      <input class="form-control mb-3" type="text" id="searchLoan" placeholder="🔍 พิมพ์เพื่อค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="filterLoans()">
+      <div id="loanContainer">
         </div>
-
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <label class="small text-muted mb-1">หักดอกเบี้ย</label>
-            <input type="number" id="pInt" class="form-control text-warning fw-bold">
-          </div>
-          <div class="col-6">
-            <label class="small text-muted mb-1">หักเงินต้น</label>
-            <input type="number" id="pPrin" class="form-control text-success fw-bold">
-          </div>
-        </div>
-        <input type="file" id="pSlip" class="form-control mb-4">
-        <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3">บันทึกชำระ</button>
-      </div>
     </div>
+  </div>
+</div>
 
-    <div id="section-create" class="glass p-4 mb-4 shadow" style="display:none">
-      <div class="d-flex justify-content-between mb-4">
-        <h6 class="fw-bold m-0 text-success">ปล่อยยอดกู้ใหม่</h6>
-        <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="showSection('list')" style="cursor:pointer"></i>
+<div id="modalPay" class="modal-overlay">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-4 border-bottom border-secondary pb-3">
+      <h5 class="fw-bold m-0 text-info"><i class="fa-solid fa-wallet me-2"></i>บันทึกรับชำระเงิน</h5>
+      <i class="fa-solid fa-circle-xmark text-danger fs-3" onclick="closeModal('modalPay')" style="cursor:pointer"></i>
+    </div>
+    
+    <label>กรอกรหัสสัญญาเพื่อดึงข้อมูล</label>
+    <div class="input-group mb-3">
+      <input type="text" id="loanIdInput" class="form-control" placeholder="เช่น L12345">
+      <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold px-4">ค้นหา</button>
+    </div>
+    
+    <div id="payDetails" style="display:none" class="mt-3">
+      <div class="p-3 mb-3 rounded" style="background: #0f172a; border: 1px dashed #475569;">
+        <h5 class="m-0 text-white" id="pName">ชื่อผู้กู้</h5>
+        <p class="text-info m-0 mt-1" id="pDetailTxt">รายละเอียด</p>
+      </div>
+
+      <div class="row g-2 mb-3">
+        <div class="col-6">
+          <label class="text-warning">หักดอกเบี้ย (บาท)</label>
+          <input type="number" id="pInt" class="form-control text-warning fw-bold fs-5">
+        </div>
+        <div class="col-6">
+          <label class="text-success">หักเงินต้น (บาท)</label>
+          <input type="number" id="pPrin" class="form-control text-success fw-bold fs-5">
+        </div>
       </div>
       
-      <select id="cUserSelect" class="form-select mb-3" onchange="toggleNewUserForm()">
-        <option value="NEW">➕ สร้างบัญชีใหม่</option>
+      <label>ช่องทางชำระ</label>
+      <select id="pMethod" class="form-select mb-3">
+        <option value="เงินโอน">โอนเข้าบัญชีธนาคาร</option>
+        <option value="เงินสด">เงินสด</option>
       </select>
       
-      <div id="newUserFormBox" class="p-3 mb-3 rounded-3" style="background: rgba(0,0,0,0.2);">
-        <input type="text" id="cName" class="form-control mb-2" placeholder="ชื่อ-นามสกุล">
-        <input type="text" id="cNick" class="form-control mb-2" placeholder="ชื่อเล่น">
-        <input type="text" id="cPhone" class="form-control mb-2" placeholder="เบอร์โทร">
-        <input type="text" id="cWork" class="form-control mb-2" placeholder="สถานที่ทำงาน">
-        <label class="small text-muted">รูปถ่ายผู้กู้</label>
-        <input type="file" id="cPhoto" class="form-control">
-      </div>
+      <label>แนบสลิป (ถ้ามี)</label>
+      <input type="file" id="pSlip" class="form-control mb-4">
+      
+      <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-3 fs-5">ยืนยันการหักยอด</button>
+    </div>
+  </div>
+</div>
 
-      <div class="row g-2 mb-3 mt-3 border-top pt-3 border-secondary">
-        <div class="col-12">
-          <label class="small text-muted">วันที่เริ่มกู้เงิน</label>
-          <input type="date" id="cStartDate" class="form-control mb-2">
-        </div>
-        <div class="col-6">
-          <label class="small text-muted">เงินต้น (฿)</label>
-          <input type="number" id="cAmount" class="form-control" placeholder="10000">
-        </div>
-        <div class="col-6">
-          <label class="small text-muted">ดอกเบี้ย (%)</label>
-          <input type="number" id="cRate" class="form-control" placeholder="5">
-        </div>
-        <div class="col-6">
-          <label class="small text-muted">รอบจ่าย</label>
-          <select id="cCycle" class="form-select">
-            <option value="1">ทุก 1 วัน</option>
-            <option value="15">ทุก 15 วัน</option>
-            <option value="30">ทุก 30 วัน</option>
-          </select>
-        </div>
-        <div class="col-6">
-          <label class="small text-muted">จำนวนงวด</label>
-          <input type="number" id="cInstallments" class="form-control" value="1">
-        </div>
-      </div>
-      <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold">สร้างสัญญากู้</button>
+<div id="modalCreate" class="modal-overlay">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-4 border-bottom border-secondary pb-3">
+      <h5 class="fw-bold m-0 text-success"><i class="fa-solid fa-file-pen me-2"></i>สร้างบัญชี / ปล่อยกู้</h5>
+      <i class="fa-solid fa-circle-xmark text-danger fs-3" onclick="closeModal('modalCreate')" style="cursor:pointer"></i>
+    </div>
+    
+    <label>เลือกคนเก่า หรือ สร้างใหม่</label>
+    <select id="cUserSelect" class="form-select mb-3" onchange="toggleNewUserForm()">
+      <option value="NEW">➕ สร้างบัญชีผู้กู้คนใหม่</option>
+    </select>
+    
+    <div id="newUserFormBox" class="p-3 mb-3 rounded" style="background: #0f172a;">
+      <label>ชื่อ-นามสกุลจริง</label>
+      <input type="text" id="cName" class="form-control mb-2" placeholder="ระบุชื่อจริง">
+      <label>ชื่อเล่น</label>
+      <input type="text" id="cNick" class="form-control mb-2" placeholder="ระบุชื่อเล่น">
+      <label>เบอร์โทรศัพท์</label>
+      <input type="text" id="cPhone" class="form-control mb-2" placeholder="08xxxxxxxx">
+      <label>สถานที่ทำงาน</label>
+      <input type="text" id="cWork" class="form-control mb-2" placeholder="ระบุสถานที่ทำงาน">
+      <label>รูปถ่ายผู้กู้ (ถ้ามี)</label>
+      <input type="file" id="cPhoto" class="form-control">
     </div>
 
+    <h6 class="fw-bold text-info mt-4 mb-2">รายละเอียดสัญญา</h6>
+    <div class="row g-2 mb-3">
+      <div class="col-12">
+        <label>วันที่เริ่มกู้เงิน</label>
+        <input type="date" id="cStartDate" class="form-control">
+      </div>
+      <div class="col-6">
+        <label>เงินต้น (บาท)</label>
+        <input type="number" id="cAmount" class="form-control text-white fw-bold" placeholder="10000">
+      </div>
+      <div class="col-6">
+        <label>ดอกเบี้ย (%)</label>
+        <input type="number" id="cRate" class="form-control" placeholder="5">
+      </div>
+      <div class="col-6">
+        <label>รอบการชำระ</label>
+        <select id="cCycle" class="form-select">
+          <option value="1">ทุก 1 วัน</option>
+          <option value="15">ทุก 15 วัน</option>
+          <option value="30">ทุก 30 วัน</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label>จำนวนงวด</label>
+        <input type="number" id="cInstallments" class="form-control" value="1">
+      </div>
+    </div>
+    
+    <button onclick="saveLoan()" class="btn btn-success w-100 py-3 fw-bold fs-5 mt-2">บันทึกสร้างสัญญากู้</button>
   </div>
 </div>
 
@@ -178,16 +208,18 @@
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
   let curPay = null;
 
-  // ตั้งค่าวันที่ปัจจุบันให้ input date
   document.getElementById('cStartDate').valueAsDate = new Date();
 
   function toggleL(s){ document.getElementById('loader').style.display = s?'flex':'none'; }
 
-  function showPopup(msg) {
-    document.getElementById('popupMsg').innerText = msg;
-    const p = document.getElementById('customPopup');
-    p.style.display = 'block';
-    setTimeout(() => { p.style.display = 'none'; }, 3000);
+  // ฟังก์ชันควบคุม Popup
+  function openModal(id) { document.getElementById(id).style.display = 'flex'; }
+  function closeModal(id) { 
+    document.getElementById(id).style.display = 'none'; 
+    if(id === 'modalPay') {
+      document.getElementById('loanIdInput').value = '';
+      document.getElementById('payDetails').style.display = 'none';
+    }
   }
 
   async function api(data){
@@ -203,39 +235,50 @@
       document.getElementById('loginPage').style.display='none';
       document.getElementById('mainApp').style.display='block';
       loadDash();
-    } else showPopup('รหัสไม่ถูกต้อง');
+    } else alert('รหัสผ่านหรือ Admin ID ไม่ถูกต้อง');
   }
 
   async function loadDash(){
     const res = await api({action:'getDashboard'});
     document.getElementById('mTotal').innerText = res.metrics.total.toLocaleString();
-    let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่</option>';
+    
+    // ยัดรายชื่อใส่ Dropdown สร้างคนกู้
+    let optHtml = '<option value="NEW">➕ สร้างบัญชีผู้กู้คนใหม่</option>';
     res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     document.getElementById('cUserSelect').innerHTML = optHtml;
     
+    // สร้างลิสต์ผู้กู้ด้านล่าง
     let html = '';
-    let datalistHtml = '';
     res.activeLoans.forEach(b => {
-      let statusClass = b.daysLeft <= 0 ? 'bg-danger' : (b.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-info');
-      datalistHtml += `<option value="${b.loanId}">${b.nickname || b.userName}</option>`;
+      let statusClass = b.daysLeft <= 0 ? 'bg-danger' : (b.daysLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
+      let statusText = b.daysLeft < 0 ? `เลยกำหนด ${Math.abs(b.daysLeft)} วัน` : (b.daysLeft === 0 ? 'ครบกำหนดวันนี้!' : `อีก ${b.daysLeft} วัน`);
+      
       html += `
-        <div class="glass p-3 mb-2 d-flex justify-content-between align-items-center">
-          <div>
-            <div class="fw-bold text-white mb-1">${b.nickname ? `(${b.nickname}) ` : ''}${b.userName}</div>
-            <small class="text-info">฿${b.amount.toLocaleString()} | Due: ${b.dueDate}</small>
-          </div>
-          <div class="text-end">
-            <span class="status-badge ${statusClass} d-block mb-2">${b.daysLeft <= 0 ? 'เลยกำหนด' : `อีก ${b.daysLeft} วัน`}</span>
-            <button class="btn btn-sm btn-info text-white rounded-pill" onclick="quickPay('${b.loanId}')">จ่าย</button>
+        <div class="borrower-card loan-item" data-name="${b.userName} ${b.nickname} ${b.loanId}">
+          <div class="d-flex justify-content-between align-items-start">
+            <div>
+              <h6 class="fw-bold mb-1">${b.nickname ? `(${b.nickname}) ` : ''}${b.userName}</h6>
+              <p class="mb-0 text-muted small">รหัสสัญญา: <span class="text-white">${b.loanId}</span></p>
+              <p class="mb-0 text-info fw-bold">ยอดค้าง: ฿${b.amount.toLocaleString()}</p>
+              <p class="mb-0 text-muted small">ดิวจ่าย: ${b.dueDate}</p>
+            </div>
+            <div class="text-end">
+              <span class="status-badge ${statusClass} d-block mb-2">${statusText}</span>
+              <button class="btn btn-sm btn-outline-info rounded-pill px-3 fw-bold" onclick="quickPay('${b.loanId}')">กดชำระ</button>
+            </div>
           </div>
         </div>`;
     });
-    document.getElementById('loanContainer').innerHTML = html;
-    document.getElementById('loanOptions').innerHTML = datalistHtml;
+    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-3">ไม่มีข้อมูลผู้กู้ในระบบ</div>';
   }
 
-  function showSection(s){
-    ['list','pay','create'].forEach(id => document.getElementById('section-'+id).style.display = id===s?'block':'none');
+  function filterLoans() {
+    const input = document.getElementById('searchLoan').value.toLowerCase();
+    const items = document.querySelectorAll('.loan-item');
+    items.forEach(item => {
+      const text = item.getAttribute('data-name').toLowerCase();
+      item.style.display = text.includes(input) ? 'block' : 'none';
+    });
   }
 
   function toggleNewUserForm(){
@@ -263,30 +306,32 @@
       startDate: document.getElementById('cStartDate').value
     });
     toggleL(false);
-    showPopup('บันทึกสัญญากู้สำเร็จ');
-    showSection('list');
+    alert('บันทึกสัญญากู้สำเร็จ');
+    closeModal('modalCreate');
     loadDash();
   }
 
   function quickPay(id){
-    if(!id) return;
     document.getElementById('loanIdInput').value = id;
-    showSection('pay');
+    openModal('modalPay');
     fetchPreview();
   }
 
   async function fetchPreview(){
     const id = document.getElementById('loanIdInput').value;
+    if(!id) return;
     toggleL(true);
     const res = await api({action:'previewPay', loanId:id});
     toggleL(false);
     if(res.success){
       curPay = res;
       document.getElementById('payDetails').style.display = 'block';
-      document.getElementById('pPhoto').src = res.photoUrl || 'https://via.placeholder.com/50';
       document.getElementById('pName').innerText = res.userName;
+      document.getElementById('pDetailTxt').innerText = `ต้นเหลือ: ฿${res.remainingPrincipal.toLocaleString()} | งวดที่: ${res.nextNo}`;
       document.getElementById('pInt').value = res.expectedInterest;
       document.getElementById('pPrin').value = 0;
+    } else {
+      alert('ไม่พบรหัสสัญญาในระบบ');
     }
   }
 
@@ -297,11 +342,11 @@
     curPay.prinPaid = document.getElementById('pPrin').value;
     curPay.intPaid = document.getElementById('pInt').value;
     curPay.slipBase64 = slipBase64;
-    curPay.method = 'เงินโอน';
+    curPay.method = document.getElementById('pMethod').value;
     await api(curPay);
     toggleL(false);
-    showPopup('บันทึกชำระเงินสำเร็จ');
-    showSection('list');
+    alert('บันทึกชำระเงินสำเร็จ');
+    closeModal('modalPay');
     loadDash();
   }
 </script>

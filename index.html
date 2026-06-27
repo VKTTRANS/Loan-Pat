@@ -262,6 +262,48 @@
   </div>
 </div>
 
+<div id="modalEditUser" class="modal-overlay" style="z-index: 1010;">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
+      <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-user-pen me-2"></i>แก้ไขข้อมูลผู้กู้</h6>
+      <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="closeModal('modalEditUser')" style="cursor:pointer"></i>
+    </div>
+    
+    <input type="hidden" id="euUserId">
+    
+    <div class="p-2 mb-3 rounded" style="background: #0f172a;">
+      <label>ชื่อ-นามสกุล</label><input type="text" id="euName" class="form-control form-control-sm mb-2">
+      <label>ชื่อเล่น</label><input type="text" id="euNick" class="form-control form-control-sm mb-2">
+      <label>เบอร์โทร</label><input type="text" id="euPhone" class="form-control form-control-sm mb-2">
+      <label>รายละเอียด/ที่อยู่</label><input type="text" id="euDetails" class="form-control form-control-sm mb-2">
+      
+      <div class="row g-2 mt-1">
+        <div class="col-6">
+          <label class="text-muted small">เปลี่ยนรูปหน้าตรง</label>
+          <input type="file" id="euPhoto" class="form-control form-control-sm">
+        </div>
+        <div class="col-6">
+          <label class="text-muted small">เปลี่ยนรูปบัตรปชช.</label>
+          <input type="file" id="euIdCard" class="form-control form-control-sm">
+        </div>
+      </div>
+
+      <div id="euGroupDiv" class="col-12 mt-2" style="display:none;">
+        <label class="text-info small">ย้ายกลุ่มดูแล (SuperAdmin)</label>
+        <select id="euGroup" class="form-select form-select-sm">
+          <option value="A">Group A</option>
+          <option value="B">Group B</option>
+          <option value="C">Group C</option>
+          <option value="D">Group D</option>
+          <option value="E">Group E</option>
+        </select>
+      </div>
+    </div>
+    
+    <button onclick="submitEditUser()" class="btn btn-warning text-dark w-100 py-2 fw-bold mt-2 shadow">บันทึกการแก้ไขผู้กู้</button>
+  </div>
+</div>
+
 <div id="modalUserHistory" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
@@ -482,32 +524,13 @@
 <div id="modalEdit" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
-      <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขข้อมูลผู้กู้และสัญญา</h6>
+      <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขสัญญากู้ยืม</h6>
       <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="closeModal('modalEdit')" style="cursor:pointer"></i>
     </div>
     
     <input type="hidden" id="eLoanId">
     <input type="hidden" id="eUserId">
     
-    <div class="p-2 mb-3 rounded" style="background: #0f172a;">
-      <h6 class="text-info small fw-bold mb-2">ข้อมูลผู้กู้ (แก้ไขได้)</h6>
-      <label>ชื่อ-นามสกุล</label><input type="text" id="eName" class="form-control form-control-sm mb-2">
-      <label>ชื่อเล่น</label><input type="text" id="eNick" class="form-control form-control-sm mb-2">
-      <label>เบอร์โทร</label><input type="text" id="ePhone" class="form-control form-control-sm mb-2">
-      <label>รายละเอียด/ที่อยู่</label><input type="text" id="eDetails" class="form-control form-control-sm mb-2">
-      
-      <div class="row g-2 mt-1">
-        <div class="col-6">
-          <label class="text-muted small">เปลี่ยนรูปหน้าตรง</label>
-          <input type="file" id="ePhoto" class="form-control form-control-sm">
-        </div>
-        <div class="col-6">
-          <label class="text-muted small">เปลี่ยนรูปบัตรปชช.</label>
-          <input type="file" id="eIdCard" class="form-control form-control-sm">
-        </div>
-      </div>
-    </div>
-
     <div class="row g-2">
       <h6 class="text-warning small fw-bold mb-0 mt-2">ข้อมูลสัญญา</h6>
       <div class="col-12"><label>วันที่เริ่มสัญญา (แก้ไขได้)</label><input type="date" id="eStartDate" class="form-control form-control-sm"></div>
@@ -583,7 +606,6 @@
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-  // 🌟 ฟังก์ชันล้างค่าแบบ Deep Reset (รีเซ็ตใหม่เอี่ยมทุกครั้งที่เรียกใช้)
   function clearForms() {
     document.getElementById('cName').value = '';
     document.getElementById('cNick').value = '';
@@ -693,6 +715,13 @@
       res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     }
     
+    // ใส่ group ลงใน Datalist
+    let groupOptHtml = '';
+    if(res.groups) {
+      res.groups.forEach(g => { groupOptHtml += `<option value="${g}"></option>`; });
+    }
+    document.getElementById('groupOptions') ? document.getElementById('groupOptions').innerHTML = groupOptHtml : null;
+    
     let grouped = {};
     allLoans.forEach(l => { 
       let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
@@ -778,6 +807,7 @@
 
     let safeFace = getSafeImgUrl(user.photoUrl);
     let safeId = getSafeImgUrl(user.idCardUrl);
+    let phoneStr = String(user.phone || '').replace(/'/g, '');
 
     let photo1 = safeFace ? `<img src="${safeFace}" class="img-box mb-2" style="width:100px; height:100px; border-color:#38bdf8;" onclick="zoomImage('${safeFace}')">` 
                           : `<div class="img-box mb-2 mx-auto d-flex justify-content-center align-items-center" style="width:100px; height:100px; border-color:#38bdf8;"><i class="fa-solid fa-user text-white fs-1"></i></div>`;
@@ -790,8 +820,10 @@
         <div>${photo1}<br><small class="text-info">หน้าตรง</small></div>
         <div>${photo2}<br><small class="text-success">บัตรฯ/อื่นๆ</small></div>
       </div>
-      <h5 class="fw-bold text-white mb-0">${user.name} ${user.nickname ? `(${user.nickname})` : ''}</h5>
-      <p class="text-muted small mb-1"><i class="fa-solid fa-phone me-1"></i>${user.phone || 'ไม่มีเบอร์โทร'}</p>
+      <h5 class="fw-bold text-white mb-0">${user.name} ${user.nickname ? `(${user.nickname})` : ''} 
+        <i class="fa-solid fa-pen text-warning ms-2" style="cursor:pointer; font-size:1rem;" onclick="triggerEditUser('${user.id}')" title="แก้ไขข้อมูลผู้กู้"></i>
+      </h5>
+      <p class="text-muted small mb-1"><i class="fa-solid fa-phone me-1"></i>${phoneStr || 'ไม่มีเบอร์โทร'}</p>
       <p class="text-muted small mb-0">${user.details || 'ไม่มีรายละเอียด'}</p>
       <span class="badge bg-dark mt-2 border border-secondary text-secondary">กลุ่มดูแล: ${user.groupName || '-'}</span>
     `;
@@ -826,6 +858,67 @@
     document.getElementById('uhLoansList').innerHTML = html;
 
     openModal('modalUserHistory');
+  }
+
+  // 🌟 ฟังก์ชันเปิดหน้าต่างแก้ User
+  function triggerEditUser(userId) {
+    promptPassword(() => {
+        let user = windowUsersData.find(u => u.id === userId);
+        if(!user) return;
+        
+        document.getElementById('euUserId').value = user.id;
+        document.getElementById('euName').value = user.name;
+        document.getElementById('euNick').value = user.nickname;
+        let phoneStr = String(user.phone || '').replace(/'/g, '');
+        document.getElementById('euPhone').value = phoneStr;
+        document.getElementById('euDetails').value = user.details;
+        
+        let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+        if(authData.role === 'SuperAdmin') {
+            document.getElementById('euGroupDiv').style.display = 'block';
+            document.getElementById('euGroup').value = user.groupName || 'A';
+        } else {
+            document.getElementById('euGroupDiv').style.display = 'none';
+        }
+        
+        document.getElementById('euPhoto').value = '';
+        document.getElementById('euIdCard').value = '';
+        
+        openModal('modalEditUser');
+    });
+  }
+
+  // 🌟 ฟังก์ชันบันทึกข้อมูล User
+  async function submitEditUser() {
+    toggleL(true);
+    let photoBase64 = await getBase64(document.getElementById('euPhoto').files[0]);
+    let idCardBase64 = await getBase64(document.getElementById('euIdCard').files[0]);
+    
+    let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+    let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
+
+    const payload = {
+      action: 'editUser', 
+      userId: document.getElementById('euUserId').value,
+      name: document.getElementById('euName').value, 
+      nickname: document.getElementById('euNick').value,
+      phone: document.getElementById('euPhone').value, 
+      details: document.getElementById('euDetails').value,
+      photoBase64: photoBase64, 
+      idCardBase64: idCardBase64,
+      groupName: group
+    };
+    
+    const res = await api(payload);
+    toggleL(false);
+    if(res.success) {
+      showAlert('อัปเดตข้อมูลผู้กู้สำเร็จ');
+      closeModal('modalEditUser');
+      closeModal('modalUserHistory'); 
+      loadDash();
+    } else {
+      showAlert('เกิดข้อผิดพลาดในการอัปเดตผู้กู้', true);
+    }
   }
 
   function updateDashMetrics() {
@@ -930,7 +1023,6 @@
     document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-2 small">ไม่มีรายการใกล้ครบกำหนด</div>';
   }
 
-  // 🌟 ปรับปรุงการเรนเดอร์ List ให้เป็นแบบบิลใครบิลมัน (ไม่รวมกลุ่มตามชื่อผู้กู้)
   function renderList(data) {
     let html = '';
     data.forEach(b => {
@@ -965,7 +1057,6 @@
     document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูล</div>';
   }
 
-  // 🌟 เพิ่มระบบจัดเรียง (Sort) ตามเงื่อนไขต่างๆ
   function applyFilters() {
     let cycleVal = document.getElementById('filterCycle').value;
     let statusVal = document.getElementById('filterStatus').value;
@@ -983,7 +1074,6 @@
       return matchCycle && matchStatus && matchSearch;
     });
 
-    // Sort Logic
     if (sortVal === 'due') {
         filtered.sort((a, b) => a.daysLeft - b.daysLeft);
     } else if (sortVal === 'amtDesc') {
@@ -1037,12 +1127,6 @@
       if(res.success) {
         document.getElementById('eLoanId').value = id;
         document.getElementById('eUserId').value = loan.userId;
-        document.getElementById('eName').value = res.userName;
-        document.getElementById('eNick').value = res.nickname;
-        
-        let userDetail = windowUsersData.find(u => u.id === loan.userId);
-        document.getElementById('ePhone').value = userDetail ? userDetail.phone : '';
-        document.getElementById('eDetails').value = res.details;
         
         if(res.startDateRaw) {
           document.getElementById('eStartDate').value = res.startDateRaw;
@@ -1051,9 +1135,6 @@
         document.getElementById('eAmount').value = Number(res.principal || 0);
         document.getElementById('eRate').value = Number(res.rate || 0);
         document.getElementById('eCycle').value = res.cycle || 1;
-        
-        document.getElementById('ePhoto').value = '';
-        document.getElementById('eIdCard').value = '';
 
         openModal('modalEdit');
       }
@@ -1062,22 +1143,21 @@
 
   async function submitEdit() {
     toggleL(true);
-    let photoBase64 = await getBase64(document.getElementById('ePhoto').files[0]);
-    let idCardBase64 = await getBase64(document.getElementById('eIdCard').files[0]);
 
     const payload = {
-      action: 'editLoan', loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value,
-      name: document.getElementById('eName').value, nickname: document.getElementById('eNick').value,
-      phone: document.getElementById('ePhone').value, details: document.getElementById('eDetails').value,
-      amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value,
-      cycle: document.getElementById('eCycle').value, startDate: document.getElementById('eStartDate').value,
-      photoBase64: photoBase64, idCardBase64: idCardBase64 
+      action: 'editLoan', 
+      loanId: document.getElementById('eLoanId').value, 
+      userId: document.getElementById('eUserId').value,
+      amount: document.getElementById('eAmount').value, 
+      rate: document.getElementById('eRate').value,
+      cycle: document.getElementById('eCycle').value, 
+      startDate: document.getElementById('eStartDate').value
     };
     
     const res = await api(payload);
     toggleL(false);
     if(res.success) {
-      showAlert('อัปเดตข้อมูลสำเร็จ');
+      showAlert('อัปเดตข้อมูลสัญญากู้สำเร็จ');
       closeModal('modalEdit');
       loadDash();
     }

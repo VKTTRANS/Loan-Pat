@@ -103,9 +103,15 @@
   </div>
 
   <div id="mainApp" style="display:none">
+    
     <div class="top-bar">
       <h5 class="fw-bold m-0 text-info">Fintech Admin</h5>
-      <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-1 fw-bold">ออกจากระบบ</button>
+      <div class="d-flex gap-2 align-items-center">
+        <button id="btnManageAdmin" class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold" style="display:none;" onclick="openModal('modalCreateAdmin')">
+          <i class="fa-solid fa-user-plus"></i> แอดมินย่อย
+        </button>
+        <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-1 fw-bold">ออกจากระบบ</button>
+      </div>
     </div>
 
     <div class="nav-tabs-main">
@@ -115,11 +121,6 @@
     </div>
 
     <div id="viewDash">
-      
-      <button id="btnManageAdmin" class="btn-action w-100 shadow py-2 mb-3" style="background-color: #334155; display:none;" onclick="openModal('modalCreateAdmin')">
-        <i class="fa-solid fa-user-tie me-2 text-warning"></i> สร้างแอดมินย่อย (SuperAdmin)
-      </button>
-
       <div class="glass-card p-3 mb-3 shadow-sm">
         <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
           <label class="fw-bold m-0 text-info"><i class="fa-solid fa-calendar-days me-1"></i> ตัวกรองสรุปยอด</label>
@@ -230,13 +231,18 @@
     <label>ชื่อแอดมิน</label>
     <input type="text" id="caName" class="form-control mb-2" placeholder="ชื่อที่ใช้เรียก">
 
-    <label class="text-info">กลุ่มดูแล (ให้ดูแลผู้กู้โซนไหน/กลุ่มไหน)</label>
-    <input type="text" id="caGroup" class="form-control mb-3" placeholder="เช่น GroupA, โซนเหนือ, ทีม1">
+    <label class="text-info">กลุ่มดูแล (Group)</label>
+    <select id="caGroup" class="form-select mb-3">
+      <option value="A">Group A</option>
+      <option value="B">Group B</option>
+      <option value="C">Group C</option>
+      <option value="D">Group D</option>
+      <option value="E">Group E</option>
+    </select>
     
     <button onclick="saveAdmin()" class="btn btn-warning text-dark fw-bold w-100 py-2 shadow">บันทึกแอดมิน</button>
   </div>
 </div>
-
 
 <div id="modalUserHistory" class="modal-overlay">
   <div class="modal-content-custom">
@@ -245,12 +251,10 @@
       <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="closeModal('modalUserHistory')" style="cursor:pointer"></i>
     </div>
     
-    <div id="uhProfile" class="text-center mb-3 pb-3 border-bottom border-secondary">
-      </div>
+    <div id="uhProfile" class="text-center mb-3 pb-3 border-bottom border-secondary"></div>
     
     <h6 class="text-info fw-bold mb-2">ประวัติการกู้ยืมทั้งหมด</h6>
-    <div id="uhLoansList" style="max-height: 250px; overflow-y: auto;">
-      </div>
+    <div id="uhLoansList" style="max-height: 250px; overflow-y: auto;"></div>
   </div>
 </div>
 
@@ -397,8 +401,13 @@
 
       <div id="cGroupDiv" class="col-12 mt-2" style="display:none;">
         <label class="small text-info">กลุ่มดูแลผู้กู้ (โยนให้กลุ่มไหนดูแล)</label>
-        <input list="groupOptions" id="cGroup" class="form-control form-control-sm" placeholder="เลือกหรือพิมพ์ชื่อกลุ่ม...">
-        <datalist id="groupOptions"></datalist>
+        <select id="cGroup" class="form-select form-select-sm">
+          <option value="A">Group A</option>
+          <option value="B">Group B</option>
+          <option value="C">Group C</option>
+          <option value="D">Group D</option>
+          <option value="E">Group E</option>
+        </select>
       </div>
     </div>
 
@@ -538,7 +547,7 @@
     document.getElementById('cPhoto').value = '';
     document.getElementById('cIdCard').value = '';
     document.getElementById('cAmount').value = '';
-    document.getElementById('cGroup').value = '';
+    // document.getElementById('cGroup').value = 'A'; // ค่า Default เป็น Dropdown
     document.getElementById('cSchedulePreview').innerHTML = '';
     document.getElementById('cUserSelect').value = 'NEW';
     toggleNewUserForm();
@@ -549,11 +558,10 @@
     document.getElementById('pSlip').value = '';
     document.getElementById('payDetails').style.display = 'none';
     
-    // Clear Admin forms
     if(document.getElementById('caId')) document.getElementById('caId').value = '';
     if(document.getElementById('caPass')) document.getElementById('caPass').value = '';
     if(document.getElementById('caName')) document.getElementById('caName').value = '';
-    if(document.getElementById('caGroup')) document.getElementById('caGroup').value = '';
+    // if(document.getElementById('caGroup')) document.getElementById('caGroup').value = 'A'; 
   }
 
   function showAlert(msg, isError = false) {
@@ -616,7 +624,6 @@
     let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
     if(!authData) return logout();
 
-    // จัดการการแสดงผลของ SuperAdmin
     if(authData.role === 'SuperAdmin') {
        document.getElementById('btnManageAdmin').style.display = 'block';
        document.getElementById('cGroupDiv').style.display = 'block';
@@ -641,13 +648,6 @@
       res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     }
     
-    // ใส่ group ลงใน Datalist
-    let groupOptHtml = '';
-    if(res.groups) {
-      res.groups.forEach(g => { groupOptHtml += `<option value="${g}"></option>`; });
-    }
-    document.getElementById('groupOptions').innerHTML = groupOptHtml;
-    
     let grouped = {};
     allLoans.forEach(l => { 
       let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
@@ -663,7 +663,6 @@
     applyFilters(); 
   }
 
-  // 🌟 ฟังก์ชันสร้างแอดมินใหม่ (เฉพาะ SuperAdmin)
   async function saveAdmin() {
     let adId = document.getElementById('caId').value;
     let adPass = document.getElementById('caPass').value;
@@ -1163,7 +1162,6 @@
 
     let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
     
-    // 🌟 ถ้ารหัสที่ล็อกอินเป็น SuperAdmin ให้ดึงกลุ่มจากช่อง Input แทน
     let group = authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName;
 
     const payload = {

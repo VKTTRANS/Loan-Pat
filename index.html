@@ -25,6 +25,7 @@
     }
     .form-control::placeholder { color: #94a3b8 !important; opacity: 1 !important; }
     .form-control:focus, .form-select:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4) !important; }
+    .form-control:disabled, .form-control[readonly] { background-color: #0f172a !important; opacity: 0.7; }
     
     .btn-action { border-radius: 10px; padding: 10px; border: none; font-weight: 700; transition: 0.2s; color: #fff !important; font-size: 0.95rem; }
     .btn-action:active { transform: scale(0.95); }
@@ -52,7 +53,6 @@
     
     .top-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-top: 10px; }
 
-    /* 🌟 ปรับ Tabs ให้รองรับ 3 เมนู */
     .nav-tabs-main { display: flex; background: #1e293b; border-radius: 10px; padding: 4px; margin-bottom: 15px; border: 1px solid #334155;}
     .nav-tabs-main button { flex: 1; border: none; background: transparent; color: #94a3b8 !important; font-weight: 600; padding: 8px; border-radius: 6px; transition: 0.3s; font-size: 0.90rem; }
     .nav-tabs-main button.active { background: #38bdf8; color: #000 !important; }
@@ -71,6 +71,8 @@
     .icon-delete { background: #f43f5e; color: #fff !important; }
     
     .history-card { background: #0f172a; border-left: 4px solid #10b981; border-radius: 10px; padding: 12px; margin-bottom: 10px; }
+    
+    .img-box { width: 80px; height: 80px; border-radius: 8px; object-fit: cover; border: 2px solid #475569; background: #334155; }
   </style>
 </head>
 <body>
@@ -108,8 +110,8 @@
 
     <div class="nav-tabs-main">
       <button id="btnTabDash" class="active" onclick="switchMainTab('Dash')"><i class="fa-solid fa-chart-pie me-1"></i> Dashboard</button>
-      <button id="btnTabUsers" onclick="switchMainTab('Users')"><i class="fa-solid fa-address-book me-1"></i> ข้อมูลผู้กู้</button>
       <button id="btnTabList" onclick="switchMainTab('List')"><i class="fa-solid fa-list-check me-1"></i> รายการกู้ยืม</button>
+      <button id="btnTabUsers" onclick="switchMainTab('Users')"><i class="fa-solid fa-address-book me-1"></i> ข้อมูลผู้กู้</button>
     </div>
 
     <div id="viewDash">
@@ -161,12 +163,6 @@
       <div id="dashAlertContainer"></div>
     </div>
 
-    <div id="viewUsers" style="display:none;">
-      <h6 class="fw-bold mb-3"><i class="fa-solid fa-address-book text-info me-1"></i>ฐานข้อมูลผู้กู้ทั้งหมด</h6>
-      <input class="form-control form-control-sm mb-3" type="text" id="searchUser" placeholder="🔍 ค้นหาชื่อ หรือ ชื่อเล่น..." onkeyup="filterUsers()">
-      <div id="usersContainer"></div>
-    </div>
-
     <div id="viewList" style="display:none;">
       <h6 class="fw-bold mb-2"><i class="fa-solid fa-list-check text-success me-1"></i>รายการกู้ยืมปัจจุบัน (ค้างชำระ)</h6>
       
@@ -204,6 +200,12 @@
       <input class="form-control form-control-sm mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นหาชื่อผู้กู้..." onkeyup="applyFilters()">
       
       <div id="loanContainer"></div>
+    </div>
+    
+    <div id="viewUsers" style="display:none;">
+      <h6 class="fw-bold mb-3"><i class="fa-solid fa-address-book text-info me-1"></i>ฐานข้อมูลผู้กู้ทั้งหมด</h6>
+      <input class="form-control form-control-sm mb-3" type="text" id="searchUser" placeholder="🔍 ค้นหาชื่อ หรือ ชื่อเล่น..." onkeyup="filterUsers()">
+      <div id="usersContainer"></div>
     </div>
   </div>
 </div>
@@ -345,16 +347,25 @@
     
     <label>ข้อมูลผู้กู้</label>
     <select id="cUserSelect" class="form-select mb-2" onchange="toggleNewUserForm()">
-      <option value="NEW">➕ สร้างบัญชีใหม่</option>
+      <option value="NEW">➕ สร้างบัญชีใหม่ (ระบุข้อมูลด้านล่าง)</option>
     </select>
     
     <div id="newUserFormBox" class="p-2 mb-2 rounded" style="background: #0f172a; border: 1px solid #334155;">
       <input type="text" id="cName" class="form-control form-control-sm mb-2" placeholder="ชื่อจริง">
       <input type="text" id="cNick" class="form-control form-control-sm mb-2" placeholder="ชื่อเล่น">
       <input type="text" id="cPhone" class="form-control form-control-sm mb-2" placeholder="เบอร์โทร">
-      <input type="text" id="cDetails" class="form-control form-control-sm mb-2" placeholder="รายละเอียด (ที่ทำงาน)">
-      <label class="small text-muted">รูปถ่าย (ถ้ามี)</label>
-      <input type="file" id="cPhoto" class="form-control form-control-sm">
+      <input type="text" id="cDetails" class="form-control form-control-sm mb-2" placeholder="รายละเอียด (ที่อยู่/ที่ทำงาน)">
+      
+      <div class="row g-2">
+        <div class="col-6">
+          <label class="small text-info">รูปหน้าตรง (ถ้ามี)</label>
+          <input type="file" id="cPhoto" class="form-control form-control-sm">
+        </div>
+        <div class="col-6">
+          <label class="small text-info">รูปบัตรปชช./อื่นๆ</label>
+          <input type="file" id="cIdCard" class="form-control form-control-sm">
+        </div>
+      </div>
     </div>
 
     <h6 class="fw-bold text-info mt-3 mb-2 border-top border-secondary pt-2">ข้อมูลเงินกู้</h6>
@@ -394,7 +405,7 @@
 <div id="modalEdit" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
-      <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขข้อมูล</h6>
+      <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขข้อมูลผู้กู้และสัญญา</h6>
       <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="closeModal('modalEdit')" style="cursor:pointer"></i>
     </div>
     
@@ -402,16 +413,32 @@
     <input type="hidden" id="eUserId">
     
     <div class="p-2 mb-3 rounded" style="background: #0f172a;">
+      <h6 class="text-info small fw-bold mb-2">ข้อมูลผู้กู้ (แก้ไขได้)</h6>
       <label>ชื่อ-นามสกุล</label><input type="text" id="eName" class="form-control form-control-sm mb-2">
       <label>ชื่อเล่น</label><input type="text" id="eNick" class="form-control form-control-sm mb-2">
       <label>เบอร์โทร</label><input type="text" id="ePhone" class="form-control form-control-sm mb-2">
-      <label>รายละเอียด</label><input type="text" id="eDetails" class="form-control form-control-sm mb-2">
+      <label>รายละเอียด/ที่อยู่</label><input type="text" id="eDetails" class="form-control form-control-sm mb-2">
+      
+      <div class="row g-2 mt-1">
+        <div class="col-6">
+          <label class="text-muted small">เปลี่ยนรูปหน้าตรง</label>
+          <input type="file" id="ePhoto" class="form-control form-control-sm">
+        </div>
+        <div class="col-6">
+          <label class="text-muted small">เปลี่ยนรูปบัตรปชช.</label>
+          <input type="file" id="eIdCard" class="form-control form-control-sm">
+        </div>
+      </div>
     </div>
 
     <div class="row g-2">
-      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold"></div>
-      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning"></div>
-      <div class="col-6">
+      <h6 class="text-warning small fw-bold mb-0 mt-2">ข้อมูลสัญญา</h6>
+      <div class="col-12"><label>วันที่เริ่มสัญญา (แก้ไขได้)</label><input type="date" id="eStartDate" class="form-control form-control-sm"></div>
+      
+      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold" readonly title="ไม่สามารถแก้ไขเงินต้นได้เพื่อป้องกันระบบรวน"></div>
+      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning" readonly></div>
+      
+      <div class="col-12">
         <label>รอบชำระ</label>
         <select id="eCycle" class="form-select form-select-sm text-warning">
           <option value="1">รายวัน</option><option value="7">สัปดาห์</option><option value="15">15 วัน</option><option value="30">รายเดือน</option>
@@ -430,7 +457,7 @@
   let curPay = null;
   let loggedInPassword = ''; 
   let pendingAction = null; 
-  let windowUsersData = []; // เก็บ Users ไว้ค้นหา
+  let windowUsersData = []; 
 
   document.getElementById('cStartDate').valueAsDate = new Date();
 
@@ -440,6 +467,16 @@
     yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
   }
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
+
+  // 🌟 ฟังก์ชันแปลงลิงก์ Drive เก่าให้เป็นแบบแสดงรูปได้
+  function getSafeImgUrl(url) {
+    if (!url || url === 'ไม่มี') return '';
+    if (url.includes('/file/d/')) {
+        let id = url.split('/file/d/')[1].split('/')[0];
+        return 'https://drive.google.com/uc?export=view&id=' + id;
+    }
+    return url; // ถ้าเป็นลิงก์ uc?id= อยู่แล้ว หรือลิงก์อื่น จะส่งกลับเลย
+  }
 
   window.onload = () => {
     let authData = localStorage.getItem('fintechAuthData');
@@ -466,6 +503,7 @@
     document.getElementById('cPhone').value = '';
     document.getElementById('cDetails').value = '';
     document.getElementById('cPhoto').value = '';
+    document.getElementById('cIdCard').value = '';
     document.getElementById('cAmount').value = '';
     document.getElementById('cSchedulePreview').innerHTML = '';
     document.getElementById('cUserSelect').value = 'NEW';
@@ -489,12 +527,10 @@
   }
 
   function switchMainTab(tab) {
-    // ซ่อนทั้งหมด
     ['Dash', 'Users', 'List'].forEach(t => {
       document.getElementById('btnTab'+t).classList.remove('active');
       document.getElementById('view'+t).style.display = 'none';
     });
-    // เปิดเฉพาะหน้าที่กด
     document.getElementById('btnTab'+tab).classList.add('active');
     document.getElementById('view'+tab).style.display = 'block';
   }
@@ -544,7 +580,7 @@
     
     updateDashMetrics(); 
     
-    let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่</option>';
+    let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่ (ระบุข้อมูลด้านล่าง)</option>';
     let datalistHtml = '';
     if(res.users) {
       res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
@@ -561,23 +597,21 @@
     
     renderDashAlerts();
     renderRecentPays(res.recentPayments || []);
-    
-    renderUsers(windowUsersData); // เรนเดอร์หน้า User
-    applyFilters(); // เรนเดอร์หน้า Active List
+    renderUsers(windowUsersData); 
+    applyFilters(); 
   }
 
-  // 🌟 ฟังก์ชันเรนเดอร์หน้าข้อมูลผู้กู้ 
   function renderUsers(usersArray) {
     let html = '';
     usersArray.forEach(u => {
-      // หาสัญญาที่เกี่ยวข้องกับ User คนนี้
       let userLoans = rawAllTimeLoans.filter(l => l.userId === u.id);
       let totalBorrowed = userLoans.reduce((sum, l) => sum + Number(l.originalPrincipal), 0);
       let loanCount = userLoans.length;
 
-      let photoHtml = (u.photoUrl && u.photoUrl !== 'ไม่มี' && u.photoUrl !== '') 
-        ? `<img src="${u.photoUrl}" style="width:50px; height:50px; border-radius:50%; object-fit:cover; border:2px solid #38bdf8;">` 
-        : `<div style="width:50px; height:50px; border-radius:50%; background:#334155; display:flex; justify-content:center; align-items:center;"><i class="fa-solid fa-user text-white"></i></div>`;
+      let safeUrl = getSafeImgUrl(u.photoUrl);
+      let photoHtml = safeUrl 
+        ? `<img src="${safeUrl}" class="img-box">` 
+        : `<div class="img-box d-flex justify-content-center align-items-center"><i class="fa-solid fa-user text-white fs-3"></i></div>`;
 
       html += `
         <div class="borrower-card" onclick="viewUserHistory('${u.id}')">
@@ -596,7 +630,6 @@
     document.getElementById('usersContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูลผู้กู้</div>';
   }
 
-  // ค้นหาในหน้าข้อมูลผู้กู้
   function filterUsers() {
     let val = document.getElementById('searchUser').value.toLowerCase();
     let filtered = windowUsersData.filter(u => 
@@ -605,26 +638,30 @@
     renderUsers(filtered);
   }
 
-  // 🌟 เปิดดูประวัติลูกค้าเต็มรูปแบบ
   function viewUserHistory(userId) {
     let user = windowUsersData.find(u => u.id === userId);
     if(!user) return;
 
-    // ส่วนหัวโปรไฟล์
-    let photo = (user.photoUrl && user.photoUrl !== 'ไม่มี' && user.photoUrl !== '') 
-      ? `<img src="${user.photoUrl}" style="width:80px; height:80px; border-radius:50%; object-fit:cover; border:2px solid #38bdf8;" class="mb-2">` 
-      : `<div style="width:80px; height:80px; border-radius:50%; background:#334155; margin:0 auto 10px auto; display:flex; justify-content:center; align-items:center;"><i class="fa-solid fa-user text-white fs-1"></i></div>`;
+    let safeFace = getSafeImgUrl(user.photoUrl);
+    let safeId = getSafeImgUrl(user.idCardUrl);
+
+    let photo1 = safeFace ? `<img src="${safeFace}" class="img-box mb-2" style="width:100px; height:100px; border-color:#38bdf8;">` 
+                          : `<div class="img-box mb-2 mx-auto d-flex justify-content-center align-items-center" style="width:100px; height:100px; border-color:#38bdf8;"><i class="fa-solid fa-user text-white fs-1"></i></div>`;
+    
+    let photo2 = safeId ? `<img src="${safeId}" class="img-box mb-2" style="width:100px; height:100px; border-color:#10b981;">` 
+                        : `<div class="img-box mb-2 mx-auto d-flex justify-content-center align-items-center" style="width:100px; height:100px; border-color:#10b981;"><i class="fa-solid fa-id-card text-white fs-1"></i></div>`;
 
     document.getElementById('uhProfile').innerHTML = `
-      ${photo}
+      <div class="d-flex justify-content-center gap-3 mb-2">
+        <div>${photo1}<br><small class="text-info">หน้าตรง</small></div>
+        <div>${photo2}<br><small class="text-success">บัตรฯ/อื่นๆ</small></div>
+      </div>
       <h5 class="fw-bold text-white mb-0">${user.name} ${user.nickname ? `(${user.nickname})` : ''}</h5>
       <p class="text-muted small mb-1"><i class="fa-solid fa-phone me-1"></i>${user.phone || 'ไม่มีเบอร์โทร'}</p>
-      <p class="text-info small mb-0">${user.details || 'ไม่มีรายละเอียดเพิ่มเติม'}</p>
+      <p class="text-muted small mb-0">${user.details || 'ไม่มีรายละเอียด'}</p>
     `;
 
-    // ส่วนรายการกู้ทั้งหมดของ User
     let uLoans = rawAllTimeLoans.filter(l => l.userId === userId).sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
-    
     let html = '';
     if(uLoans.length === 0) {
       html = '<div class="text-center text-muted small p-2">ยังไม่มีประวัติการกู้</div>';
@@ -708,7 +745,7 @@
     } else {
       data.forEach(p => {
         let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' 
-          ? `<a href="${p.slipUrl}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill"><i class="fa-solid fa-image me-1"></i>สลิป</a>` 
+          ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="btn btn-sm btn-outline-info rounded-pill"><i class="fa-solid fa-image me-1"></i>สลิป</a>` 
           : `<span class="badge bg-secondary">ไม่มีสลิป</span>`;
 
         html += `
@@ -756,7 +793,6 @@
     document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-2 small">ไม่มีรายการใกล้ครบกำหนด</div>';
   }
 
-  // 🌟 Render หน้า Active Loans
   function renderList(data) {
     let grouped = {};
     data.forEach(l => {
@@ -876,10 +912,19 @@
         document.getElementById('ePhone').value = userDetail ? userDetail.phone : '';
         document.getElementById('eDetails').value = res.details;
         
+        // 🌟 เซ็ตวันที่ลงช่อง Input
+        if(res.startDateRaw) {
+          document.getElementById('eStartDate').value = res.startDateRaw;
+        }
+
         document.getElementById('eAmount').value = Number(res.principal || 0);
         document.getElementById('eRate').value = Number(res.rate || 0);
         document.getElementById('eCycle').value = res.cycle || 1;
         
+        // เคลียร์ไฟล์เก่าออก
+        document.getElementById('ePhoto').value = '';
+        document.getElementById('eIdCard').value = '';
+
         openModal('modalEdit');
       }
     });
@@ -887,13 +932,18 @@
 
   async function submitEdit() {
     toggleL(true);
+    let photoBase64 = await getBase64(document.getElementById('ePhoto').files[0]);
+    let idCardBase64 = await getBase64(document.getElementById('eIdCard').files[0]);
+
     const payload = {
       action: 'editLoan', loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value,
       name: document.getElementById('eName').value, nickname: document.getElementById('eNick').value,
       phone: document.getElementById('ePhone').value, details: document.getElementById('eDetails').value,
       amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value,
-      cycle: document.getElementById('eCycle').value
+      cycle: document.getElementById('eCycle').value, startDate: document.getElementById('eStartDate').value,
+      photoBase64: photoBase64, idCardBase64: idCardBase64 // ส่งรูปไปอัปเดตถ้ามี
     };
+    
     const res = await api(payload);
     toggleL(false);
     if(res.success) {
@@ -935,7 +985,7 @@
                 </div>
                 <div class="text-end">
                   <b class="text-success fs-6">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
-                  ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<br><a href="${p.slipUrl}" target="_blank" class="text-info text-decoration-none mt-1 d-block" style="font-size:0.75rem;">ดูสลิป</a>` : ''}
+                  ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<br><a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-info text-decoration-none mt-1 d-block" style="font-size:0.75rem;">ดูสลิป</a>` : ''}
                 </div>
               </div>
             </div>`;
@@ -1017,9 +1067,12 @@
 
     toggleL(true);
     let photoBase64 = await getBase64(document.getElementById('cPhoto').files[0]);
+    let idCardBase64 = await getBase64(document.getElementById('cIdCard').files[0]); // ดึงรูปบัตรมาด้วย
+
     const payload = {
       action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value,
-      phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64,
+      phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, 
+      photoBase64: photoBase64, idCardBase64: idCardBase64,
       amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value,
       installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value
     };
@@ -1060,7 +1113,6 @@
       document.getElementById('payDetails').style.display = 'block';
       document.getElementById('pName').innerText = `👤 ${res.userName}`;
       
-      // ดึงค่าอย่างปลอดภัย (รองรับทั้ง Key เก่าและใหม่ ป้องกัน NaN)
       let arrears = Number(res.arrears || res.remainingPrincipal || 0);
       let fine = Number(res.fineAmount || res.suggestedFine || 0);
       let expected = Number(res.suggestedPay || res.suggestedTotal || 0);
@@ -1069,13 +1121,11 @@
       document.getElementById('pFine').innerText = fine.toLocaleString();
       document.getElementById('pExpected').innerText = expected.toLocaleString();
       
-      // ตั้งค่าเริ่มต้นให้คิดค่าปรับ
       document.getElementById('pChargeFine').value = 'Yes';
       document.getElementById('pFinePaidInput').value = fine;
       document.getElementById('pFinePaidInput').disabled = false;
       document.getElementById('pTotalPaidInput').value = expected;
       
-      // อัปเดตตัวแปร curPay ให้เป็นตัวเลขชัวร์ๆ
       curPay.fineAmount = fine;
       curPay.suggestedPay = expected;
 

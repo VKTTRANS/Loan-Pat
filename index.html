@@ -118,7 +118,7 @@
     <div class="top-bar">
       <h5 class="fw-bold m-0 text-info">Fintech Admin</h5>
       <div class="d-flex gap-2 align-items-center">
-        <button id="btnManageAdmin" class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold" style="display:none;" onclick="openModal('modalCreateAdmin')">
+        <button id="btnManageAdmin" class="btn btn-warning btn-sm rounded-pill px-3 py-1 fw-bold" style="display:none;" onclick="clearForms(); openModal('modalCreateAdmin')">
           <i class="fa-solid fa-user-plus"></i> แอดมินย่อย
         </button>
         <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-1 fw-bold">ออกจากระบบ</button>
@@ -167,8 +167,8 @@
       </div>
 
       <div class="row g-2 mb-3">
-        <div class="col-6"><button onclick="openModal('modalPay')" class="btn-action bg-primary w-100 shadow py-2"><i class="fa-solid fa-wallet d-block mb-1 fs-4"></i> รับเงิน</button></div>
-        <div class="col-6"><button onclick="openModal('modalCreate')" class="btn-action bg-success w-100 shadow py-2"><i class="fa-solid fa-user-plus d-block mb-1 fs-4"></i> ปล่อยยอด</button></div>
+        <div class="col-6"><button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary w-100 shadow py-2"><i class="fa-solid fa-wallet d-block mb-1 fs-4"></i> รับเงิน</button></div>
+        <div class="col-6"><button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success w-100 shadow py-2"><i class="fa-solid fa-user-plus d-block mb-1 fs-4"></i> ปล่อยยอด</button></div>
       </div>
 
       <button onclick="openModal('modalRecentPays')" class="btn-action w-100 shadow py-2 mb-4" style="background-color: #0ea5e9;">
@@ -183,37 +183,44 @@
       <h6 class="fw-bold mb-2"><i class="fa-solid fa-list-check text-success me-1"></i>รายการกู้ยืมปัจจุบัน (ค้างชำระ)</h6>
       
       <div class="row g-2 mb-3">
-        <div class="col-4">
+        <div class="col-3">
           <label class="small text-muted mb-1">รอบกู้</label>
-          <select id="filterCycle" class="form-select form-select-sm" onchange="applyFilters()">
+          <select id="filterCycle" class="form-select form-select-sm px-1" onchange="applyFilters()">
             <option value="all">ทั้งหมด</option>
-            <option value="1">รายวัน</option>
-            <option value="7">รายสัปดาห์</option>
+            <option value="1">วัน</option>
+            <option value="7">สัปดาห์</option>
             <option value="15">15 วัน</option>
-            <option value="30">รายเดือน</option>
+            <option value="30">เดือน</option>
           </select>
         </div>
-        <div class="col-4">
+        <div class="col-3">
           <label class="small text-muted mb-1">สถานะ</label>
-          <select id="filterStatus" class="form-select form-select-sm" onchange="applyFilters()">
+          <select id="filterStatus" class="form-select form-select-sm px-1" onchange="applyFilters()">
             <option value="all">ทั้งหมด</option>
             <option value="due">ใกล้ครบ</option>
             <option value="overdue">เกินกำหนด</option>
           </select>
         </div>
-        <div class="col-4">
+        <div class="col-3">
+          <label class="small text-muted mb-1">เรียงตาม</label>
+          <select id="filterSort" class="form-select form-select-sm px-1" onchange="applyFilters()">
+            <option value="due">วันครบกำหนด</option>
+            <option value="amtDesc">ยอด (มากไปน้อย)</option>
+            <option value="amtAsc">ยอด (น้อยไปมาก)</option>
+          </select>
+        </div>
+        <div class="col-3">
           <label class="small text-muted mb-1">แสดงผล</label>
-          <select id="filterLimit" class="form-select form-select-sm" onchange="applyFilters()">
+          <select id="filterLimit" class="form-select form-select-sm px-1" onchange="applyFilters()">
             <option value="30">30 รายการ</option>
             <option value="50">50 รายการ</option>
-            <option value="80">80 รายการ</option>
             <option value="100">100 รายการ</option>
             <option value="all">ทั้งหมด</option>
           </select>
         </div>
       </div>
 
-      <input class="form-control form-control-sm mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นหาชื่อผู้กู้..." onkeyup="applyFilters()">
+      <input class="form-control form-control-sm mb-3" type="text" id="searchLoan" placeholder="🔍 ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
       
       <div id="loanContainer"></div>
     </div>
@@ -576,6 +583,7 @@
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+  // 🌟 ฟังก์ชันล้างค่าแบบ Deep Reset (รีเซ็ตใหม่เอี่ยมทุกครั้งที่เรียกใช้)
   function clearForms() {
     document.getElementById('cName').value = '';
     document.getElementById('cNick').value = '';
@@ -593,6 +601,8 @@
     document.getElementById('pFinePaidInput').value = '';
     document.getElementById('pSlip').value = '';
     document.getElementById('payDetails').style.display = 'none';
+    document.getElementById('pWarning').style.display = 'none';
+    curPay = null;
     
     if(document.getElementById('caId')) document.getElementById('caId').value = '';
     if(document.getElementById('caPass')) document.getElementById('caPass').value = '';
@@ -912,7 +922,7 @@
             </div>
             <div class="text-end">
               <span class="status-badge ${statusClass} d-block mb-1">${statusText}</span>
-              <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="event.stopPropagation(); quickPay('${b.loanId}')">รับเงิน</button>
+              <button class="btn btn-sm btn-primary rounded-pill px-3" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับเงิน</button>
             </div>
           </div>
         </div>`;
@@ -920,61 +930,46 @@
     document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-2 small">ไม่มีรายการใกล้ครบกำหนด</div>';
   }
 
+  // 🌟 ปรับปรุงการเรนเดอร์ List ให้เป็นแบบบิลใครบิลมัน (ไม่รวมกลุ่มตามชื่อผู้กู้)
   function renderList(data) {
-    let grouped = {};
-    data.forEach(l => {
-      let key = l.userName + '|' + l.nickname;
-      if(!grouped[key]) grouped[key] = { userName: l.userName, nickname: l.nickname, loans: [], totalAmt: 0 };
-      grouped[key].loans.push(l);
-      grouped[key].totalAmt += Number(l.amount || 0);
-    });
-
     let html = '';
-    for(let k in grouped) {
-      let u = grouped[k];
-      let nickDisplay = u.nickname ? `(${u.nickname})` : '';
-      
-      let loanRows = '';
-      u.loans.forEach(b => {
+    data.forEach(b => {
         let dLeft = Number(b.daysLeft) || 0;
         let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
         let statusText = dLeft < 0 ? `เลยกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
 
-        loanRows += `
-          <div class="d-flex justify-content-between align-items-start border-top border-secondary pt-3 mt-3 loan-item-row" onclick="viewDetails('${b.loanId}')">
-            <div>
-              <span class="badge bg-secondary mb-1">รอบ ${b.cycle} วัน</span>
-              <span class="text-muted small d-block mb-1">รหัสสัญญา: ${b.loanId}</span>
-              <p class="mb-0 text-info fw-bold">ค้าง: ฿${Number(b.amount || 0).toLocaleString()}</p>
-              <p class="mb-0 text-muted small mt-1">กำหนดจ่าย: ${b.dueDate}</p>
-              
-              <div class="mt-2">
-                <span class="action-icon icon-edit me-1" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen"></i></span>
-                <span class="action-icon icon-delete" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash"></i></span>
-              </div>
+        html += `
+        <div class="borrower-card loan-item" onclick="viewDetails('${b.loanId}')">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h6 class="fw-bold mb-1 text-white">👤 ${b.userName} ${b.nickname ? `(${b.nickname})` : ''}</h6>
+                    <span class="badge bg-secondary mb-1">รอบ ${b.cycle} วัน</span>
+                    <span class="text-muted small d-block mb-1">รหัสสัญญา: ${b.loanId}</span>
+                    <p class="mb-0 text-info fw-bold">ค้าง: ฿${Number(b.amount || 0).toLocaleString()}</p>
+                    <p class="mb-0 text-muted small mt-1">กำหนดจ่าย: ${b.dueDate}</p>
+                    
+                    <div class="mt-2">
+                        <span class="action-icon icon-edit me-1" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen"></i></span>
+                        <span class="action-icon icon-delete" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash"></i></span>
+                    </div>
+                </div>
+                <div class="text-end">
+                    <span class="status-badge ${statusClass} d-block mb-3">${statusText}</span>
+                    <button class="btn btn-sm btn-primary rounded-pill px-4 py-2 fw-bold shadow" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">บันทึกรับเงิน</button>
+                </div>
             </div>
-            <div class="text-end">
-              <span class="status-badge ${statusClass} d-block mb-3">${statusText}</span>
-              <button class="btn btn-sm btn-primary rounded-pill px-4 py-2 fw-bold shadow" onclick="event.stopPropagation(); quickPay('${b.loanId}')">บันทึกรับเงิน</button>
-            </div>
-          </div>
+        </div>
         `;
-      });
-
-      html += `
-        <div class="borrower-card loan-item" data-name="${u.userName} ${u.nickname}">
-          <h5 class="fw-bold mb-1 text-white">👤 ${u.userName} ${nickDisplay}</h5>
-          <p class="mb-0 text-warning small">หนี้ที่กำลังค้างรวมทั้งหมด: ฿${Number(u.totalAmt || 0).toLocaleString()}</p>
-          ${loanRows}
-        </div>`;
-    }
+    });
     
     document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูล</div>';
   }
 
+  // 🌟 เพิ่มระบบจัดเรียง (Sort) ตามเงื่อนไขต่างๆ
   function applyFilters() {
     let cycleVal = document.getElementById('filterCycle').value;
     let statusVal = document.getElementById('filterStatus').value;
+    let sortVal = document.getElementById('filterSort').value;
     let limitVal = document.getElementById('filterLimit').value;
     let searchVal = document.getElementById('searchLoan').value.toLowerCase();
 
@@ -987,6 +982,15 @@
       let matchSearch = (l.userName + l.nickname + l.loanId).toLowerCase().includes(searchVal);
       return matchCycle && matchStatus && matchSearch;
     });
+
+    // Sort Logic
+    if (sortVal === 'due') {
+        filtered.sort((a, b) => a.daysLeft - b.daysLeft);
+    } else if (sortVal === 'amtDesc') {
+        filtered.sort((a, b) => Number(b.amount) - Number(a.amount));
+    } else if (sortVal === 'amtAsc') {
+        filtered.sort((a, b) => Number(a.amount) - Number(b.amount));
+    }
 
     if(limitVal !== 'all') filtered = filtered.slice(0, parseInt(limitVal));
     renderList(filtered);

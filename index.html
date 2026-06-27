@@ -283,8 +283,22 @@
       </div>
 
       <div class="mb-2">
-        <label class="text-info">ยอดเงินที่โอนมาจริง (฿)</label>
-        <input type="number" id="pTotalPaidInput" class="form-control text-white fw-bold fs-4 py-2" style="border: 2px solid #38bdf8 !important;">
+        <label class="text-danger">คิดค่าปรับรอบนี้หรือไม่?</label>
+        <select id="pChargeFine" class="form-select" onchange="toggleFineInput()">
+          <option value="Yes">คิดค่าปรับตามจริง</option>
+          <option value="No">ยกเว้นค่าปรับรอบนี้</option>
+        </select>
+      </div>
+
+      <div class="row g-2 mb-2">
+        <div class="col-6">
+          <label class="text-danger">หักเป็นค่าปรับ (฿)</label>
+          <input type="number" id="pFinePaidInput" class="form-control text-white fw-bold fs-4 py-2" style="border: 2px solid #f43f5e !important;" oninput="syncTotalPay()">
+        </div>
+        <div class="col-6">
+          <label class="text-info">ยอดรับเงินทั้งหมด (฿)</label>
+          <input type="number" id="pTotalPaidInput" class="form-control text-white fw-bold fs-4 py-2" style="border: 2px solid #38bdf8 !important;">
+        </div>
       </div>
       
       <div class="row g-2 mb-3">
@@ -334,14 +348,6 @@
         </select>
       </div>
       <div class="col-6"><label>งวด</label><input type="number" id="cInstallments" class="form-control form-control-sm" value="1" oninput="generateSchedulePreview()"></div>
-      
-      <div class="col-12">
-        <label class="text-danger">คิดค่าปรับเลยกำหนด</label>
-        <select id="cFine" class="form-select form-select-sm text-danger">
-          <option value="No">ไม่คิดค่าปรับ</option>
-          <option value="Yes">คิดค่าปรับวันละ 100 บาท</option>
-        </select>
-      </div>
     </div>
     
     <div id="cSchedulePreview" class="p-2 rounded mb-2 mt-2" style="background:#0f172a; max-height: 100px; overflow-y: auto; padding-right: 15px;"></div>
@@ -385,13 +391,6 @@
         <label>รอบชำระ</label>
         <select id="eCycle" class="form-select form-select-sm text-warning">
           <option value="1">รายวัน</option><option value="7">สัปดาห์</option><option value="15">15 วัน</option><option value="30">รายเดือน</option>
-        </select>
-      </div>
-      <div class="col-6">
-        <label class="text-danger">ค่าปรับ</label>
-        <select id="eFine" class="form-select form-select-sm text-danger">
-          <option value="No">ปิด</option>
-          <option value="Yes">เปิด (100/วัน)</option>
         </select>
       </div>
     </div>
@@ -449,6 +448,7 @@
     
     document.getElementById('loanIdInput').value = '';
     document.getElementById('pTotalPaidInput').value = '';
+    document.getElementById('pFinePaidInput').value = '';
     document.getElementById('pSlip').value = '';
     document.getElementById('payDetails').style.display = 'none';
   }
@@ -749,7 +749,6 @@
         document.getElementById('eAmount').value = res.principal;
         document.getElementById('eRate').value = res.rate;
         document.getElementById('eCycle').value = res.cycle;
-        document.getElementById('eFine').value = res.fineEnabled ? "Yes" : "No";
         
         openModal('modalEdit');
       }
@@ -763,7 +762,7 @@
       name: document.getElementById('eName').value, nickname: document.getElementById('eNick').value,
       phone: document.getElementById('ePhone').value, details: document.getElementById('eDetails').value,
       amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value,
-      cycle: document.getElementById('eCycle').value, fineEnabled: document.getElementById('eFine').value
+      cycle: document.getElementById('eCycle').value
     };
     const res = await api(payload);
     toggleL(false);
@@ -881,8 +880,7 @@
       action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value,
       phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64,
       amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value,
-      installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value,
-      fineEnabled: document.getElementById('cFine').value 
+      installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value
     };
 
     await api(payload);
@@ -925,6 +923,10 @@
       document.getElementById('pFine').innerText = Number(res.fineAmount).toLocaleString();
       document.getElementById('pExpected').innerText = Number(res.suggestedPay).toLocaleString();
       
+      // ตั้งค่าเริ่มต้นให้คิดค่าปรับ
+      document.getElementById('pChargeFine').value = 'Yes';
+      document.getElementById('pFinePaidInput').value = res.fineAmount;
+      document.getElementById('pFinePaidInput').disabled = false;
       document.getElementById('pTotalPaidInput').value = res.suggestedPay;
 
     } else {
@@ -933,15 +935,38 @@
     }
   }
 
+  function toggleFineInput() {
+    if(!curPay) return;
+    const chargeFine = document.getElementById('pChargeFine').value === 'Yes';
+    const fineInput = document.getElementById('pFinePaidInput');
+    if (chargeFine) {
+      fineInput.value = curPay.fineAmount;
+      fineInput.disabled = false;
+    } else {
+      fineInput.value = 0;
+      fineInput.disabled = true;
+    }
+    syncTotalPay();
+  }
+
+  function syncTotalPay() {
+    if(!curPay) return;
+    const fine = Number(document.getElementById('pFinePaidInput').value) || 0;
+    const basePay = curPay.suggestedPay - curPay.fineAmount; 
+    document.getElementById('pTotalPaidInput').value = basePay + fine;
+  }
+
   async function submitPay() {
     const totalPaidVal = document.getElementById('pTotalPaidInput').value;
+    const finePaidVal = document.getElementById('pFinePaidInput').value;
+    
     if(!totalPaidVal || Number(totalPaidVal) <= 0) { showAlert('กรุณากรอกยอดเงินให้ถูกต้อง', true); return; }
 
     toggleL(true);
     let slipBase64 = await getBase64(document.getElementById('pSlip').files[0]);
     await api({
       action: 'submitPay', loanId: curPay.loanId, userId: curPay.userId, nextNo: curPay.nextNo,
-      totalPaidAmount: totalPaidVal, fineAmount: curPay.fineAmount, 
+      totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, 
       payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64
     });
     toggleL(false);

@@ -115,8 +115,12 @@
     </div>
 
     <div id="viewDash">
+      
+      <button id="btnManageAdmin" class="btn-action w-100 shadow py-2 mb-3" style="background-color: #334155; display:none;" onclick="openModal('modalCreateAdmin')">
+        <i class="fa-solid fa-user-tie me-2 text-warning"></i> สร้างแอดมินย่อย (SuperAdmin)
+      </button>
+
       <div class="glass-card p-3 mb-3 shadow-sm">
-        
         <div class="d-flex justify-content-between align-items-center border-bottom border-secondary pb-2 mb-3">
           <label class="fw-bold m-0 text-info"><i class="fa-solid fa-calendar-days me-1"></i> ตัวกรองสรุปยอด</label>
           <div class="d-flex gap-2">
@@ -210,6 +214,30 @@
   </div>
 </div>
 
+<div id="modalCreateAdmin" class="modal-overlay">
+  <div class="modal-content-custom">
+    <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
+      <h6 class="fw-bold m-0 text-warning"><i class="fa-solid fa-user-plus me-2"></i>สร้างแอดมินย่อย</h6>
+      <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="closeModal('modalCreateAdmin')" style="cursor:pointer"></i>
+    </div>
+    
+    <label>รหัสแอดมิน (ใช้ล็อกอิน)</label>
+    <input type="text" id="caId" class="form-control mb-2" placeholder="เช่น admin1">
+    
+    <label>รหัสผ่าน</label>
+    <input type="password" id="caPass" class="form-control mb-2">
+    
+    <label>ชื่อแอดมิน</label>
+    <input type="text" id="caName" class="form-control mb-2" placeholder="ชื่อที่ใช้เรียก">
+
+    <label class="text-info">กลุ่มดูแล (ให้ดูแลผู้กู้โซนไหน/กลุ่มไหน)</label>
+    <input type="text" id="caGroup" class="form-control mb-3" placeholder="เช่น GroupA, โซนเหนือ, ทีม1">
+    
+    <button onclick="saveAdmin()" class="btn btn-warning text-dark fw-bold w-100 py-2 shadow">บันทึกแอดมิน</button>
+  </div>
+</div>
+
+
 <div id="modalUserHistory" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
@@ -283,7 +311,7 @@
     
     <label>พิมพ์ค้นหาชื่อผู้กู้</label>
     <div class="input-group mb-2">
-      <input list="payLoanOptions" id="loanIdInput" class="form-control" placeholder="พิมพ์ชื่อเล่น/ชื่อจริง...">
+      <input list="payLoanOptions" id="loanIdInput" class="form-control" placeholder="พิมพ์ชื่อเล่น/ชื่อจริง/รหัสสัญญา...">
       <datalist id="payLoanOptions"></datalist>
       <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold px-3">ค้นหา</button>
     </div>
@@ -365,6 +393,12 @@
           <label class="small text-info">รูปบัตรปชช./อื่นๆ</label>
           <input type="file" id="cIdCard" class="form-control form-control-sm">
         </div>
+      </div>
+
+      <div id="cGroupDiv" class="col-12 mt-2" style="display:none;">
+        <label class="small text-info">กลุ่มดูแลผู้กู้ (โยนให้กลุ่มไหนดูแล)</label>
+        <input list="groupOptions" id="cGroup" class="form-control form-control-sm" placeholder="เลือกหรือพิมพ์ชื่อกลุ่ม...">
+        <datalist id="groupOptions"></datalist>
       </div>
     </div>
 
@@ -504,6 +538,7 @@
     document.getElementById('cPhoto').value = '';
     document.getElementById('cIdCard').value = '';
     document.getElementById('cAmount').value = '';
+    document.getElementById('cGroup').value = '';
     document.getElementById('cSchedulePreview').innerHTML = '';
     document.getElementById('cUserSelect').value = 'NEW';
     toggleNewUserForm();
@@ -513,6 +548,12 @@
     document.getElementById('pFinePaidInput').value = '';
     document.getElementById('pSlip').value = '';
     document.getElementById('payDetails').style.display = 'none';
+    
+    // Clear Admin forms
+    if(document.getElementById('caId')) document.getElementById('caId').value = '';
+    if(document.getElementById('caPass')) document.getElementById('caPass').value = '';
+    if(document.getElementById('caName')) document.getElementById('caName').value = '';
+    if(document.getElementById('caGroup')) document.getElementById('caGroup').value = '';
   }
 
   function showAlert(msg, isError = false) {
@@ -555,10 +596,9 @@
     const res = await api({ action: 'login', userId: userId, password: pass });
     toggleL(false);
     
-    // รองรับทั้ง Admin ปกติ และ SuperAdmin
     if(res.success && (res.role === 'Admin' || res.role === 'SuperAdmin')) {
       loggedInPassword = pass; 
-      localStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: pass, timestamp: Date.now(), role: res.role }));
+      localStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: pass, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadDash();
@@ -576,8 +616,18 @@
     let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
     if(!authData) return logout();
 
-    // 🌟 ส่ง adminId ไปให้หลังบ้านเช็คสิทธิ์การดึงข้อมูล
+    // จัดการการแสดงผลของ SuperAdmin
+    if(authData.role === 'SuperAdmin') {
+       document.getElementById('btnManageAdmin').style.display = 'block';
+       document.getElementById('cGroupDiv').style.display = 'block';
+    } else {
+       document.getElementById('btnManageAdmin').style.display = 'none';
+       document.getElementById('cGroupDiv').style.display = 'none';
+    }
+
+    toggleL(true);
     const res = await api({ action: 'getDashboard', adminId: authData.userId });
+    toggleL(false);
     
     allLoans = res.activeLoans || [];
     rawAllTimeLoans = res.allTimeLoans || []; 
@@ -590,6 +640,13 @@
     if(res.users) {
       res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     }
+    
+    // ใส่ group ลงใน Datalist
+    let groupOptHtml = '';
+    if(res.groups) {
+      res.groups.forEach(g => { groupOptHtml += `<option value="${g}"></option>`; });
+    }
+    document.getElementById('groupOptions').innerHTML = groupOptHtml;
     
     let grouped = {};
     allLoans.forEach(l => { 
@@ -604,6 +661,34 @@
     renderRecentPays(res.recentPayments || []);
     renderUsers(windowUsersData); 
     applyFilters(); 
+  }
+
+  // 🌟 ฟังก์ชันสร้างแอดมินใหม่ (เฉพาะ SuperAdmin)
+  async function saveAdmin() {
+    let adId = document.getElementById('caId').value;
+    let adPass = document.getElementById('caPass').value;
+    let adName = document.getElementById('caName').value;
+    let adGroup = document.getElementById('caGroup').value;
+
+    if(!adId || !adPass || !adGroup) {
+      showAlert('กรุณากรอกข้อมูลให้ครบถ้วน', true);
+      return;
+    }
+
+    toggleL(true);
+    const res = await api({
+      action: 'createAdmin',
+      newAdminId: adId, password: adPass, name: adName, groupName: adGroup
+    });
+    toggleL(false);
+
+    if(res.success) {
+      showAlert('สร้างรหัสแอดมินใหม่เรียบร้อยแล้ว');
+      clearForms();
+      closeModal('modalCreateAdmin');
+    } else {
+      showAlert(res.error || 'เกิดข้อผิดพลาด', true);
+    }
   }
 
   function renderUsers(usersArray) {
@@ -664,6 +749,7 @@
       <h5 class="fw-bold text-white mb-0">${user.name} ${user.nickname ? `(${user.nickname})` : ''}</h5>
       <p class="text-muted small mb-1"><i class="fa-solid fa-phone me-1"></i>${user.phone || 'ไม่มีเบอร์โทร'}</p>
       <p class="text-muted small mb-0">${user.details || 'ไม่มีรายละเอียด'}</p>
+      <span class="badge bg-dark mt-2 border border-secondary text-secondary">กลุ่มดูแล: ${user.groupName || '-'}</span>
     `;
 
     let uLoans = rawAllTimeLoans.filter(l => l.userId === userId).sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
@@ -820,7 +906,6 @@
         let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
         let statusText = dLeft < 0 ? `เลยกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
 
-        // 🌟 แสดงรหัสสัญญาในหน้า List 
         loanRows += `
           <div class="d-flex justify-content-between align-items-start border-top border-secondary pt-3 mt-3 loan-item-row" onclick="viewDetails('${b.loanId}')">
             <div>
@@ -1076,13 +1161,15 @@
     let photoBase64 = await getBase64(document.getElementById('cPhoto').files[0]);
     let idCardBase64 = await getBase64(document.getElementById('cIdCard').files[0]); 
 
-    // 🌟 ดึงข้อมูล AdminOwner จากการล็อกอิน
     let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+    
+    // 🌟 ถ้ารหัสที่ล็อกอินเป็น SuperAdmin ให้ดึงกลุ่มจากช่อง Input แทน
+    let group = authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName;
 
     const payload = {
       action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value,
       phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, 
-      photoBase64: photoBase64, idCardBase64: idCardBase64, adminId: authData.userId, // ส่ง ID คนสร้างไป
+      photoBase64: photoBase64, idCardBase64: idCardBase64, groupName: group,
       amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value,
       installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value
     };

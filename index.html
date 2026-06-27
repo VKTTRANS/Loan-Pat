@@ -25,7 +25,6 @@
     }
     .form-control::placeholder { color: #94a3b8 !important; opacity: 1 !important; }
     .form-control:focus, .form-select:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4) !important; }
-    .form-control:disabled, .form-control[readonly] { background-color: #0f172a !important; opacity: 0.7; }
     
     .btn-action { border-radius: 10px; padding: 10px; border: none; font-weight: 700; transition: 0.2s; color: #fff !important; font-size: 0.95rem; }
     .btn-action:active { transform: scale(0.95); }
@@ -281,7 +280,7 @@
       
       <div class="row text-center mt-2 border-top border-secondary pt-2">
         <div class="col-4 border-end border-secondary">
-          <label class="text-muted d-block small">ยอดกู้</label>
+          <label class="text-muted d-block small">ยอดกู้ (เงินต้น)</label>
           <b class="text-white fs-6" id="dPrin">0</b>
         </div>
         <div class="col-4 border-end border-secondary">
@@ -290,7 +289,7 @@
           <small class="text-info d-block mt-1" style="font-size: 0.70rem;">(ดอก: ฿<span id="dIntPaid">0</span>)</small>
         </div>
         <div class="col-4">
-          <label class="text-muted d-block small">คงเหลือ</label>
+          <label class="text-muted d-block small">ต้นคงเหลือ</label>
           <b class="text-warning fs-5" id="dRemain">0</b>
         </div>
       </div>
@@ -309,7 +308,7 @@
 <div id="modalPay" class="modal-overlay">
   <div class="modal-content-custom">
     <div class="d-flex justify-content-between mb-3 border-bottom border-secondary pb-2">
-      <h6 class="fw-bold m-0 text-info"><i class="fa-solid fa-wallet me-2"></i>บันทึกรับเงิน (ระบบทบยอด)</h6>
+      <h6 class="fw-bold m-0 text-info"><i class="fa-solid fa-wallet me-2"></i>บันทึกรับเงิน (ระบบลดต้นลดดอก)</h6>
       <i class="fa-solid fa-circle-xmark text-danger fs-4" onclick="closeModal('modalPay')" style="cursor:pointer"></i>
     </div>
     
@@ -326,7 +325,7 @@
         
         <div class="row mt-2 pt-2 border-top border-secondary">
           <div class="col-4 border-end border-secondary">
-            <small class="text-muted d-block">ยอดค้าง</small>
+            <small class="text-muted d-block">ยอดค้าง (รวมดอก)</small>
             <b class="text-info fs-6" id="pArrears">0</b>
           </div>
           <div class="col-4 border-end border-secondary">
@@ -478,8 +477,8 @@
       <h6 class="text-warning small fw-bold mb-0 mt-2">ข้อมูลสัญญา</h6>
       <div class="col-12"><label>วันที่เริ่มสัญญา (แก้ไขได้)</label><input type="date" id="eStartDate" class="form-control form-control-sm"></div>
       
-      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold" readonly title="ไม่สามารถแก้ไขเงินต้นได้เพื่อป้องกันระบบรวน"></div>
-      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning" readonly></div>
+      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold"></div>
+      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning"></div>
       
       <div class="col-12">
         <label>รอบชำระ</label>
@@ -511,11 +510,12 @@
   }
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
 
+  // 🌟 ฟังก์ชันแปลงลิงก์รูปให้ปลอดภัยและทะลุบล็อก 100%
   function getSafeImgUrl(url) {
     if (!url || url === 'ไม่มี') return '';
-    if (url.includes('/file/d/')) {
-        let id = url.split('/file/d/')[1].split('/')[0];
-        return 'https://drive.google.com/uc?export=view&id=' + id;
+    let match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/d\/([a-zA-Z0-9_-]+)/);
+    if (match && match[1]) {
+        return 'https://drive.google.com/thumbnail?id=' + match[1] + '&sz=w1000';
     }
     return url; 
   }
@@ -547,7 +547,6 @@
     document.getElementById('cPhoto').value = '';
     document.getElementById('cIdCard').value = '';
     document.getElementById('cAmount').value = '';
-    // document.getElementById('cGroup').value = 'A'; // ค่า Default เป็น Dropdown
     document.getElementById('cSchedulePreview').innerHTML = '';
     document.getElementById('cUserSelect').value = 'NEW';
     toggleNewUserForm();
@@ -561,7 +560,6 @@
     if(document.getElementById('caId')) document.getElementById('caId').value = '';
     if(document.getElementById('caPass')) document.getElementById('caPass').value = '';
     if(document.getElementById('caName')) document.getElementById('caName').value = '';
-    // if(document.getElementById('caGroup')) document.getElementById('caGroup').value = 'A'; 
   }
 
   function showAlert(msg, isError = false) {
@@ -699,8 +697,8 @@
 
       let safeUrl = getSafeImgUrl(u.photoUrl);
       let photoHtml = safeUrl 
-        ? `<img src="${safeUrl}" class="img-box">` 
-        : `<div class="img-box d-flex justify-content-center align-items-center"><i class="fa-solid fa-user text-white fs-3"></i></div>`;
+        ? `<img src="${safeUrl}" class="img-box" style="border-radius:50%; width:50px; height:50px;">` 
+        : `<div class="img-box d-flex justify-content-center align-items-center" style="border-radius:50%; width:50px; height:50px;"><i class="fa-solid fa-user text-white fs-4"></i></div>`;
 
       html += `
         <div class="borrower-card" onclick="viewUserHistory('${u.id}')">
@@ -710,7 +708,7 @@
             </div>
             <div>
               <h6 class="fw-bold mb-1 text-white">${u.name} ${u.nickname ? `(${u.nickname})` : ''}</h6>
-              <span class="text-muted small">กู้ไปแล้ว ${loanCount} ครั้ง | ยอดรวม ฿${totalBorrowed.toLocaleString()}</span>
+              <span class="text-muted small">กู้ไปแล้ว ${loanCount} ครั้ง | ยอดกู้รวม ฿${totalBorrowed.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -803,7 +801,7 @@
         let matchM = (fMonth === 'all' || fMonth == m.toString());
         
         if (matchY && matchM) {
-          let orig = Number(l.originalPrincipal) || 0;
+          let orig = Number(l.originalPrincipal) || 0; 
           let remain = Number(l.remainingPrincipal) || 0;
           
           mTotalLoan += orig;
@@ -1161,7 +1159,6 @@
     let idCardBase64 = await getBase64(document.getElementById('cIdCard').files[0]); 
 
     let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
-    
     let group = authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName;
 
     const payload = {
@@ -1208,9 +1205,10 @@
       document.getElementById('payDetails').style.display = 'block';
       document.getElementById('pName').innerText = `👤 ${res.userName}`;
       
+      // 🌟 นำยอดค้าง (Arrears) ที่ระบบคำนวณแบบทบยอดตามเวลาจริงมาแสดง
       let arrears = Number(res.arrears || res.remainingPrincipal || 0);
-      let fine = Number(res.fineAmount || res.suggestedFine || 0);
-      let expected = Number(res.suggestedPay || res.suggestedTotal || 0);
+      let fine = Number(res.fineAmount || 0);
+      let expected = Number(res.suggestedPay || 0);
 
       document.getElementById('pArrears').innerText = arrears.toLocaleString();
       document.getElementById('pFine').innerText = fine.toLocaleString();

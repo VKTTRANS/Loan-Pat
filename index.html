@@ -25,6 +25,7 @@
     }
     .form-control::placeholder { color: #94a3b8 !important; opacity: 1 !important; }
     .form-control:focus, .form-select:focus { border-color: #38bdf8 !important; box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.4) !important; }
+    .form-control:disabled, .form-control[readonly] { background-color: #0f172a !important; opacity: 0.7; }
     
     .btn-action { border-radius: 10px; padding: 10px; border: none; font-weight: 700; transition: 0.2s; color: #fff !important; font-size: 0.95rem; }
     .btn-action:active { transform: scale(0.95); }
@@ -137,7 +138,7 @@
 
         <div class="row text-center mb-2">
           <div class="col-6">
-            <label class="text-muted fw-bold d-block mb-1">ยอดปล่อยกู้รวม</label>
+            <label class="text-muted fw-bold d-block mb-1">ยอดปล่อยกู้รวม (เงินต้น)</label>
             <h4 class="fw-bold text-white m-0">฿<span id="mTotalLoan">0</span></h4>
           </div>
           <div class="col-6 border-start border-secondary">
@@ -280,7 +281,7 @@
       
       <div class="row text-center mt-2 border-top border-secondary pt-2">
         <div class="col-4 border-end border-secondary">
-          <label class="text-muted d-block small">ยอดกู้ (เงินต้น)</label>
+          <label class="text-muted d-block small">เงินต้นรวม</label>
           <b class="text-white fs-6" id="dPrin">0</b>
         </div>
         <div class="col-4 border-end border-secondary">
@@ -320,22 +321,38 @@
     </div>
     
     <div id="payDetails" style="display:none" class="mt-3">
+      <div id="pWarning" class="alert alert-danger py-1 px-2 small mb-2 fw-bold" style="display:none; border:1px solid #f43f5e; background:#4c0519; color:#fda4af;"></div>
+      
       <div class="p-3 mb-3 rounded" style="background: #0f172a; border: 1px dashed #475569;">
-        <h6 class="m-0 text-white fw-bold" id="pName">...</h6>
+        <h6 class="m-0 text-white fw-bold border-bottom border-secondary pb-2 mb-2" id="pName">...</h6>
         
-        <div class="row mt-2 pt-2 border-top border-secondary">
+        <div class="row text-center mb-2">
+           <div class="col-12">
+               <small class="text-muted d-block">เงินต้นคงเหลือทั้งหมด</small>
+               <b class="text-white fs-5" id="pRemainingPrin">0</b>
+           </div>
+        </div>
+
+        <div class="row mt-2 pt-2 text-center border-top border-secondary">
           <div class="col-4 border-end border-secondary">
-            <small class="text-muted d-block">ยอดค้าง (รวมดอก)</small>
-            <b class="text-info fs-6" id="pArrears">0</b>
+            <small class="text-muted d-block">เงินต้นที่ต้องจ่าย</small>
+            <b class="text-info fs-6" id="pExpectedPrin">0</b>
           </div>
           <div class="col-4 border-end border-secondary">
+            <small class="text-muted d-block">ดอกเบี้ย</small>
+            <b class="text-warning fs-6" id="pExpectedInt">0</b>
+          </div>
+          <div class="col-4">
             <small class="text-muted d-block">ค่าปรับ</small>
             <b class="text-danger fs-6" id="pFine">0</b>
           </div>
-          <div class="col-4">
-            <small class="text-muted d-block">รวมต้องจ่าย</small>
-            <b class="text-warning fs-5" id="pExpected">0</b>
-          </div>
+        </div>
+
+        <div class="row mt-2 pt-2 border-top border-secondary text-center">
+           <div class="col-12">
+               <small class="text-muted d-block">รวมทั้งหมด (ต้น + ดอก + ปรับ)</small>
+               <b class="text-success fs-4" id="pExpectedTotal">0</b>
+           </div>
         </div>
       </div>
 
@@ -478,7 +495,7 @@
       <div class="col-12"><label>วันที่เริ่มสัญญา (แก้ไขได้)</label><input type="date" id="eStartDate" class="form-control form-control-sm"></div>
       
       <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold"></div>
-      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning"></div>
+      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning" readonly></div>
       
       <div class="col-12">
         <label>รอบชำระ</label>
@@ -510,7 +527,6 @@
   }
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
 
-  // 🌟 ฟังก์ชันแปลงลิงก์รูปให้ปลอดภัยและทะลุบล็อก 100%
   function getSafeImgUrl(url) {
     if (!url || url === 'ไม่มี') return '';
     let match = url.match(/id=([a-zA-Z0-9_-]+)/) || url.match(/d\/([a-zA-Z0-9_-]+)/);
@@ -1205,22 +1221,29 @@
       document.getElementById('payDetails').style.display = 'block';
       document.getElementById('pName').innerText = `👤 ${res.userName}`;
       
-      // 🌟 นำยอดค้าง (Arrears) ที่ระบบคำนวณแบบทบยอดตามเวลาจริงมาแสดง
-      let arrears = Number(res.arrears || res.remainingPrincipal || 0);
-      let fine = Number(res.fineAmount || 0);
-      let expected = Number(res.suggestedPay || 0);
+      // 🌟 จัดการ UI ใหม่ให้แยกส่วนชัดเจน
+      if(res.missedInst > 1) {
+          document.getElementById('pWarning').innerText = `⚠️ ค้างชำระทบยอด ${res.missedInst} รอบบิล`;
+          document.getElementById('pWarning').style.display = 'block';
+      } else {
+          document.getElementById('pWarning').style.display = 'none';
+      }
 
-      document.getElementById('pArrears').innerText = arrears.toLocaleString();
-      document.getElementById('pFine').innerText = fine.toLocaleString();
-      document.getElementById('pExpected').innerText = expected.toLocaleString();
+      document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`;
+      document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString();
+      document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString();
+      document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString();
+      document.getElementById('pExpectedTotal').innerText = Number(res.suggestedPay || 0).toLocaleString();
       
       document.getElementById('pChargeFine').value = 'Yes';
-      document.getElementById('pFinePaidInput').value = fine;
+      document.getElementById('pFinePaidInput').value = res.fineAmount || 0;
       document.getElementById('pFinePaidInput').disabled = false;
-      document.getElementById('pTotalPaidInput').value = expected;
+      document.getElementById('pTotalPaidInput').value = res.suggestedPay;
       
-      curPay.fineAmount = fine;
-      curPay.suggestedPay = expected;
+      curPay.expectedPrin = res.expectedPrin;
+      curPay.expectedInt = res.expectedInt;
+      curPay.fineAmount = res.fineAmount;
+      curPay.suggestedPay = res.suggestedPay;
 
     } else {
       showAlert('ระบุชื่อผู้กู้ไม่ถูกต้อง', true);

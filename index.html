@@ -468,14 +468,13 @@
   }
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
 
-  // 🌟 ฟังก์ชันแปลงลิงก์ Drive เก่าให้เป็นแบบแสดงรูปได้
   function getSafeImgUrl(url) {
     if (!url || url === 'ไม่มี') return '';
     if (url.includes('/file/d/')) {
         let id = url.split('/file/d/')[1].split('/')[0];
         return 'https://drive.google.com/uc?export=view&id=' + id;
     }
-    return url; // ถ้าเป็นลิงก์ uc?id= อยู่แล้ว หรือลิงก์อื่น จะส่งกลับเลย
+    return url; 
   }
 
   window.onload = () => {
@@ -556,9 +555,10 @@
     const res = await api({ action: 'login', userId: userId, password: pass });
     toggleL(false);
     
-    if(res.success && res.role === 'Admin') {
+    // รองรับทั้ง Admin ปกติ และ SuperAdmin
+    if(res.success && (res.role === 'Admin' || res.role === 'SuperAdmin')) {
       loggedInPassword = pass; 
-      localStorage.setItem('fintechAuthData', JSON.stringify({ userId: userId, pass: pass, timestamp: Date.now() }));
+      localStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: pass, timestamp: Date.now(), role: res.role }));
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadDash();
@@ -573,7 +573,12 @@
   }
 
   async function loadDash() {
-    const res = await api({ action: 'getDashboard' });
+    let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+    if(!authData) return logout();
+
+    // 🌟 ส่ง adminId ไปให้หลังบ้านเช็คสิทธิ์การดึงข้อมูล
+    const res = await api({ action: 'getDashboard', adminId: authData.userId });
+    
     allLoans = res.activeLoans || [];
     rawAllTimeLoans = res.allTimeLoans || []; 
     windowUsersData = res.users || [];
@@ -677,6 +682,7 @@
               <div>
                 <b class="text-white">ยอดกู้: ฿${Number(l.originalPrincipal).toLocaleString()}</b>
                 <span class="d-block text-muted small mt-1">เริ่มสัญญา: ${l.startDate && !isNaN(new Date(l.startDate).getTime()) ? new Date(l.startDate).toLocaleDateString('th-TH') : '-'}</span>
+                <span class="d-block text-muted small">รหัสสัญญา: ${l.loanId}</span>
               </div>
               <div class="text-end">
                 ${statusBadge}
@@ -781,6 +787,7 @@
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <h6 class="fw-bold mb-1 text-white">👤 ${displayName}</h6>
+              <span class="text-muted small d-block mb-1">รหัสสัญญา: ${b.loanId}</span>
               <span class="text-info small fw-bold">ค้าง: ฿${Number(b.amount || 0).toLocaleString()}</span>
             </div>
             <div class="text-end">
@@ -813,10 +820,12 @@
         let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-primary');
         let statusText = dLeft < 0 ? `เลยกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
 
+        // 🌟 แสดงรหัสสัญญาในหน้า List 
         loanRows += `
           <div class="d-flex justify-content-between align-items-start border-top border-secondary pt-3 mt-3 loan-item-row" onclick="viewDetails('${b.loanId}')">
             <div>
               <span class="badge bg-secondary mb-1">รอบ ${b.cycle} วัน</span>
+              <span class="text-muted small d-block mb-1">รหัสสัญญา: ${b.loanId}</span>
               <p class="mb-0 text-info fw-bold">ค้าง: ฿${Number(b.amount || 0).toLocaleString()}</p>
               <p class="mb-0 text-muted small mt-1">กำหนดจ่าย: ${b.dueDate}</p>
               
@@ -856,7 +865,7 @@
       let dLeft = Number(l.daysLeft) || 0;
       if (statusVal === 'due') matchStatus = (dLeft >= 0 && dLeft <= 3); 
       else if (statusVal === 'overdue') matchStatus = (dLeft < 0); 
-      let matchSearch = (l.userName + l.nickname).toLowerCase().includes(searchVal);
+      let matchSearch = (l.userName + l.nickname + l.loanId).toLowerCase().includes(searchVal);
       return matchCycle && matchStatus && matchSearch;
     });
 
@@ -912,7 +921,6 @@
         document.getElementById('ePhone').value = userDetail ? userDetail.phone : '';
         document.getElementById('eDetails').value = res.details;
         
-        // 🌟 เซ็ตวันที่ลงช่อง Input
         if(res.startDateRaw) {
           document.getElementById('eStartDate').value = res.startDateRaw;
         }
@@ -921,7 +929,6 @@
         document.getElementById('eRate').value = Number(res.rate || 0);
         document.getElementById('eCycle').value = res.cycle || 1;
         
-        // เคลียร์ไฟล์เก่าออก
         document.getElementById('ePhoto').value = '';
         document.getElementById('eIdCard').value = '';
 
@@ -941,7 +948,7 @@
       phone: document.getElementById('ePhone').value, details: document.getElementById('eDetails').value,
       amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value,
       cycle: document.getElementById('eCycle').value, startDate: document.getElementById('eStartDate').value,
-      photoBase64: photoBase64, idCardBase64: idCardBase64 // ส่งรูปไปอัปเดตถ้ามี
+      photoBase64: photoBase64, idCardBase64: idCardBase64 
     };
     
     const res = await api(payload);
@@ -960,7 +967,7 @@
     
     if(res.success) {
       document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`;
-      document.getElementById('dDetails').innerText = res.details || 'ไม่มีข้อมูลเพิ่มเติม';
+      document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}<br><small class="text-muted">รหัสสัญญา: ${res.loanId}</small>`;
       
       document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString()}`;
       document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString()}`;
@@ -1067,12 +1074,15 @@
 
     toggleL(true);
     let photoBase64 = await getBase64(document.getElementById('cPhoto').files[0]);
-    let idCardBase64 = await getBase64(document.getElementById('cIdCard').files[0]); // ดึงรูปบัตรมาด้วย
+    let idCardBase64 = await getBase64(document.getElementById('cIdCard').files[0]); 
+
+    // 🌟 ดึงข้อมูล AdminOwner จากการล็อกอิน
+    let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
 
     const payload = {
       action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value,
       phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, 
-      photoBase64: photoBase64, idCardBase64: idCardBase64,
+      photoBase64: photoBase64, idCardBase64: idCardBase64, adminId: authData.userId, // ส่ง ID คนสร้างไป
       amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value,
       installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value
     };

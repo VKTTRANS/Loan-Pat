@@ -11,7 +11,7 @@
     body { font-family: 'Prompt', sans-serif; background-color: #0b1120; color: #ffffff; padding-bottom: 50px; }
     h1, h2, h3, h4, h5, h6, p, span, div, b, label { color: #ffffff !important; }
     
-    label, .small, .text-muted { color: #e2e8f0 !important; font-weight: 600 !important; font-size: 0.9rem !important; margin-bottom: 4px; display: block; }
+    label, .small, .text-muted { color: #e2e8f0 !important; font-weight: 600 !important; font-size: 0.95rem !important; margin-bottom: 6px; display: block; }
     .text-info { color: #38bdf8 !important; }
     .text-success { color: #4ade80 !important; }
     .text-warning { color: #facc15 !important; }
@@ -20,7 +20,7 @@
     .glass-card { background: #162032; border: 1px solid #334155; border-radius: 12px; transition: 0.3s; }
     
     .form-control, .form-select { 
-      background-color: #1e293b !important; border: 1px solid #475569 !important; color: #ffffff !important; 
+      background-color: #1e293b !important; border: 2px solid #475569 !important; color: #ffffff !important; 
       border-radius: 8px; padding: 10px; font-weight: 500; font-size: 0.95rem;
     }
     .form-control::placeholder { color: #94a3b8 !important; opacity: 1 !important; }
@@ -41,10 +41,7 @@
       max-height: 90vh; overflow-y: auto; padding: 20px; box-shadow: 0 10px 40px rgba(0,0,0,0.9);
     }
 
-    .loader { 
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); 
-      display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; 
-    }
+    .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
 
     .borrower-card { 
       background: #1e293b; border-left: 5px solid #38bdf8; border-radius: 10px; margin-bottom: 12px; 
@@ -171,7 +168,7 @@
           <select id="filterCycle" class="form-select form-select-sm" onchange="applyFilters()">
             <option value="all">ทั้งหมด</option>
             <option value="1">รายวัน</option>
-            <option value="7">สัปดาห์</option>
+            <option value="7">รายสัปดาห์</option>
             <option value="15">15 วัน</option>
             <option value="30">รายเดือน</option>
           </select>
@@ -269,31 +266,25 @@
       <div class="p-3 mb-3 rounded" style="background: #0f172a; border: 1px dashed #475569;">
         <h6 class="m-0 text-white fw-bold" id="pName">...</h6>
         
-        <div class="row mt-2 pt-2 border-top border-secondary text-center">
+        <div class="row mt-2 pt-2 border-top border-secondary">
           <div class="col-4 border-end border-secondary">
-            <small class="text-muted d-block">ยอดค้างชำระ</small>
+            <small class="text-muted d-block">ยอดค้าง</small>
             <b class="text-info fs-6" id="pArrears">0</b>
           </div>
           <div class="col-4 border-end border-secondary">
-            <small class="text-muted d-block">ค่าปรับเลยกำหนด</small>
-            <b class="text-danger fs-6" id="pSuggestedFine">0</b>
+            <small class="text-muted d-block">ค่าปรับ</small>
+            <b class="text-danger fs-6" id="pFine">0</b>
           </div>
           <div class="col-4">
-            <small class="text-muted d-block">รวมยอดที่ควรเก็บ</small>
+            <small class="text-muted d-block">รวมต้องจ่าย</small>
             <b class="text-warning fs-5" id="pExpected">0</b>
           </div>
         </div>
       </div>
 
-      <div class="row g-2 mb-3">
-        <div class="col-6">
-          <label class="text-danger fw-bold">หักเป็นค่าปรับ (฿)</label>
-          <input type="number" id="pFineInput" class="form-control text-danger fw-bold fs-5 py-2" value="0" style="border: 2px solid #f43f5e !important;">
-        </div>
-        <div class="col-6">
-          <label class="text-info fw-bold">ยอดรับเงินทั้งหมด (฿)</label>
-          <input type="number" id="pTotalPaidInput" class="form-control text-white fw-bold fs-5 py-2" style="border: 2px solid #38bdf8 !important;">
-        </div>
+      <div class="mb-2">
+        <label class="text-info">ยอดเงินที่โอนมาจริง (฿)</label>
+        <input type="number" id="pTotalPaidInput" class="form-control text-white fw-bold fs-4 py-2" style="border: 2px solid #38bdf8 !important;">
       </div>
       
       <div class="row g-2 mb-3">
@@ -343,6 +334,14 @@
         </select>
       </div>
       <div class="col-6"><label>งวด</label><input type="number" id="cInstallments" class="form-control form-control-sm" value="1" oninput="generateSchedulePreview()"></div>
+      
+      <div class="col-12">
+        <label class="text-danger">คิดค่าปรับเลยกำหนด</label>
+        <select id="cFine" class="form-select form-select-sm text-danger">
+          <option value="No">ไม่คิดค่าปรับ</option>
+          <option value="Yes">คิดค่าปรับวันละ 100 บาท</option>
+        </select>
+      </div>
     </div>
     
     <div id="cSchedulePreview" class="p-2 rounded mb-2 mt-2" style="background:#0f172a; max-height: 100px; overflow-y: auto; padding-right: 15px;"></div>
@@ -382,10 +381,17 @@
     <div class="row g-2">
       <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold"></div>
       <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning"></div>
-      <div class="col-12">
+      <div class="col-6">
         <label>รอบชำระ</label>
         <select id="eCycle" class="form-select form-select-sm text-warning">
           <option value="1">รายวัน</option><option value="7">สัปดาห์</option><option value="15">15 วัน</option><option value="30">รายเดือน</option>
+        </select>
+      </div>
+      <div class="col-6">
+        <label class="text-danger">ค่าปรับ</label>
+        <select id="eFine" class="form-select form-select-sm text-danger">
+          <option value="No">ปิด</option>
+          <option value="Yes">เปิด (100/วัน)</option>
         </select>
       </div>
     </div>
@@ -443,7 +449,6 @@
     
     document.getElementById('loanIdInput').value = '';
     document.getElementById('pTotalPaidInput').value = '';
-    document.getElementById('pFineInput').value = '0';
     document.getElementById('pSlip').value = '';
     document.getElementById('payDetails').style.display = 'none';
   }
@@ -586,7 +591,7 @@
               <div>
                 <b class="text-white">👤 ${p.userName} ${p.nickname ? `(${p.nickname})` : ''}</b>
                 <span class="d-block text-muted small mt-1"><i class="fa-regular fa-clock me-1"></i>${p.date} | งวดที่ ${p.no}</span>
-                <span class="d-block text-danger small">ค่าปรับ: ฿${Number(p.finePaid).toLocaleString()}</span>
+                <span class="d-block text-danger small">ค่าปรับจ่ายแล้ว: ฿${Number(p.finePaid).toLocaleString()}</span>
               </div>
               <div class="text-end">
                 <b class="text-success fs-5 d-block mb-1">+ ฿${Number(p.totalPaid).toLocaleString()}</b>
@@ -644,15 +649,20 @@
         let statusText = b.daysLeft < 0 ? `เลยกำหนด` : (b.daysLeft === 0 ? 'ครบดิววันนี้' : `อีก ${b.daysLeft} วัน`);
 
         loanRows += `
-          <div class="d-flex justify-content-between align-items-start border-top border-secondary pt-3 mt-3 loan-item-row" onclick="viewDetails('${b.loanId}')" style="cursor:pointer;">
+          <div class="d-flex justify-content-between align-items-start border-top border-secondary pt-3 mt-3 loan-item-row" onclick="viewDetails('${b.loanId}')">
             <div>
               <span class="badge bg-secondary mb-1">รอบ ${b.cycle} วัน</span>
-              <span class="text-muted small ms-1">รหัส: ${b.loanId}</span> <p class="mb-0 text-info fw-bold mt-1">ค้าง: ฿${Number(b.amount).toLocaleString()}</p>
-              <p class="mb-0 text-muted small mt-1">กำหนดจ่าย: <span class="text-white">${b.dueDate}</span></p>
+              <p class="mb-0 text-info fw-bold">ค้าง: ฿${Number(b.amount).toLocaleString()}</p>
+              <p class="mb-0 text-muted small mt-1">กำหนดจ่าย: ${b.dueDate}</p>
+              
+              <div class="mt-2">
+                <span class="action-icon icon-edit me-1" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen"></i></span>
+                <span class="action-icon icon-delete" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash"></i></span>
+              </div>
             </div>
             <div class="text-end">
-              <span class="status-badge ${statusClass} d-block mb-2">${statusText}</span>
-              <button class="btn btn-sm btn-primary rounded-pill px-3 fw-bold shadow" onclick="event.stopPropagation(); quickPay('${b.loanId}')">รับเงิน</button>
+              <span class="status-badge ${statusClass} d-block mb-3">${statusText}</span>
+              <button class="btn btn-sm btn-primary rounded-pill px-4 py-2 fw-bold shadow" onclick="event.stopPropagation(); quickPay('${b.loanId}')">บันทึกรับเงิน</button>
             </div>
           </div>
         `;
@@ -660,19 +670,13 @@
 
       html += `
         <div class="borrower-card loan-item" data-name="${u.userName} ${u.nickname}">
-          <div class="d-flex justify-content-between">
-            <h5 class="fw-bold mb-1 text-white">👤 ${u.userName} ${nickDisplay}</h5>
-            <div class="text-end">
-              <span class="action-icon icon-edit" onclick="event.stopPropagation(); triggerEdit('${u.loans[0].loanId}')"><i class="fa-solid fa-pen"></i></span>
-              <span class="action-icon icon-delete ms-1" onclick="event.stopPropagation(); triggerDelete('${u.loans[0].loanId}')"><i class="fa-solid fa-trash"></i></span>
-            </div>
-          </div>
+          <h5 class="fw-bold mb-1 text-white">👤 ${u.userName} ${nickDisplay}</h5>
           <p class="mb-0 text-warning small">ยอดค้างรวมทั้งหมด: ฿${u.totalAmt.toLocaleString()}</p>
           ${loanRows}
         </div>`;
     }
     
-    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูลผู้กู้ตามเงื่อนไขที่ค้นหา</div>';
+    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4">ไม่มีข้อมูล</div>';
   }
 
   function applyFilters() {
@@ -745,6 +749,7 @@
         document.getElementById('eAmount').value = res.principal;
         document.getElementById('eRate').value = res.rate;
         document.getElementById('eCycle').value = res.cycle;
+        document.getElementById('eFine').value = res.fineEnabled ? "Yes" : "No";
         
         openModal('modalEdit');
       }
@@ -754,16 +759,11 @@
   async function submitEdit() {
     toggleL(true);
     const payload = {
-      action: 'editLoan',
-      loanId: document.getElementById('eLoanId').value,
-      userId: document.getElementById('eUserId').value,
-      name: document.getElementById('eName').value,
-      nickname: document.getElementById('eNick').value,
-      phone: document.getElementById('ePhone').value,
-      details: document.getElementById('eDetails').value,
-      amount: document.getElementById('eAmount').value,
-      rate: document.getElementById('eRate').value,
-      cycle: document.getElementById('eCycle').value
+      action: 'editLoan', loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value,
+      name: document.getElementById('eName').value, nickname: document.getElementById('eNick').value,
+      phone: document.getElementById('ePhone').value, details: document.getElementById('eDetails').value,
+      amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value,
+      cycle: document.getElementById('eCycle').value, fineEnabled: document.getElementById('eFine').value
     };
     const res = await api(payload);
     toggleL(false);
@@ -784,10 +784,7 @@
       document.getElementById('dDetails').innerText = res.details || 'ไม่มีข้อมูลเพิ่มเติม';
       document.getElementById('dPrin').innerText = `฿${Number(res.principal).toLocaleString()}`;
       document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid).toLocaleString()}`;
-      
-      // ดึงค่า totalIntPaid โดยเพิ่ม fallback ไม่ให้เจอคำว่า NaN
       document.getElementById('dIntPaid').innerText = Number(res.totalIntPaid || 0).toLocaleString();
-      
       document.getElementById('dRemain').innerText = `฿${Number(res.remaining).toLocaleString()}`;
       
       let hHtml = '';
@@ -852,7 +849,6 @@
     let totalInt = amount * (rate / 100);
     let payPerPeriod = (amount + totalInt) / inst;
     let html = '';
-    
     for(let i = 1; i <= inst; i++) {
       let d = new Date(start);
       d.setDate(d.getDate() + (i * cycle));
@@ -885,7 +881,8 @@
       action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value,
       phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64,
       amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value,
-      installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value
+      installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value,
+      fineEnabled: document.getElementById('cFine').value 
     };
 
     await api(payload);
@@ -906,6 +903,7 @@
 
   async function fetchPreview() {
     let query = document.getElementById('loanIdInput').value;
+    
     if(query.includes('(')) query = query.split('(')[0].trim();
     
     let targetLoanId = query;
@@ -923,14 +921,11 @@
       document.getElementById('payDetails').style.display = 'block';
       document.getElementById('pName').innerText = `👤 ${res.userName}`;
       
-      // 🌟 โชว์บิลเรียกเก็บ (ทบยอด + ค่าปรับ)
       document.getElementById('pArrears').innerText = Number(res.arrears).toLocaleString();
-      document.getElementById('pSuggestedFine').innerText = Number(res.suggestedFine).toLocaleString();
-      document.getElementById('pExpected').innerText = Number(res.suggestedTotal).toLocaleString();
+      document.getElementById('pFine').innerText = Number(res.fineAmount).toLocaleString();
+      document.getElementById('pExpected').innerText = Number(res.suggestedPay).toLocaleString();
       
-      // 🌟 แนะนำยอดจ่าย
-      document.getElementById('pFineInput').value = res.suggestedFine;
-      document.getElementById('pTotalPaidInput').value = res.suggestedTotal;
+      document.getElementById('pTotalPaidInput').value = res.suggestedPay;
 
     } else {
       showAlert('ระบุชื่อผู้กู้ไม่ถูกต้อง', true);
@@ -946,7 +941,7 @@
     let slipBase64 = await getBase64(document.getElementById('pSlip').files[0]);
     await api({
       action: 'submitPay', loanId: curPay.loanId, userId: curPay.userId, nextNo: curPay.nextNo,
-      totalPaidAmount: totalPaidVal, fineAmount: document.getElementById('pFineInput').value,
+      totalPaidAmount: totalPaidVal, fineAmount: curPay.fineAmount, 
       payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64
     });
     toggleL(false);

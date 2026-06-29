@@ -76,7 +76,7 @@
     .nav-tabs-custom div { padding: 10px 15px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.90rem; text-align: center; flex: 1;}
     .nav-tabs-custom div.active { color: #1e3a8a; border-bottom: 2px solid #1e3a8a; }
 
-    .action-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 0.95rem;}
+    .action-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer;}
     .icon-edit { background: #fef3c7; color: #b45309; }
     .icon-delete { background: #fee2e2; color: #b91c1c; }
     
@@ -284,10 +284,7 @@
     <label>รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control mb-2 py-2" placeholder="admin01">
     <label>ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control mb-2 py-2">
     <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก (สแกน NFC)</label><input type="text" id="caPin" class="form-control mb-2 py-2 fw-bold fs-5 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <label>กลุ่มดูแล</label>
-    <select id="caGroup" class="form-select mb-2 py-2">
-      <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
-    </select>
+    <label>กลุ่มดูแล</label><select id="caGroup" class="form-select mb-2 py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
     <label>รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control mb-3 py-2">
     <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
@@ -307,10 +304,7 @@
       <option value="Active" class="text-success">เปิดใช้งาน (Active)</option>
       <option value="Suspended" class="text-danger">ระงับสิทธิ์ (Suspended)</option>
     </select>
-    <label>กลุ่มดูแล</label>
-    <select id="eaGroup" class="form-select mb-2 py-2">
-      <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
-    </select>
+    <label>กลุ่มดูแล</label><select id="eaGroup" class="form-select mb-2 py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
     <label>แก้ไขรหัสผ่าน (เว้นว่างได้)</label><input type="password" id="eaPass" class="form-control mb-3 py-2" placeholder="รหัสผ่านใหม่">
     <button onclick="submitEditAdmin()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกการอัปเดต</button>
   </div>
@@ -332,10 +326,7 @@
       <label class="text-muted">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control mb-2 py-1" accept="image/*">
       <div id="euGroupDiv" style="display:none;">
         <label class="text-primary-corp fw-bold mt-1">ย้ายกลุ่มดูแล</label>
-        <select id="euGroup" class="form-select py-2 mb-1">
-          <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
-          <option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option>
-        </select>
+        <select id="euGroup" class="form-select py-2 mb-1"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
       </div>
     </div>
     <button onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
@@ -377,7 +368,8 @@
     <div class="pro-card p-3 mb-3" style="background: linear-gradient(to bottom right, #eff6ff, #ffffff);">
       <h6 class="fw-bold text-primary-corp mb-1" id="dName">ชื่อผู้กู้</h6>
       <p class="small text-muted mb-1" id="dDetails">รายละเอียดเพิ่มเติม</p>
-      <span class="badge bg-light text-primary-corp border shadow-sm px-2 py-1 mb-2" id="dAdminName"><i class="fa-solid fa-user-tie me-1"></i> ผู้ปล่อยกู้: -</span>
+      
+      <div class="mt-2 mb-2 d-flex flex-wrap gap-2" id="dBadges"></div>
       
       <div class="row text-center mt-2 pt-2 border-top">
         <div class="col-4 border-end">
@@ -482,11 +474,7 @@
           <div class="col-6"><label class="text-muted small">เอกสาร/บัตร ปชช.</label><input type="file" id="cIdCard" class="form-control py-1" accept="image/*"></div>
       </div>
       <div id="cGroupDiv" style="display:none;" class="mt-2">
-        <label class="fw-bold text-primary-corp small">กลุ่มดูแล</label>
-        <select id="cGroup" class="form-select py-2">
-          <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
-          <option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option>
-        </select>
+        <label class="fw-bold text-primary-corp small">กลุ่มดูแล</label><select id="cGroup" class="form-select py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
       </div>
     </div>
 
@@ -1114,7 +1102,14 @@
   async function viewDetails(id) {
     toggleL(true); const res = await api({ action: 'getLoanDetails', loanId: id }); toggleL(false);
     if(res.success) {
-      document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}<br><span class="badge bg-light text-secondary border mt-2 px-2 py-1 shadow-sm">รหัส: ${res.loanId}</span>`;
+      document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}`;
+      
+      // 🌟 นำป้ายเริ่มสัญญา และ รหัสสัญญามาเรียงสวยๆ ตรงนี้
+      let badgesHtml = `
+        <span class="badge bg-light text-secondary border shadow-sm px-2 py-1"><i class="fa-solid fa-hashtag me-1"></i>รหัส: ${res.loanId}</span>
+        <span class="badge bg-light text-secondary border shadow-sm px-2 py-1"><i class="fa-regular fa-calendar me-1"></i>เริ่ม: ${res.startDate}</span>
+      `;
+      document.getElementById('dBadges').innerHTML = badgesHtml;
       
       document.getElementById('dAdminName').innerHTML = `<i class="fa-solid fa-user-tie me-1"></i> ผู้ปล่อยกู้: ${res.adminName}`;
       

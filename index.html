@@ -367,9 +367,11 @@
     
     <div class="pro-card p-3 mb-3" style="background: linear-gradient(to bottom right, #eff6ff, #ffffff);">
       <h6 class="fw-bold text-primary-corp mb-1" id="dName">ชื่อผู้กู้</h6>
-      <p class="small text-muted mb-1" id="dDetails">รายละเอียดเพิ่มเติม</p>
-      
-      <div class="mt-2 mb-2 d-flex flex-wrap gap-2" id="dBadges"></div>
+      <p class="small text-muted mb-2" id="dDetails">รายละเอียดเพิ่มเติม</p>
+
+      <div id="dBadges" class="mb-2 d-flex flex-wrap gap-2"></div>
+
+      <span class="badge bg-light text-primary-corp border shadow-sm px-2 py-1 mb-2" id="dAdminName"><i class="fa-solid fa-user-tie me-1"></i> ผู้ปล่อยกู้: -</span>
       
       <div class="row text-center mt-2 pt-2 border-top">
         <div class="col-4 border-end">
@@ -1104,7 +1106,7 @@
     if(res.success) {
       document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}`;
       
-      // 🌟 นำป้ายเริ่มสัญญา และ รหัสสัญญามาเรียงสวยๆ ตรงนี้
+      // 🌟 นำป้ายเริ่มสัญญา และ รหัสสัญญา มาใส่ไว้ใน HTML element ที่สร้างรอไว้
       let badgesHtml = `
         <span class="badge bg-light text-secondary border shadow-sm px-2 py-1"><i class="fa-solid fa-hashtag me-1"></i>รหัส: ${res.loanId}</span>
         <span class="badge bg-light text-secondary border shadow-sm px-2 py-1"><i class="fa-regular fa-calendar me-1"></i>เริ่ม: ${res.startDate}</span>

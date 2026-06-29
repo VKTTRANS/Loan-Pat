@@ -192,6 +192,30 @@
           <label class="fw-bold d-block mb-1 text-warning-corp" style="font-size: 1rem;">ยอดหนี้คงค้างทั้งหมด</label>
           <h2 class="fw-bold m-0 text-warning-corp">฿<span id="mTotalRemain">0</span></h2>
         </div>
+
+        <div class="row text-center mt-4 pt-3 border-top g-2">
+          <div class="col-3 border-end">
+            <span class="text-muted d-block small fw-bold mb-1">รายวัน</span>
+            <span class="d-block text-primary-corp fw-bold" style="font-size: 0.80rem;">฿<span id="m1Loan">0</span></span>
+            <span class="d-block text-warning-corp fw-bold mt-1" style="font-size: 0.80rem;">฿<span id="m1Remain">0</span></span>
+          </div>
+          <div class="col-3 border-end">
+            <span class="text-muted d-block small fw-bold mb-1">สัปดาห์</span>
+            <span class="d-block text-primary-corp fw-bold" style="font-size: 0.80rem;">฿<span id="m7Loan">0</span></span>
+            <span class="d-block text-warning-corp fw-bold mt-1" style="font-size: 0.80rem;">฿<span id="m7Remain">0</span></span>
+          </div>
+          <div class="col-3 border-end">
+            <span class="text-muted d-block small fw-bold mb-1">15 วัน</span>
+            <span class="d-block text-primary-corp fw-bold" style="font-size: 0.80rem;">฿<span id="m15Loan">0</span></span>
+            <span class="d-block text-warning-corp fw-bold mt-1" style="font-size: 0.80rem;">฿<span id="m15Remain">0</span></span>
+          </div>
+          <div class="col-3">
+            <span class="text-muted d-block small fw-bold mb-1">รายเดือน</span>
+            <span class="d-block text-primary-corp fw-bold" style="font-size: 0.80rem;">฿<span id="m30Loan">0</span></span>
+            <span class="d-block text-warning-corp fw-bold mt-1" style="font-size: 0.80rem;">฿<span id="m30Remain">0</span></span>
+          </div>
+        </div>
+
       </div>
 
       <div class="row g-3 mb-4">
@@ -872,6 +896,7 @@
     else showAlert('เกิดข้อผิดพลาดในการอัปเดต', true);
   }
 
+  // 🌟 ฟังก์ชันคำนวณข้อมูลสรุป ยอดที่ดึงกลับมาให้
   function updateDashMetrics() {
     let fYear = document.getElementById('dashFilterYear').value; let fMonth = document.getElementById('dashFilterMonth').value;
     let mTotalLoan = 0, mTotalRemain = 0, m1Loan = 0, m1Remain = 0, m7Loan = 0, m7Remain = 0, m15Loan = 0, m15Remain = 0, m30Loan = 0, m30Remain = 0;
@@ -883,6 +908,7 @@
         if ((fYear === 'all' || fYear == y.toString()) && (fMonth === 'all' || fMonth == m.toString())) {
           let orig = Number(l.originalPrincipal) || 0; let remain = Number(l.remainingPrincipal) || 0;
           mTotalLoan += orig; if(l.status === 'Active') mTotalRemain += remain;
+          
           if (l.cycle === '1') { m1Loan += orig; if(l.status === 'Active') m1Remain += remain; } 
           else if (l.cycle === '7') { m7Loan += orig; if(l.status === 'Active') m7Remain += remain; }
           else if (l.cycle === '15') { m15Loan += orig; if(l.status === 'Active') m15Remain += remain; } 
@@ -891,9 +917,17 @@
       }
     });
 
-    ['TotalLoan','TotalRemain','1Loan','1Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => {
-      document.getElementById('m'+k).innerText = Math.round(eval('m'+k)).toLocaleString();
-    });
+    // อัปเดตตัวเลขแสดงผลบนหน้าจอ
+    document.getElementById('mTotalLoan').innerText = Math.round(mTotalLoan).toLocaleString();
+    document.getElementById('mTotalRemain').innerText = Math.round(mTotalRemain).toLocaleString();
+    document.getElementById('m1Loan').innerText = Math.round(m1Loan).toLocaleString();
+    document.getElementById('m1Remain').innerText = Math.round(m1Remain).toLocaleString();
+    document.getElementById('m7Loan').innerText = Math.round(m7Loan).toLocaleString();
+    document.getElementById('m7Remain').innerText = Math.round(m7Remain).toLocaleString();
+    document.getElementById('m15Loan').innerText = Math.round(m15Loan).toLocaleString();
+    document.getElementById('m15Remain').innerText = Math.round(m15Remain).toLocaleString();
+    document.getElementById('m30Loan').innerText = Math.round(m30Loan).toLocaleString();
+    document.getElementById('m30Remain').innerText = Math.round(m30Remain).toLocaleString();
   }
 
   function renderRecentPays(data) {

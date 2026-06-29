@@ -167,7 +167,7 @@
             <select id="dashFilterMonth" class="form-select form-select-sm" style="width: auto;" onchange="updateDashMetrics()">
               <option value="all">ทุกเดือน</option><option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option><option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option><option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
             </select>
-            <select id="dashFilterYear" class="form-select form-select-sm" style="width: auto; display:none;" onchange="updateDashMetrics()"></select>
+            <select id="dashFilterYear" class="form-select form-select-sm" style="width: auto;" onchange="updateDashMetrics()"></select>
           </div>
         </div>
 
@@ -539,14 +539,13 @@
     if (sessionStorage.getItem('fintechAuthData')) timeLogoutVar = setTimeout(logout, 300000); 
   }
 
-  // 🌟 ฟังก์ชันแยกส่วนสำหรับจัดเก็บข้อมูล Dashboard ที่วิ่งมารอบเดียว
   function processDashboardData(res) {
     allLoans = res.activeLoans || []; rawAllTimeLoans = res.allTimeLoans || []; windowUsersData = res.users || [];
     updateDashMetrics(); 
     
     let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่ (ระบุด้านล่าง)</option>';
     let datalistHtml = '';
-    if(res.users) res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
+    if(res.users) res.users.forEach(u => { optHtml += `<option value="${u.id}">👤 ${u.name} (${u.nickname})</option>`; });
     allLoans.forEach(l => { 
       let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
       datalistHtml += `<option value="${l.loanId}">👤 ${name} (ค้าง: ฿${Number(l.amount).toLocaleString()})</option>`;
@@ -565,12 +564,13 @@
     if(authData) {
       let parsed = JSON.parse(authData);
       
-      // 🌟 ดักจับว่าถ้ามีแท็ก UID ใหม่เข้ามาที่ไม่ตรงกับของคนเดิม ให้เตะออกไปโชว์หน้า PIN ทันที!
-      if (detectedNfcUid && detectedNfcUid !== parsed.userId) {
+      // 🌟 ถ้ารหัสแท็กที่แตะเข้ามาไม่ตรงกับรหัสแอดมินที่จำไว้ในเครื่อง = ต้องล็อกอินใหม่!
+      if (detectedNfcUid && String(detectedNfcUid).trim() !== String(parsed.userId).trim()) {
         sessionStorage.removeItem('fintechAuthData');
         checkNfcEntry();
       } else if(Date.now() - parsed.timestamp < 43200000) { 
-        loggedInPassword = parsed.pass;
+        let rawStorageData = sessionStorage.getItem('fintechAuthData');
+        loggedInPassword = JSON.parse(rawStorageData).pass;
         window.history.replaceState({}, document.title, window.location.pathname);
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
@@ -624,7 +624,6 @@
 
   async function submitNfcLogin() {
     toggleL(true);
-    // 🌟 ระบบล็อกอินแบบใหม่ ขอข้อมูล Dashboard พร้อมกันในรอบเดียวเลย
     const res = await api({ action: 'loginNfc', userId: detectedNfcUid, pin: currentPinInput });
     toggleL(false);
     
@@ -633,7 +632,6 @@
       sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: currentPinInput, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
       window.history.replaceState({}, document.title, window.location.pathname);
       
-      // อัปเดตสิทธิ์ปุ่ม SuperAdmin
       if(res.role === 'SuperAdmin') {
          document.getElementById('btnManageAdmin').style.display = 'block'; document.getElementById('cGroupDiv').style.display = 'block';
       } else {
@@ -643,7 +641,7 @@
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       clearPin(); 
-      if(res.dashboard) processDashboardData(res.dashboard); // ประมวลผลจากข้อมูลที่แนบมาเลย (เร็วขึ้นมาก)
+      if(res.dashboard) processDashboardData(res.dashboard); 
       resetInactivityTimer(); 
     } else {
       showAlert(res.error || 'รหัส PIN ไม่ถูกต้อง!', true); clearPin();
@@ -871,8 +869,10 @@
     if(res.success) { showAlert('อัปเดตข้อมูลลูกค้าสำเร็จ'); closeModal('modalEditUser'); closeModal('modalUserHistory'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการอัปเดต', true);
   }
 
+  // 🌟 ฟังก์ชันตัวกรอง ที่แก้ให้ดึงค่าปีจาก Dropdown ได้อย่างถูกต้อง
   function updateDashMetrics() {
-    let fYear = currentYear; let fMonth = document.getElementById('dashFilterMonth').value;
+    let fYear = document.getElementById('dashFilterYear').value; 
+    let fMonth = document.getElementById('dashFilterMonth').value;
     let mTotalLoan = 0, mTotalRemain = 0, m1Loan = 0, m1Remain = 0, m7Loan = 0, m7Remain = 0, m15Loan = 0, m15Remain = 0, m30Loan = 0, m30Remain = 0;
 
     rawAllTimeLoans.forEach(l => {
@@ -893,7 +893,6 @@
     ['TotalLoan','TotalRemain','1Loan','1Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => { document.getElementById('m'+k).innerText = Math.round(eval('m'+k)).toLocaleString(); });
   }
 
-  // 🌟 เพิ่มปุ่มลบประวัติลงใน Modal รับชำระเงินล่าสุด
   function renderRecentPays(data) {
     let html = '';
     if (!data || data.length === 0) html = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีประวัติการรับชำระเงิน</div>';
@@ -1066,8 +1065,7 @@
              toggleL(false);
              if (res.success) {
                 showAlert('ลบประวัติรับชำระเงินสำเร็จ!');
-                closeModal('modalDetails'); closeModal('modalRecentPays');
-                loadDash();
+                closeModal('modalDetails'); closeModal('modalRecentPays'); loadDash();
              } else showAlert(res.error, true);
           });
        }
@@ -1112,10 +1110,13 @@
 
   function quickPay(id) { document.getElementById('loanIdInput').value = id; document.getElementById('pPayDate').valueAsDate = new Date(); openModal('modalPay'); fetchPreview(); }
 
+  // 🌟 ฟังก์ชันจัดการเรื่องการดึงรหัสสัญญาที่แก้บัคแล้ว (ป้องกันช่องว่างในชื่อลูกค้าและรหัสสัญญา)
   async function fetchPreview() {
-    let query = document.getElementById('loanIdInput').value; let targetLoanId = query;
-    if(query.includes('(') || query.includes('👤')) { let parts = query.split(' '); if (parts.length > 0) targetLoanId = parts[0]; }
-    let loanObj = allLoans.find(l => l.loanId === targetLoanId); if(loanObj) targetLoanId = loanObj.loanId;
+    let query = document.getElementById('loanIdInput').value.trim(); 
+    let targetLoanId = query;
+    if(query.includes('👤')) { 
+      targetLoanId = query.split(' ')[0].trim(); 
+    }
     if(!targetLoanId) return showAlert('กรุณาเลือกรหัสสัญญาให้ถูกต้อง', true);
 
     toggleL(true); const res = await api({ action: 'previewPay', loanId: targetLoanId }); toggleL(false);
@@ -1127,7 +1128,7 @@
       document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`; document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString(); document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString(); document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString(); document.getElementById('pExpectedTotal').innerText = `฿${Number(res.suggestedPay || 0).toLocaleString()}`;
       document.getElementById('pChargeFine').value = 'Yes'; document.getElementById('pFinePaidInput').value = res.fineAmount || 0; document.getElementById('pFinePaidInput').disabled = false; document.getElementById('pTotalPaidInput').value = res.suggestedPay;
       curPay.expectedPrin = res.expectedPrin; curPay.expectedInt = res.expectedInt; curPay.fineAmount = res.fineAmount; curPay.suggestedPay = res.suggestedPay;
-    } else { showAlert('ค้นหารหัสสัญญาไม่พบ', true); document.getElementById('payDetails').style.display = 'none'; }
+    } else { showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); document.getElementById('payDetails').style.display = 'none'; }
   }
 
   function toggleFineInput() {

@@ -280,11 +280,11 @@
       <div class="row g-2 mt-1">
         <div class="col-6">
           <label class="text-muted small">เปลี่ยนรูปหน้าตรง</label>
-          <input type="file" id="euPhoto" class="form-control form-control-sm">
+          <input type="file" id="euPhoto" class="form-control form-control-sm" accept="image/*">
         </div>
         <div class="col-6">
           <label class="text-muted small">เปลี่ยนรูปบัตรปชช.</label>
-          <input type="file" id="euIdCard" class="form-control form-control-sm">
+          <input type="file" id="euIdCard" class="form-control form-control-sm" accept="image/*">
         </div>
       </div>
 
@@ -375,7 +375,7 @@
     
     <label>พิมพ์ค้นหาชื่อผู้กู้</label>
     <div class="input-group mb-2">
-      <input list="payLoanOptions" id="loanIdInput" class="form-control" placeholder="พิมพ์ชื่อเล่น/ชื่อจริง/รหัสสัญญา...">
+      <input list="payLoanOptions" id="loanIdInput" class="form-control" placeholder="พิมพ์รหัสสัญญา / ชื่อ...">
       <datalist id="payLoanOptions"></datalist>
       <button onclick="fetchPreview()" class="btn btn-info text-white fw-bold px-3">ค้นหา</button>
     </div>
@@ -427,18 +427,18 @@
       <div class="row g-2 mb-2">
         <div class="col-6">
           <label class="text-danger">หักเป็นค่าปรับ (฿)</label>
-          <input type="number" id="pFinePaidInput" class="form-control text-white fw-bold fs-4 py-2" style="border: 2px solid #f43f5e !important;" oninput="syncTotalPay()">
+          <input type="number" id="pFinePaidInput" class="form-control text-white fw-bold fs-4 py-2" min="0" style="border: 2px solid #f43f5e !important;" oninput="syncTotalPay()">
         </div>
         <div class="col-6">
           <label class="text-info">ยอดรับเงินทั้งหมด (฿)</label>
-          <input type="number" id="pTotalPaidInput" class="form-control text-white fw-bold fs-4 py-2" style="border: 2px solid #38bdf8 !important;">
+          <input type="number" id="pTotalPaidInput" class="form-control text-white fw-bold fs-4 py-2" min="0" style="border: 2px solid #38bdf8 !important;">
         </div>
       </div>
       
       <div class="row g-2 mb-3">
         <div class="col-12"><label>วันที่รับเงิน</label><input type="date" id="pPayDate" class="form-control"></div>
         <div class="col-6"><label>ช่องทาง</label><select id="pMethod" class="form-select"><option value="เงินโอน">โอนผ่านบัญชี</option><option value="เงินสด">รับเงินสด</option></select></div>
-        <div class="col-6"><label>สลิป (ถ้ามี)</label><input type="file" id="pSlip" class="form-control"></div>
+        <div class="col-6"><label>สลิป (ถ้ามี)</label><input type="file" id="pSlip" class="form-control" accept="image/*"></div>
       </div>
       
       <button onclick="submitPay()" class="btn btn-primary w-100 fw-bold py-2 mt-2 shadow">ยืนยันหักยอดอัตโนมัติ</button>
@@ -467,11 +467,11 @@
       <div class="row g-2">
         <div class="col-6">
           <label class="small text-info">รูปหน้าตรง (ถ้ามี)</label>
-          <input type="file" id="cPhoto" class="form-control form-control-sm">
+          <input type="file" id="cPhoto" class="form-control form-control-sm" accept="image/*">
         </div>
         <div class="col-6">
           <label class="small text-info">รูปบัตรปชช./อื่นๆ</label>
-          <input type="file" id="cIdCard" class="form-control form-control-sm">
+          <input type="file" id="cIdCard" class="form-control form-control-sm" accept="image/*">
         </div>
       </div>
 
@@ -490,8 +490,8 @@
     <h6 class="fw-bold text-info mt-3 mb-2 border-top border-secondary pt-2">ข้อมูลเงินกู้</h6>
     <div class="row g-2">
       <div class="col-12"><label>เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control form-control-sm" oninput="generateSchedulePreview()"></div>
-      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="cAmount" class="form-control form-control-sm fw-bold" placeholder="10000" oninput="generateSchedulePreview()"></div>
-      <div class="col-6"><label>ดอก (%)</label><input type="number" id="cRate" class="form-control form-control-sm" value="5" oninput="generateSchedulePreview()"></div>
+      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="cAmount" class="form-control form-control-sm fw-bold" min="0" placeholder="10000" oninput="generateSchedulePreview()"></div>
+      <div class="col-6"><label>ดอก (%)</label><input type="number" id="cRate" class="form-control form-control-sm" min="0" value="5" oninput="generateSchedulePreview()"></div>
       <div class="col-6">
         <label>รอบชำระ</label>
         <select id="cCycle" class="form-select form-select-sm" onchange="generateSchedulePreview()">
@@ -501,7 +501,7 @@
           <option value="30">รายเดือน</option>
         </select>
       </div>
-      <div class="col-6"><label>งวด</label><input type="number" id="cInstallments" class="form-control form-control-sm" value="1" oninput="generateSchedulePreview()"></div>
+      <div class="col-6"><label>งวด</label><input type="number" id="cInstallments" class="form-control form-control-sm" min="1" value="1" oninput="generateSchedulePreview()"></div>
     </div>
     
     <div id="cSchedulePreview" class="p-2 rounded mb-2 mt-2" style="background:#0f172a; max-height: 100px; overflow-y: auto; padding-right: 15px;"></div>
@@ -535,8 +535,8 @@
       <h6 class="text-warning small fw-bold mb-0 mt-2">ข้อมูลสัญญา</h6>
       <div class="col-12"><label>วันที่เริ่มสัญญา (แก้ไขได้)</label><input type="date" id="eStartDate" class="form-control form-control-sm"></div>
       
-      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold"></div>
-      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning" readonly></div>
+      <div class="col-6"><label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm text-warning fw-bold" min="0"></div>
+      <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm text-warning" min="0" readonly></div>
       
       <div class="col-12">
         <label>รอบชำระ</label>
@@ -587,17 +587,18 @@
     document.getElementById('imageViewer').style.display = 'none';
   }
 
+  // 🌟 ใช้ Session Storage เพื่อความปลอดภัย (ลบเมื่อปิดบราวเซอร์)
   window.onload = () => {
-    let authData = localStorage.getItem('fintechAuthData');
+    let authData = sessionStorage.getItem('fintechAuthData');
     if(authData) {
       let parsed = JSON.parse(authData);
-      if(Date.now() - parsed.timestamp < 259200000) {
+      if(Date.now() - parsed.timestamp < 43200000) { // อยู่ได้ 12 ชม.
         loggedInPassword = parsed.pass;
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         loadDash();
       } else {
-        localStorage.removeItem('fintechAuthData');
+        sessionStorage.removeItem('fintechAuthData');
       }
     }
   };
@@ -673,7 +674,8 @@
     
     if(res.success && (res.role === 'Admin' || res.role === 'SuperAdmin')) {
       loggedInPassword = pass; 
-      localStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: pass, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
+      // เปลี่ยนมาเก็บใน Session Storage
+      sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: pass, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadDash();
@@ -683,12 +685,12 @@
   }
 
   function logout() {
-    localStorage.removeItem('fintechAuthData'); 
+    sessionStorage.removeItem('fintechAuthData'); 
     location.reload();
   }
 
   async function loadDash() {
-    let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     if(!authData) return logout();
 
     if(authData.role === 'SuperAdmin') {
@@ -715,17 +717,16 @@
       res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
     }
     
-    // ใส่ group ลงใน Datalist
     let groupOptHtml = '';
     if(res.groups) {
       res.groups.forEach(g => { groupOptHtml += `<option value="${g}"></option>`; });
     }
     document.getElementById('groupOptions') ? document.getElementById('groupOptions').innerHTML = groupOptHtml : null;
     
-    let grouped = {};
+    // 🌟 ปรับปรุงการแสดงผล Datalist ให้ชัดเจนขึ้น มีรหัสกำกับ
     allLoans.forEach(l => { 
       let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
-      if(!grouped[name]) { grouped[name] = true; datalistHtml += `<option value="${name}"></option>`; }
+      datalistHtml += `<option value="${l.loanId}">👤 ${name} (ค้าง: ฿${Number(l.amount).toLocaleString()})</option>`;
     }); 
     
     document.getElementById('cUserSelect').innerHTML = optHtml;
@@ -860,7 +861,6 @@
     openModal('modalUserHistory');
   }
 
-  // 🌟 ฟังก์ชันเปิดหน้าต่างแก้ User
   function triggerEditUser(userId) {
     promptPassword(() => {
         let user = windowUsersData.find(u => u.id === userId);
@@ -873,7 +873,7 @@
         document.getElementById('euPhone').value = phoneStr;
         document.getElementById('euDetails').value = user.details;
         
-        let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+        let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
         if(authData.role === 'SuperAdmin') {
             document.getElementById('euGroupDiv').style.display = 'block';
             document.getElementById('euGroup').value = user.groupName || 'A';
@@ -888,13 +888,36 @@
     });
   }
 
-  // 🌟 ฟังก์ชันบันทึกข้อมูล User
+  // 🌟 ฟังก์ชันบีบอัดรูปก่อนแปลงเป็น Base64
+  function compressImage(file, maxWidth = 800) {
+    return new Promise((resolve) => {
+      if (!file) { resolve(""); return; }
+      const reader = new FileReader();
+      reader.readAsDataURL(file);
+      reader.onload = (event) => {
+        const img = new Image();
+        img.src = event.target.result;
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          let scaleSize = maxWidth / img.width;
+          if (scaleSize > 1) scaleSize = 1;
+          canvas.width = img.width * scaleSize;
+          canvas.height = img.height * scaleSize;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          resolve(canvas.toDataURL('image/jpeg', 0.7)); // บีบอัด JPEG 70%
+        };
+      };
+    });
+  }
+
   async function submitEditUser() {
     toggleL(true);
-    let photoBase64 = await getBase64(document.getElementById('euPhoto').files[0]);
-    let idCardBase64 = await getBase64(document.getElementById('euIdCard').files[0]);
+    // 🌟 ใช้ compressImage แทน
+    let photoBase64 = await compressImage(document.getElementById('euPhoto').files[0]);
+    let idCardBase64 = await compressImage(document.getElementById('euIdCard').files[0]);
     
-    let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
 
     const payload = {
@@ -1261,25 +1284,18 @@
     document.getElementById('cSchedulePreview').innerHTML = html;
   }
 
-  function getBase64(file) {
-    return new Promise((resolve) => {
-      if(!file) resolve("");
-      else { const reader = new FileReader(); reader.readAsDataURL(file); reader.onload = () => resolve(reader.result); }
-    });
-  }
-
   async function saveLoan() {
     const uId = document.getElementById('cUserSelect').value;
     const amount = document.getElementById('cAmount').value;
     
-    if(!amount || amount <= 0) { showAlert('กรุณาระบุยอดเงินต้น', true); return; }
+    if(!amount || amount <= 0) { showAlert('กรุณาระบุยอดเงินต้นให้ถูกต้อง', true); return; }
     if(uId === 'NEW' && !document.getElementById('cName').value) { showAlert('กรุณากรอกชื่อผู้กู้', true); return; }
 
     toggleL(true);
-    let photoBase64 = await getBase64(document.getElementById('cPhoto').files[0]);
-    let idCardBase64 = await getBase64(document.getElementById('cIdCard').files[0]); 
+    let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]);
+    let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
 
-    let authData = JSON.parse(localStorage.getItem('fintechAuthData'));
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     let group = authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName;
 
     const payload = {
@@ -1309,13 +1325,18 @@
   async function fetchPreview() {
     let query = document.getElementById('loanIdInput').value;
     
-    if(query.includes('(')) query = query.split('(')[0].trim();
-    
+    // ดึงเฉพาะรหัสสัญญาออกมาหากพิมพ์แบบมีชื่อต่อท้าย
     let targetLoanId = query;
-    let loanObj = allLoans.find(l => l.userName === query || l.loanId === query);
+    if(query.includes('(') || query.includes('👤')) {
+       // ถ้ามีช่องว่างลองสกัดดู
+       let parts = query.split(' ');
+       if (parts.length > 0) targetLoanId = parts[0];
+    }
+    
+    let loanObj = allLoans.find(l => l.loanId === targetLoanId);
     if(loanObj) targetLoanId = loanObj.loanId;
     
-    if(!targetLoanId) return showAlert('กรุณาเลือกชื่อจาก Dropdown', true);
+    if(!targetLoanId) return showAlert('กรุณาเลือกรหัสสัญญาที่ถูกต้อง', true);
 
     toggleL(true);
     const res = await api({ action: 'previewPay', loanId: targetLoanId });
@@ -1350,7 +1371,7 @@
       curPay.suggestedPay = res.suggestedPay;
 
     } else {
-      showAlert('ระบุชื่อผู้กู้ไม่ถูกต้อง', true);
+      showAlert('ระบุรหัสสัญญาผู้กู้ไม่ถูกต้อง', true);
       document.getElementById('payDetails').style.display = 'none';
     }
   }
@@ -1383,7 +1404,7 @@
     if(!totalPaidVal || Number(totalPaidVal) <= 0) { showAlert('กรุณากรอกยอดเงินให้ถูกต้อง', true); return; }
 
     toggleL(true);
-    let slipBase64 = await getBase64(document.getElementById('pSlip').files[0]);
+    let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]);
     await api({
       action: 'submitPay', loanId: curPay.loanId, userId: curPay.userId, nextNo: curPay.nextNo,
       totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, 

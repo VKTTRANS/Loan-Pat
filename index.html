@@ -8,12 +8,10 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* 🌟 Mobile-First Financial Theme */
     body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; color: #1e293b; padding-bottom: 80px; padding-top: 65px; }
     
     label, .small, .text-muted { font-weight: 500; font-size: 0.90rem; margin-bottom: 8px; display: block; color: #64748b; }
     
-    /* Colors */
     .text-primary-corp { color: #1e3a8a !important; }
     .text-success-corp { color: #059669 !important; }
     .text-warning-corp { color: #d97706 !important; }
@@ -22,10 +20,8 @@
     .bg-primary-corp { background-color: #1e3a8a !important; color: white !important; }
     .bg-success-corp { background-color: #10b981 !important; color: white !important; }
 
-    /* Cards */
     .pro-card { background: #ffffff; border: none; border-radius: 16px; box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05); margin-bottom: 16px; }
     
-    /* Inputs - ขยายใหญ่ขึ้นให้กดง่ายบนมือถือ */
     .form-control, .form-select { 
       background-color: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; 
       border-radius: 10px; padding: 12px 16px; font-weight: 500; font-size: 1rem;
@@ -34,14 +30,12 @@
     .form-control:focus, .form-select:focus { border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15); background-color: #ffffff; }
     .form-control:disabled, .form-control[readonly] { background-color: #e2e8f0; opacity: 0.8; }
     
-    /* Buttons */
     .btn-action { border-radius: 12px; padding: 14px; border: none; font-weight: 700; transition: 0.2s; color: #fff; font-size: 1rem; box-shadow: 0 4px 6px rgba(0,0,0,0.1); width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;}
     .btn-action i { font-size: 1.5rem; margin-bottom: 6px; }
     .btn-action:active { transform: scale(0.97); }
     
     .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.80rem; font-weight: 600; color: #fff; }
     
-    /* Modals - ทำให้เต็มจอกว่าเดิมบนมือถือ */
     .modal-overlay { 
       position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.8); 
       z-index: 1000; display: none; align-items: flex-end; justify-content: center; backdrop-filter: blur(4px);
@@ -55,20 +49,17 @@
 
     .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
 
-    /* Borrower Cards */
     .borrower-card { 
       background: #ffffff; border-left: 6px solid #1e3a8a; border-radius: 12px; margin-bottom: 16px; 
       padding: 16px; cursor: pointer; transition: 0.2s; box-shadow: 0 2px 8px rgba(0,0,0,0.06);
     }
     
-    /* 🌟 Top Header (Fixed) */
     .top-header {
       position: fixed; top: 0; left: 0; width: 100%; background: linear-gradient(135deg, #1e3a8a 0%, #172554 100%);
       color: white; padding: 15px 20px; z-index: 900; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
       display: flex; justify-content: space-between; align-items: center;
     }
 
-    /* 🌟 Bottom Navigation (App Style) */
     .bottom-nav {
       position: fixed; bottom: 0; left: 0; width: 100%; background: #ffffff;
       box-shadow: 0 -2px 15px rgba(0,0,0,0.08); display: flex; justify-content: space-around;
@@ -94,14 +85,12 @@
     .image-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10500; display: none; justify-content: center; align-items: center; cursor: zoom-out; }
     .image-viewer-overlay img { max-width: 95%; max-height: 95%; border-radius: 10px; }
     
-    /* NFC Keypad */
     .pin-dot { width: 20px; height: 20px; border-radius: 50%; border: 2px solid #1e3a8a; background: transparent; transition: 0.1s; }
     .pin-dot.active { background: #1e3a8a; box-shadow: 0 0 10px rgba(30, 58, 138, 0.4); }
     .nfc-btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; border-radius: 16px; transition: 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
     .nfc-btn:active { background: #e2e8f0; transform: scale(0.95); }
     
-    /* 🌟 Utilities for Mobile */
-    .stack-form .col-6 { width: 100% !important; margin-bottom: 12px; } /* บังคับฟอร์มเรียงแถวเดียวบนมือถือ */
+    .stack-form .col-6 { width: 100% !important; margin-bottom: 12px; }
   </style>
 </head>
 <body>
@@ -125,7 +114,6 @@
 </div>
 
 <div class="container" id="loginPage" style="max-width: 600px; padding-top: 50px;">
-  
   <div id="noNfcWarning" class="text-center py-5">
     <i class="fa-solid fa-shield-halved mb-4" style="font-size: 5rem; color: #1e3a8a;"></i>
     <h3 class="fw-bold text-primary-corp mb-3">ระบบรักษาความปลอดภัย</h3>
@@ -160,26 +148,26 @@
 </div>
 
 <div id="mainApp" style="display:none">
-  
   <div class="top-header">
     <h5 class="fw-bold m-0"><i class="fa-solid fa-building-columns me-2"></i>Fintech Pro</h5>
-    <div class="d-flex gap-2">
-      <button id="btnManageAdmin" class="btn btn-light btn-sm rounded-pill px-3 fw-bold text-primary-corp shadow-sm" style="display:none;" onclick="openManageAdmins()"><i class="fa-solid fa-users-gear"></i></button>
-      <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 fw-bold shadow-sm"><i class="fa-solid fa-power-off"></i></button>
+    <div class="d-flex gap-2 align-items-center">
+      <button id="btnManageAdmin" class="btn btn-light btn-sm rounded-pill px-3 py-1 fw-bold text-primary-corp shadow-sm" style="display:none;" onclick="openManageAdmins()">
+        <i class="fa-solid fa-users-gear me-1"></i> จัดการแอดมิน
+      </button>
+      <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-1 fw-bold text-white shadow-sm"><i class="fa-solid fa-power-off"></i></button>
     </div>
   </div>
 
   <div class="container" style="max-width: 600px;">
-    
     <div id="viewDash">
       <div class="pro-card p-4">
         <div class="d-flex justify-content-between align-items-center mb-4">
           <h6 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-chart-pie me-2"></i>ภาพรวมระบบ</h6>
           <div class="d-flex gap-2">
-            <select id="dashFilterMonth" class="form-select form-select-sm px-2 py-1" style="width: auto; border-radius: 20px;" onchange="updateDashMetrics()">
+            <select id="dashFilterMonth" class="form-select form-select-sm" style="width: auto;" onchange="updateDashMetrics()">
               <option value="all">ทุกเดือน</option><option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option><option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option><option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
             </select>
-            <select id="dashFilterYear" class="form-select form-select-sm px-2 py-1" style="width: auto; border-radius: 20px; display:none;" onchange="updateDashMetrics()"></select>
+            <select id="dashFilterYear" class="form-select form-select-sm" style="width: auto; display:none;" onchange="updateDashMetrics()"></select>
           </div>
         </div>
 
@@ -215,20 +203,11 @@
             <span class="d-block text-warning-corp fw-bold mt-1" style="font-size: 0.80rem;">฿<span id="m30Remain">0</span></span>
           </div>
         </div>
-
       </div>
 
       <div class="row g-3 mb-4">
-        <div class="col-12">
-          <button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-3">
-            <i class="fa-solid fa-hand-holding-dollar"></i> บันทึกรับชำระเงิน
-          </button>
-        </div>
-        <div class="col-12">
-          <button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-3">
-            <i class="fa-solid fa-file-signature"></i> เปิดสัญญาลูกค้าใหม่
-          </button>
-        </div>
+        <div class="col-12"><button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-3"><i class="fa-solid fa-hand-holding-dollar"></i> บันทึกรับชำระเงิน</button></div>
+        <div class="col-12"><button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-3"><i class="fa-solid fa-file-signature"></i> เปิดสัญญาลูกค้าใหม่</button></div>
       </div>
 
       <h6 class="fw-bold mb-3 text-danger-corp px-2"><i class="fa-solid fa-bell me-2"></i>รายการใกล้ครบกำหนด / ค้างชำระ</h6>
@@ -241,7 +220,6 @@
           <span class="input-group-text bg-white border-end-0"><i class="fa-solid fa-magnifying-glass text-muted"></i></span>
           <input class="form-control border-start-0 ps-0" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
         </div>
-        
         <details class="mb-2">
           <summary class="fw-bold text-primary-corp" style="cursor:pointer; outline:none;"><i class="fa-solid fa-filter me-1"></i> ตัวกรองขั้นสูง</summary>
           <div class="row g-2 mt-2 pt-2 border-top stack-form">
@@ -252,7 +230,6 @@
           </div>
         </details>
       </div>
-      
       <div id="loanContainer"></div>
     </div>
     
@@ -265,7 +242,6 @@
       </div>
       <div id="usersContainer"></div>
     </div>
-
   </div>
 
   <div class="bottom-nav">
@@ -295,7 +271,7 @@
     </div>
     <label>รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control mb-3" placeholder="admin01">
     <label>ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control mb-3">
-    <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก (สำหรับสแกน NFC)</label><input type="text" id="caPin" class="form-control mb-3 fw-bold fs-4 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก</label><input type="text" id="caPin" class="form-control mb-3 fw-bold fs-4 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     <label>กลุ่มดูแล</label><select id="caGroup" class="form-select mb-4"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
     <label>รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control mb-4">
     <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-3 fw-bold fs-5 rounded-pill shadow-sm">บันทึกข้อมูล</button>
@@ -337,7 +313,7 @@
       <label class="text-muted">อัปเดตรูปหน้าตรง</label><input type="file" id="euPhoto" class="form-control mb-3" accept="image/*">
       <label class="text-muted">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control mb-3" accept="image/*">
       <div id="euGroupDiv" style="display:none;">
-        <label class="text-primary-corp fw-bold">ย้ายกลุ่มดูแล (SuperAdmin)</label>
+        <label class="text-primary-corp fw-bold">ย้ายกลุ่มดูแล</label>
         <select id="euGroup" class="form-select mb-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
       </div>
     </div>
@@ -399,8 +375,8 @@
       <div id="tabBtnSchedule" onclick="switchDetailTab('Schedule')">ตารางงวด</div>
     </div>
     
-    <div id="dHistory"></div>
-    <div id="dSchedule" style="display: none;"></div>
+    <div id="dHistory" style="max-height: 250px; overflow-y: auto;"></div>
+    <div id="dSchedule" style="display: none; max-height: 250px; overflow-y: auto;"></div>
   </div>
 </div>
 
@@ -515,6 +491,17 @@
   </div>
 </div>
 
+<div id="modalAuth" class="modal-overlay" style="z-index: 10000; align-items: center;">
+  <div class="pro-card p-4 text-center" style="width: 85%; max-width: 320px; border-top: 5px solid #dc2626;">
+    <h6 class="text-dark fw-bold mb-3"><i class="fa-solid fa-lock text-danger-corp me-2"></i>ยืนยันตัวตนเพื่อทำรายการ</h6>
+    <input type="password" id="authPassword" class="form-control text-center mb-3" placeholder="รหัสผ่าน Admin คอนเฟิร์ม">
+    <div class="row g-2">
+      <div class="col-6"><button class="btn btn-secondary w-100 fw-bold py-2 rounded-3" onclick="closeModal('modalAuth')">ยกเลิก</button></div>
+      <div class="col-6"><button class="btn btn-danger w-100 fw-bold py-2 rounded-3" onclick="confirmPassword()">ยืนยันลบ</button></div>
+    </div>
+  </div>
+</div>
+
 <script>
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
   let allLoans = []; 
@@ -525,6 +512,7 @@
   let currentPinInput = "";
   let detectedNfcUid = "";
   let timeLogoutVar;
+  let pendingAction = null; // ตัวแปรเก็บฟังก์ชันรอการอนุมัติรหัสผ่าน
 
   document.getElementById('cStartDate').valueAsDate = new Date();
   let currentYear = new Date().getFullYear() + 543;
@@ -559,7 +547,10 @@
     if(authData) {
       let parsed = JSON.parse(authData);
       if(Date.now() - parsed.timestamp < 43200000) { 
-        loggedInPassword = parsed.pass;
+        // 🌟 ดึงรหัสผ่านดั้งเดิมที่เก็บไว้ใน Session มาใช้งานเป็นรหัสความปลอดภัยสำหรับการลบ
+        let rawStorageData = localStorage.getItem('fintechAuthData') || sessionStorage.getItem('fintechAuthData');
+        loggedInPassword = JSON.parse(rawStorageData).pass;
+        
         window.history.replaceState({}, document.title, window.location.pathname);
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
@@ -617,7 +608,7 @@
     toggleL(false);
     
     if (res.success) {
-      loggedInPassword = res.role; 
+      loggedInPassword = currentPinInput; // เก็บกุญแจ PIN ไว้ใช้ไขความปลอดภัยตอนลบประวัติชำระเงิน
       sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: currentPinInput, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
       window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('loginPage').style.display = 'none';
@@ -633,7 +624,7 @@
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
   function clearForms() {
-    ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cAmount','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin'].forEach(id => {
+    ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cAmount','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin','authPassword'].forEach(id => {
       if(document.getElementById(id)) document.getElementById(id).value = '';
     });
     document.getElementById('cSchedulePreview').innerHTML = '';
@@ -890,15 +881,15 @@
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
 
-    const res = await api({ action: 'editUser', userId: document.getElementById('euUserId').value, name: document.getElementById('euName').value, nickname: document.getElementById('euNick').value, phone: document.getElementById('euPhone').value, details: document.getElementById('euDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, groupName: group });
+    const res = await api({ action: 'editUser', operatorId: authData.userId, userId: document.getElementById('euUserId').value, name: document.getElementById('euName').value, nickname: document.getElementById('euNick').value, phone: document.getElementById('euPhone').value, details: document.getElementById('euDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, groupName: group });
     toggleL(false);
     if(res.success) { showAlert('อัปเดตข้อมูลลูกค้าสำเร็จ'); closeModal('modalEditUser'); closeModal('modalUserHistory'); loadDash(); } 
     else showAlert('เกิดข้อผิดพลาดในการอัปเดต', true);
   }
 
-  // 🌟 ฟังก์ชันคำนวณข้อมูลสรุป ยอดที่ดึงกลับมาให้
   function updateDashMetrics() {
-    let fYear = document.getElementById('dashFilterYear').value; let fMonth = document.getElementById('dashFilterMonth').value;
+    let fYear = currentYear; // บังคับดึงปีปัจจุบันพุทธศักราชหลังบ้าน
+    let fMonth = document.getElementById('dashFilterMonth').value;
     let mTotalLoan = 0, mTotalRemain = 0, m1Loan = 0, m1Remain = 0, m7Loan = 0, m7Remain = 0, m15Loan = 0, m15Remain = 0, m30Loan = 0, m30Remain = 0;
 
     rawAllTimeLoans.forEach(l => {
@@ -917,7 +908,6 @@
       }
     });
 
-    // อัปเดตตัวเลขแสดงผลบนหน้าจอ
     document.getElementById('mTotalLoan').innerText = Math.round(mTotalLoan).toLocaleString();
     document.getElementById('mTotalRemain').innerText = Math.round(mTotalRemain).toLocaleString();
     document.getElementById('m1Loan').innerText = Math.round(m1Loan).toLocaleString();
@@ -1032,10 +1022,13 @@
   }
 
   function triggerDelete(id) {
-    if(confirm('🚨 คำเตือน: คุณต้องการ "ลบ" สัญญานี้อย่างถาวรใช่หรือไม่?')) {
-      toggleL(true);
-      api({ action: 'deleteLoan', loanId: id }).then(res => { toggleL(false); if(res.success) { showAlert('ลบข้อมูลสัญญาเรียบร้อยแล้ว'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการลบ', true); });
-    }
+    promptPassword(() => {
+      if(confirm('🚨 คำเตือน: คุณต้องการ "ลบ" สัญญานี้อย่างถาวรใช่หรือไม่?')) {
+        let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+        toggleL(true);
+        api({ action: 'deleteLoan', loanId: id, operatorId: authData.userId }).then(res => { toggleL(false); if(res.success) { showAlert('ลบข้อมูลสัญญาเรียบร้อยแล้ว'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการลบ', true); });
+      }
+    });
   }
 
   function triggerEdit(id) {
@@ -1054,7 +1047,8 @@
 
   async function submitEdit() {
     toggleL(true);
-    const res = await api({ action: 'editLoan', loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value, amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value, cycle: document.getElementById('eCycle').value, startDate: document.getElementById('eStartDate').value });
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+    const res = await api({ action: 'editLoan', operatorId: authData.userId, loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value, amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value, cycle: document.getElementById('eCycle').value, startDate: document.getElementById('eStartDate').value });
     toggleL(false);
     if(res.success) { showAlert('อัปเดตข้อมูลสัญญาสำเร็จ'); closeModal('modalEdit'); loadDash(); }
   }
@@ -1080,7 +1074,10 @@
                 </div>
                 <div class="text-end">
                   <b class="text-success-corp fs-6 d-block mb-1">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
-                  ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none mt-1 d-block" style="font-size:0.75rem;"><i class="fa-solid fa-file-invoice"></i> สลิป</a>` : ''}
+                  <div class="d-flex gap-2 justify-content-end align-items-center mt-2">
+                     ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none" style="font-size:0.85rem;"><i class="fa-solid fa-file-invoice"></i></a>` : ''}
+                     <i class="fa-solid fa-trash-can text-danger-corp" style="cursor:pointer; font-size:1rem;" onclick="triggerDeletePayment('${p.id}', '${res.loanId}')" title="ลบรายการรับเงินนี้"></i>
+                  </div>
                 </div>
               </div>
             </div>`;
@@ -1089,7 +1086,7 @@
       document.getElementById('dHistory').innerHTML = hHtml;
 
       let sHtml = '';
-      if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted small p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
+      if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
       else {
         res.schedule.forEach(s => {
           sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-3 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal">${s.date}</span></span><b class="text-primary-corp fs-6">฿${Number(s.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`;
@@ -1098,6 +1095,42 @@
       document.getElementById('dSchedule').innerHTML = sHtml;
       
       switchDetailTab('History'); openModal('modalDetails');
+    }
+  }
+
+  // 🌟 ฟังก์ชันดักจับปุ่มลบรายการรับเงิน -> บังคับให้กรอก Password
+  function triggerDeletePayment(paymentId, loanId) {
+    promptPassword(() => {
+       if (confirm('คุณต้องการ "ลบประวัติรับชำระเงิน" รหัสงวดนี้ใช่หรือไม่? (ระบบจะดึงยอดเงินต้นคงเหลือในสัญญากลับคืนให้โดยอัตโนมัติ)')) {
+          let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+          toggleL(true);
+          api({ action: 'deletePayment', paymentId: paymentId, loanId: loanId, operatorId: authData.userId }).then(res => {
+             toggleL(false);
+             if (res.success) {
+                showAlert('ลบประวัติรับชำระเงิน และคืนยอดเงินต้นหลังบ้านสำเร็จ!');
+                closeModal('modalDetails');
+                loadDash();
+             } else {
+                showAlert(res.error, true);
+             }
+          });
+       }
+    });
+  }
+
+  function promptPassword(callback) {
+    pendingAction = callback;
+    document.getElementById('authPassword').value = '';
+    openModal('modalAuth');
+  }
+
+  function confirmPassword() {
+    // ใช้รหัสผ่านหรือ PIN ที่เก็บในบราวเซอร์ตรวจสอบความปลอดภัยขั้นสอง
+    if(document.getElementById('authPassword').value === loggedInPassword) {
+      closeModal('modalAuth');
+      if(pendingAction) pendingAction();
+    } else {
+      showAlert('รหัสผ่านยืนยันไม่ถูกต้อง!', true);
     }
   }
 
@@ -1125,7 +1158,7 @@
     let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
-    await api({ action: 'saveLoan', userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, groupName: authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName, amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value });
+    await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value });
     toggleL(false); clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();
   }
 
@@ -1166,7 +1199,8 @@
     if(!totalPaidVal || Number(totalPaidVal) <= 0) { showAlert('กรุณาระบุยอดชำระให้ถูกต้อง', true); return; }
 
     toggleL(true); let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]);
-    await api({ action: 'submitPay', loanId: curPay.loanId, userId: curPay.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 });
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+    await api({ action: 'submitPay', loanId: curPay.loanId, userId: authData.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 });
     toggleL(false); clearForms(); showAlert('บันทึกการชำระเงินเสร็จสมบูรณ์!'); closeModal('modalPay'); loadDash();
   }
 </script>

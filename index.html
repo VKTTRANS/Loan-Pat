@@ -1538,6 +1538,32 @@
     closeModal('modalPay');
     loadDash();
   }
+
+  // 🌟 ระบบ Auto Logout เมื่อไม่มีการเลื่อนจอหรือแตะหน้าจอเกิน 5 นาที (300,000 มิลลิวินาที)
+  let inactivityTimer = function () {
+    let time;
+    
+    // ฟังก์ชันรีเซ็ตเวลาใหม่ทุกครั้งที่มีการขยับ
+    function resetTimer() {
+      clearTimeout(time);
+      // เช็คว่าถ้าล็อกอินอยู่ (มี Session) ถึงจะเริ่มนับเวลาเตะออก
+      if (sessionStorage.getItem('fintechAuthData')) {
+        time = setTimeout(logout, 300000); // 300000 ms = 5 นาที (แก้ตัวเลขตรงนี้ได้)
+      }
+    }
+
+    // ดักจับการเคลื่อนไหวทุกอย่างของผู้ใช้
+    window.onload = resetTimer;
+    document.onmousemove = resetTimer;
+    document.onkeypress = resetTimer;
+    document.ontouchstart = resetTimer; // สำหรับหน้าจอมือถือ
+    document.onclick = resetTimer;
+    document.onscroll = resetTimer;
+  };
+
+  // เรียกใช้งานระบบตอนโหลดหน้าเว็บ
+  inactivityTimer();
+  
 </script>
 </body>
 </html>

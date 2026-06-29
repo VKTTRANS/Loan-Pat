@@ -8,7 +8,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
-    /* 🌟 Mobile-First Compact Financial Theme */
     body { font-family: 'Prompt', sans-serif; background-color: #f1f5f9; color: #1e293b; padding-bottom: 75px; padding-top: 60px; }
     
     label, .small, .text-muted { font-weight: 500; font-size: 0.85rem; margin-bottom: 4px; display: block; color: #64748b; }
@@ -21,10 +20,8 @@
     .bg-primary-corp { background-color: #1e3a8a !important; color: white !important; }
     .bg-success-corp { background-color: #10b981 !important; color: white !important; }
 
-    /* ลด Padding และเงาของ Card ลงให้ดูคลีนขึ้นบนจอมือถือ */
     .pro-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); margin-bottom: 12px; }
     
-    /* Inputs - ลดความสูงลงเล็กน้อย */
     .form-control, .form-select { 
       background-color: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; 
       border-radius: 8px; padding: 10px 12px; font-weight: 500; font-size: 0.95rem;
@@ -33,7 +30,6 @@
     .form-control:focus, .form-select:focus { border-color: #1e3a8a; box-shadow: 0 0 0 3px rgba(30, 58, 138, 0.15); background-color: #ffffff; }
     .form-control:disabled, .form-control[readonly] { background-color: #e2e8f0; opacity: 0.8; }
     
-    /* Buttons - ลดขนาดลงนิดนึง */
     .btn-action { border-radius: 10px; padding: 12px; border: none; font-weight: 700; transition: 0.2s; color: #fff; font-size: 0.95rem; box-shadow: 0 2px 4px rgba(0,0,0,0.1); width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center;}
     .btn-action i { font-size: 1.3rem; margin-bottom: 4px; }
     .btn-action:active { transform: scale(0.97); }
@@ -53,7 +49,6 @@
 
     .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
 
-    /* Borrower Cards - ลดขนาดเส้นขอบและ Padding */
     .borrower-card { 
       background: #ffffff; border-left: 5px solid #1e3a8a; border-radius: 10px; margin-bottom: 12px; 
       padding: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
@@ -90,7 +85,6 @@
     .image-viewer-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.95); z-index: 10500; display: none; justify-content: center; align-items: center; cursor: zoom-out; }
     .image-viewer-overlay img { max-width: 95%; max-height: 95%; border-radius: 10px; }
     
-    /* NFC Keypad - ปรับขนาดเล็กลงนิดหน่อย */
     .pin-dot { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #1e3a8a; background: transparent; transition: 0.1s; }
     .pin-dot.active { background: #1e3a8a; box-shadow: 0 0 8px rgba(30, 58, 138, 0.4); }
     .nfc-btn { background: #f8fafc; border: 1px solid #e2e8f0; color: #1e293b; border-radius: 14px; transition: 0.1s; box-shadow: 0 2px 4px rgba(0,0,0,0.02);}
@@ -532,7 +526,7 @@
   let curPay = null;
   let loggedInPassword = ''; 
   let windowUsersData = []; 
-  let windowRecentPays = []; // 🌟 เก็บประวัติรับเงินดิบไว้ใช้ตอนจำกัดการแสดงผล (Limit)
+  let windowRecentPays = []; 
 
   let currentPinInput = "";
   let detectedNfcUid = "";
@@ -541,7 +535,6 @@
 
   document.getElementById('cStartDate').valueAsDate = new Date();
   
-  // สร้างตัวเลือกปี พ.ศ. ให้ Dashboard
   let currentYear = new Date().getFullYear() + 543;
   let yearHtml = '<option value="all">ทุกปี</option>';
   for(let y = currentYear - 2; y <= currentYear + 2; y++) yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
@@ -568,7 +561,7 @@
 
   function processDashboardData(res) {
     allLoans = res.activeLoans || []; rawAllTimeLoans = res.allTimeLoans || []; windowUsersData = res.users || [];
-    windowRecentPays = res.recentPayments || []; // 🌟 เก็บใส่ตัวแปรโกลบอล
+    windowRecentPays = res.recentPayments || []; 
     
     updateDashMetrics(); 
     
@@ -797,7 +790,6 @@
     if(res.success) { showAlert('สร้างแอดมินใหม่เรียบร้อยแล้ว'); clearForms(); closeModal('modalCreateAdmin'); loadDash(); } else showAlert(res.error || 'เกิดข้อผิดพลาด', true);
   }
 
-  // 🌟 ฟังก์ชันจัดการให้ Filter ผู้ใช้งานได้ตามจำนวน Limit
   function filterUsers() {
     let val = document.getElementById('searchUser').value.toLowerCase();
     let limitVal = document.getElementById('userFilterLimit').value;
@@ -902,7 +894,7 @@
   }
 
   function updateDashMetrics() {
-    let fYear = document.getElementById('dashFilterYear').value; // 🌟 รับค่าจาก Dropdown แล้ว
+    let fYear = document.getElementById('dashFilterYear').value; 
     let fMonth = document.getElementById('dashFilterMonth').value;
     let mTotalLoan = 0, mTotalRemain = 0, m1Loan = 0, m1Remain = 0, m7Loan = 0, m7Remain = 0, m15Loan = 0, m15Remain = 0, m30Loan = 0, m30Remain = 0;
 
@@ -924,7 +916,6 @@
     ['TotalLoan','TotalRemain','1Loan','1Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => { document.getElementById('m'+k).innerText = Math.round(eval('m'+k)).toLocaleString(); });
   }
 
-  // 🌟 ฟังก์ชันจัดการ Limit ของหน้ารับเงินล่าสุด
   function applyRecentPaysLimit() {
     let limitVal = document.getElementById('recentPaysLimit').value;
     let dataToRender = windowRecentPays;
@@ -1033,7 +1024,6 @@
     });
   }
 
-  // 🌟 ฟังก์ชันทริกเกอร์เรียกใช้งานระบบ Archive
   function triggerArchive() {
     promptPassword(() => {
       if(confirm('📦 ยืนยันการ "ย้ายข้อมูลเก่าลง Archive"?\nระบบจะทำการย้ายสัญญาที่ (ปิดยอด/ถูกลบ) ที่เกิน 6 เดือน ไปเก็บในชีตสำรองเพื่อลดความหนืดของระบบ')) {
@@ -1041,12 +1031,8 @@
         toggleL(true);
         api({ action: 'archiveData', operatorId: authData.userId }).then(res => { 
           toggleL(false); 
-          if(res.success) { 
-            showAlert('จัดเก็บข้อมูลเก่าลง Archive สำเร็จ!\nย้ายข้อมูลไปทั้งหมด ' + res.count + ' สัญญา'); 
-            loadDash(); 
-          } else {
-            showAlert(res.error, true); 
-          }
+          if(res.success) { showAlert('จัดเก็บข้อมูลเก่าลง Archive สำเร็จ!\nย้ายข้อมูลไปทั้งหมด ' + res.count + ' สัญญา'); loadDash(); } 
+          else { showAlert(res.error, true); }
         });
       }
     });
@@ -1168,28 +1154,33 @@
 
   function quickPay(id) { document.getElementById('loanIdInput').value = id; document.getElementById('pPayDate').valueAsDate = new Date(); openModal('modalPay'); fetchPreview(); }
 
-  // 🌟 ฟังก์ชันจัดการเรื่องการดึงรหัสสัญญาที่แก้บัคแล้ว (ตัดช่องว่าง String แข็งแรงขึ้น)
+  // 🌟 เพิ่ม Try...Catch และดักจับปัญหาให้แสดง Error แถบแดงเวลาเกิดบัคหลังบ้าน
   async function fetchPreview() {
     let query = String(document.getElementById('loanIdInput').value).trim(); 
     let targetLoanId = query;
-    if(query.includes('👤')) { 
-      targetLoanId = query.split(' ')[0].trim(); 
-    }
+    if(query.includes('👤')) targetLoanId = query.split(' ')[0].trim(); 
     
     let loanObj = allLoans.find(l => String(l.loanId).trim() === String(targetLoanId).trim());
     if(loanObj) targetLoanId = String(loanObj.loanId).trim();
     if(!targetLoanId) return showAlert('กรุณาเลือกรหัสสัญญาให้ถูกต้อง', true);
 
-    toggleL(true); const res = await api({ action: 'previewPay', loanId: targetLoanId }); toggleL(false);
-    if(res.success) {
-      curPay = res; document.getElementById('payDetails').style.display = 'block'; document.getElementById('pName').innerText = `👤 ข้อมูลลูกค้า: ${res.userName}`;
-      if(res.missedInst > 1) { document.getElementById('pWarning').innerText = `⚠️ ระบบคิดค่างวดทบยอด ${res.missedInst} รอบบิล`; document.getElementById('pWarning').style.display = 'block'; } 
-      else document.getElementById('pWarning').style.display = 'none';
+    toggleL(true); 
+    try {
+      const res = await api({ action: 'previewPay', loanId: targetLoanId }); 
+      toggleL(false);
+      
+      if(res.success) {
+        curPay = res; document.getElementById('payDetails').style.display = 'block'; document.getElementById('pName').innerText = `👤 ข้อมูลลูกค้า: ${res.userName}`;
+        if(res.missedInst > 1) { document.getElementById('pWarning').innerText = `⚠️ ระบบคิดค่างวดทบยอด ${res.missedInst} รอบบิล`; document.getElementById('pWarning').style.display = 'block'; } 
+        else document.getElementById('pWarning').style.display = 'none';
 
-      document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`; document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString(); document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString(); document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString(); document.getElementById('pExpectedTotal').innerText = `฿${Number(res.suggestedPay || 0).toLocaleString()}`;
-      document.getElementById('pChargeFine').value = 'Yes'; document.getElementById('pFinePaidInput').value = res.fineAmount || 0; document.getElementById('pFinePaidInput').disabled = false; document.getElementById('pTotalPaidInput').value = res.suggestedPay;
-      curPay.expectedPrin = res.expectedPrin; curPay.expectedInt = res.expectedInt; curPay.fineAmount = res.fineAmount; curPay.suggestedPay = res.suggestedPay;
-    } else { showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); document.getElementById('payDetails').style.display = 'none'; }
+        document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`; document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString(); document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString(); document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString(); document.getElementById('pExpectedTotal').innerText = `฿${Number(res.suggestedPay || 0).toLocaleString()}`;
+        document.getElementById('pChargeFine').value = 'Yes'; document.getElementById('pFinePaidInput').value = res.fineAmount || 0; document.getElementById('pFinePaidInput').disabled = false; document.getElementById('pTotalPaidInput').value = res.suggestedPay;
+        curPay.expectedPrin = res.expectedPrin; curPay.expectedInt = res.expectedInt; curPay.fineAmount = res.fineAmount; curPay.suggestedPay = res.suggestedPay;
+      } else { showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); document.getElementById('payDetails').style.display = 'none'; }
+    } catch(e) {
+      toggleL(false); showAlert('เซิร์ฟเวอร์ขัดข้อง: ' + e.message, true);
+    }
   }
 
   function toggleFineInput() {
@@ -1204,13 +1195,29 @@
     document.getElementById('pTotalPaidInput').value = ((Number(curPay.suggestedPay) || 0) - (Number(curPay.fineAmount) || 0)) + (Number(document.getElementById('pFinePaidInput').value) || 0);
   }
 
+  // 🌟 เพิ่ม Try...Catch และดักจับปัญหา Error ดักการกดผ่านโดยไม่ตรวจสอบ
   async function submitPay() {
-    const totalPaidVal = document.getElementById('pTotalPaidInput').value; const finePaidVal = document.getElementById('pFinePaidInput').value;
+    const totalPaidVal = document.getElementById('pTotalPaidInput').value; 
+    const finePaidVal = document.getElementById('pFinePaidInput').value;
+    
     if(!totalPaidVal || Number(totalPaidVal) <= 0) { showAlert('กรุณาระบุยอดชำระให้ถูกต้อง', true); return; }
 
-    toggleL(true); let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]); let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    await api({ action: 'submitPay', loanId: String(curPay.loanId).trim(), userId: authData.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 });
-    toggleL(false); clearForms(); showAlert('บันทึกการชำระเงินเสร็จสมบูรณ์!'); closeModal('modalPay'); loadDash();
+    toggleL(true); 
+    try {
+      let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]); 
+      let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+      
+      const res = await api({ action: 'submitPay', loanId: String(curPay.loanId).trim(), userId: authData.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 });
+      toggleL(false); 
+      
+      if(res.success) {
+        clearForms(); showAlert('บันทึกการชำระเงินเสร็จสมบูรณ์!'); closeModal('modalPay'); loadDash();
+      } else {
+        showAlert('บันทึกไม่สำเร็จ: ' + res.error, true);
+      }
+    } catch(e) {
+      toggleL(false); showAlert('ระบบขัดข้อง: ' + e.message, true);
+    }
   }
 </script>
 </body>

@@ -284,7 +284,10 @@
     <label>รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control mb-2 py-2" placeholder="admin01">
     <label>ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control mb-2 py-2">
     <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก (สแกน NFC)</label><input type="text" id="caPin" class="form-control mb-2 py-2 fw-bold fs-5 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <label>กลุ่มดูแล</label><select id="caGroup" class="form-select mb-2 py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
+    <label>กลุ่มดูแล</label>
+    <select id="caGroup" class="form-select mb-2 py-2">
+      <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
+    </select>
     <label>รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control mb-3 py-2">
     <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
@@ -304,7 +307,10 @@
       <option value="Active" class="text-success">เปิดใช้งาน (Active)</option>
       <option value="Suspended" class="text-danger">ระงับสิทธิ์ (Suspended)</option>
     </select>
-    <label>กลุ่มดูแล</label><select id="eaGroup" class="form-select mb-2 py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
+    <label>กลุ่มดูแล</label>
+    <select id="eaGroup" class="form-select mb-2 py-2">
+      <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
+    </select>
     <label>แก้ไขรหัสผ่าน (เว้นว่างได้)</label><input type="password" id="eaPass" class="form-control mb-3 py-2" placeholder="รหัสผ่านใหม่">
     <button onclick="submitEditAdmin()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกการอัปเดต</button>
   </div>
@@ -326,7 +332,10 @@
       <label class="text-muted">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control mb-2 py-1" accept="image/*">
       <div id="euGroupDiv" style="display:none;">
         <label class="text-primary-corp fw-bold mt-1">ย้ายกลุ่มดูแล</label>
-        <select id="euGroup" class="form-select py-2 mb-1"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
+        <select id="euGroup" class="form-select py-2 mb-1">
+          <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
+          <option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option>
+        </select>
       </div>
     </div>
     <button onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
@@ -473,7 +482,11 @@
           <div class="col-6"><label class="text-muted small">เอกสาร/บัตร ปชช.</label><input type="file" id="cIdCard" class="form-control py-1" accept="image/*"></div>
       </div>
       <div id="cGroupDiv" style="display:none;" class="mt-2">
-        <label class="fw-bold text-primary-corp small">กลุ่มดูแล</label><select id="cGroup" class="form-select py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
+        <label class="fw-bold text-primary-corp small">กลุ่มดูแล</label>
+        <select id="cGroup" class="form-select py-2">
+          <option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option>
+          <option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option>
+        </select>
       </div>
     </div>
 
@@ -1015,7 +1028,7 @@
                     </div>
                 </div>
                 <div class="text-end d-flex flex-column justify-content-between" style="height: 100%;">
-                    <span class="status-badge ${statusClass} d-block shadow-sm mb-3">${statusText}</span>
+                    <span class="status-badge ${statusClass} d-block shadow-sm mb-4">${statusText}</span>
                     <button class="btn btn-sm bg-primary-corp rounded-pill px-3 py-1 fw-bold shadow-sm mt-auto" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
                 </div>
             </div>
@@ -1191,7 +1204,7 @@
 
     toggleL(true); let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value });
+    await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value, groupName: authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName });
     toggleL(false); clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();
   }
 

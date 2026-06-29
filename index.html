@@ -81,7 +81,6 @@
     }
     .image-viewer-overlay img { max-width: 95%; max-height: 95%; border-radius: 10px; border: 2px solid #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.5); }
     
-    /* 🌟 สไตล์สำหรับจุดกลมแสดงรหัส PIN */
     .pin-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid #38bdf8; background: transparent; transition: 0.1s; }
     .pin-dot.active { background: #38bdf8; box-shadow: 0 0 10px #38bdf8; }
   </style>
@@ -595,9 +594,9 @@
   let pendingAction = null; 
   let windowUsersData = []; 
   
-  // 🌟 ตัวแปรจัดการเกี่ยวกับการล็อกอินด้วย NFC + PIN
   let currentPinInput = "";
   let detectedNfcUid = "";
+  let timeLogoutVar; // ตัวแปรสำหรับจับเวลาถอยหลังล็อกเอาท์
 
   document.getElementById('cStartDate').valueAsDate = new Date();
 
@@ -627,26 +626,33 @@
     document.getElementById('imageViewer').style.display = 'none';
   }
 
+  // 🌟 ฟังก์ชันจัดการเรื่องการนับเวลาถอยหลังล็อกเอาท์อัตโนมัติ 5 นาทีเมื่อไม่มีการเลื่อน/กดหน้าจอ
+  function resetInactivityTimer() {
+    clearTimeout(timeLogoutVar);
+    if (sessionStorage.getItem('fintechAuthData')) {
+      timeLogoutVar = setTimeout(logout, 300000); // 300000 ms = 5 นาที
+    }
+  }
+
   window.onload = () => {
-    // 🌟 1. ตรวจสอบพารามิเตอร์ URL ก่อนว่ามาจากการแตะแท็ก NFC (?uid=xxx) หรือไม่
+    // 1. ตรวจสอบพารามิเตอร์ URL จากการแตะแท็ก NFC
     const urlParams = new URLSearchParams(window.location.search);
     detectedNfcUid = urlParams.get('uid');
     
     if (detectedNfcUid) {
-      // สลับหน้าจอให้กลายเป็นหน้าจอคีย์แพด PIN ทันที
       document.getElementById('normalLoginBox').style.display = 'none';
       document.getElementById('nfcLoginBox').style.display = 'block';
       document.getElementById('nfcUserDisplay').innerText = detectedNfcUid;
     }
 
-    // 2. ตรวจสอบการจำประวัติ Session ล็อกอินค้างไว้
+    // 2. ตรวจสอบประวัติการล็อกอินค้างไว้จาก Session
     let authData = sessionStorage.getItem('fintechAuthData');
     if(authData) {
       let parsed = JSON.parse(authData);
       if(Date.now() - parsed.timestamp < 43200000) { 
         loggedInPassword = parsed.pass;
         
-        // 🌟 ท่าไม้ตาย: ลบพารามิเตอร์บนช่อง URL ทันที เพื่อไม่ให้ใครเห็นหรือแอบก๊อปปี้ลิงก์ไปใช้ได้อีก
+        // ลบพารามิเตอร์บน URL ทันทีหลังจากโหลดหน้าเว็บผ่านเพื่อความปลอดภัย
         window.history.replaceState({}, document.title, window.location.pathname);
         
         document.getElementById('loginPage').style.display = 'none';
@@ -656,15 +662,21 @@
         sessionStorage.removeItem('fintechAuthData');
       }
     }
+
+    // 3. 🌟 เริ่มเปิดระบบดักจับพฤติกรรมเพื่อจับเวลาถอยหลังล็อกเอาท์อัตโนมัติ โดยไม่ไปเขียนทับฟังก์ชัน onload อีกแล้ว
+    resetInactivityTimer();
+    document.addEventListener('mousemove', resetInactivityTimer);
+    document.addEventListener('keypress', resetInactivityTimer);
+    document.addEventListener('touchstart', resetInactivityTimer);
+    document.addEventListener('click', resetInactivityTimer);
+    document.addEventListener('scroll', resetInactivityTimer);
   };
 
-  // 🌟 ฟังก์ชันทำงานของระบบ Numpad สัมผัสป้อนรหัส PIN
   function pressPin(num) {
     if (currentPinInput.length >= 4) return;
     currentPinInput += num;
     updatePinDots();
     
-    // ถ้าป้อนครบ 4 หลักแล้ว ให้ส่งรหัสไปตรวจสอบที่ระบบหลังบ้านโดยอัตโนมัติ
     if (currentPinInput.length === 4) {
       submitNfcLogin();
     }
@@ -690,7 +702,6 @@
     currentPinInput = "";
     updatePinDots();
     detectedNfcUid = "";
-    // ย้อนกลับมาแสดงผลหน้าล็อกอินปกติ
     document.getElementById('nfcLoginBox').style.display = 'none';
     document.getElementById('normalLoginBox').style.display = 'block';
     window.history.replaceState({}, document.title, window.location.pathname);
@@ -702,17 +713,16 @@
     toggleL(false);
     
     if (res.success) {
-      // บันทึก Session ชั่วคราว (ใช้ PIN มาแทนรหัสผ่านหลักเพื่อการตรวจสอบยืนยันสิทธิ์ขั้นสอง)
-      loggedInPassword = res.role; // หรือค่าตรวจสอบสิทธิ์ภายใน
+      loggedInPassword = res.role; 
       sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: currentPinInput, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
       
-      // 🌟 ลบช่อง URL ให้สะอาดทันที ป้องกันการแชร์ลิงก์
       window.history.replaceState({}, document.title, window.location.pathname);
       
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       clearPin();
       loadDash();
+      resetInactivityTimer(); // เปิดตัวจับเวลาทันทีหลังล็อกอิน
     } else {
       showAlert(res.error || 'รหัส PIN ไม่ถูกต้อง!', true);
       clearPin();
@@ -798,12 +808,14 @@
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadDash();
+      resetInactivityTimer();
     } else {
       showAlert('รหัสผ่านหรือ Admin ID ไม่ถูกต้อง', true);
     }
   }
 
   function logout() {
+    clearTimeout(timeLogoutVar);
     sessionStorage.removeItem('fintechAuthData'); 
     location.reload();
   }
@@ -812,7 +824,6 @@
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     if(!authData) return logout();
 
-    // 🌟 ระบบสิทธิ์ตรวจจับปุ่มสร้าง แอดมินย่อย ของ SuperAdmin ทำงานแยกแยะตามปกติ
     if(authData.role === 'SuperAdmin') {
        document.getElementById('btnManageAdmin').style.display = 'block';
        document.getElementById('cGroupDiv').style.display = 'block';
@@ -862,7 +873,7 @@
     let adPass = document.getElementById('caPass').value;
     let adName = document.getElementById('caName').value;
     let adGroup = document.getElementById('caGroup').value;
-    let adPin = document.getElementById('caPin').value; // 🌟 รับค่า PIN รหัส 4 หลัก
+    let adPin = document.getElementById('caPin').value; 
 
     if(!adId || !adPass || !adGroup || !adPin) {
       showAlert('กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงรหัส PIN', true);
@@ -1150,7 +1161,7 @@
       let dLeft = Number(b.daysLeft) || 0;
       let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-primary');
       let statusText = dLeft < 0 ? `เลยกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
-      let displayName = b.userName ? b.userName : 'ไม่ระบุชื่อ';
+      let displayName = b.userName ? b.userName : 'ไม่ระ捕ชื่อ';
       html += `
         <div class="borrower-card p-2 mb-2 border-danger" onclick="viewDetails('${b.loanId}')" style="border-left-width: 4px;">
           <div class="d-flex justify-content-between align-items-center">
@@ -1538,32 +1549,6 @@
     closeModal('modalPay');
     loadDash();
   }
-
-  // 🌟 ระบบ Auto Logout เมื่อไม่มีการเลื่อนจอหรือแตะหน้าจอเกิน 5 นาที (300,000 มิลลิวินาที)
-  let inactivityTimer = function () {
-    let time;
-    
-    // ฟังก์ชันรีเซ็ตเวลาใหม่ทุกครั้งที่มีการขยับ
-    function resetTimer() {
-      clearTimeout(time);
-      // เช็คว่าถ้าล็อกอินอยู่ (มี Session) ถึงจะเริ่มนับเวลาเตะออก
-      if (sessionStorage.getItem('fintechAuthData')) {
-        time = setTimeout(logout, 300000); // 300000 ms = 5 นาที (แก้ตัวเลขตรงนี้ได้)
-      }
-    }
-
-    // ดักจับการเคลื่อนไหวทุกอย่างของผู้ใช้
-    window.onload = resetTimer;
-    document.onmousemove = resetTimer;
-    document.onkeypress = resetTimer;
-    document.ontouchstart = resetTimer; // สำหรับหน้าจอมือถือ
-    document.onclick = resetTimer;
-    document.onscroll = resetTimer;
-  };
-
-  // เรียกใช้งานระบบตอนโหลดหน้าเว็บ
-  inactivityTimer();
-  
 </script>
 </body>
 </html>

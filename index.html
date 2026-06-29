@@ -271,7 +271,7 @@
     </div>
     <label>รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control mb-3" placeholder="admin01">
     <label>ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control mb-3">
-    <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก</label><input type="text" id="caPin" class="form-control mb-3 fw-bold fs-4 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก (สำหรับสแกน NFC)</label><input type="text" id="caPin" class="form-control mb-3 fw-bold fs-4 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     <label>กลุ่มดูแล</label><select id="caGroup" class="form-select mb-4"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
     <label>รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control mb-4">
     <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-3 fw-bold fs-5 rounded-pill shadow-sm">บันทึกข้อมูล</button>
@@ -493,11 +493,11 @@
 
 <div id="modalAuth" class="modal-overlay" style="z-index: 10000; align-items: center;">
   <div class="pro-card p-4 text-center" style="width: 85%; max-width: 320px; border-top: 5px solid #dc2626;">
-    <h6 class="text-dark fw-bold mb-3"><i class="fa-solid fa-lock text-danger-corp me-2"></i>ยืนยันตัวตนเพื่อทำรายการ</h6>
-    <input type="password" id="authPassword" class="form-control text-center mb-3" placeholder="รหัสผ่าน Admin คอนเฟิร์ม">
+    <h6 class="text-dark fw-bold mb-3"><i class="fa-solid fa-lock text-danger-corp me-2"></i>ยืนยันตัวตนเพื่อลบ</h6>
+    <input type="password" id="authPassword" class="form-control text-center mb-3 py-3" placeholder="รหัสผ่าน Admin / PIN">
     <div class="row g-2">
-      <div class="col-6"><button class="btn btn-secondary w-100 fw-bold py-2 rounded-3" onclick="closeModal('modalAuth')">ยกเลิก</button></div>
-      <div class="col-6"><button class="btn btn-danger w-100 fw-bold py-2 rounded-3" onclick="confirmPassword()">ยืนยันลบ</button></div>
+      <div class="col-6"><button class="btn btn-secondary w-100 fw-bold py-3 rounded-3" onclick="closeModal('modalAuth')">ยกเลิก</button></div>
+      <div class="col-6"><button class="btn btn-danger w-100 fw-bold py-3 rounded-3" onclick="confirmPassword()">ยืนยันลบ</button></div>
     </div>
   </div>
 </div>
@@ -512,7 +512,7 @@
   let currentPinInput = "";
   let detectedNfcUid = "";
   let timeLogoutVar;
-  let pendingAction = null; // ตัวแปรเก็บฟังก์ชันรอการอนุมัติรหัสผ่าน
+  let pendingAction = null; 
 
   document.getElementById('cStartDate').valueAsDate = new Date();
   let currentYear = new Date().getFullYear() + 543;
@@ -539,6 +539,24 @@
     if (sessionStorage.getItem('fintechAuthData')) timeLogoutVar = setTimeout(logout, 300000); 
   }
 
+  // 🌟 ฟังก์ชันแยกส่วนสำหรับจัดเก็บข้อมูล Dashboard ที่วิ่งมารอบเดียว
+  function processDashboardData(res) {
+    allLoans = res.activeLoans || []; rawAllTimeLoans = res.allTimeLoans || []; windowUsersData = res.users || [];
+    updateDashMetrics(); 
+    
+    let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่ (ระบุด้านล่าง)</option>';
+    let datalistHtml = '';
+    if(res.users) res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
+    allLoans.forEach(l => { 
+      let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
+      datalistHtml += `<option value="${l.loanId}">👤 ${name} (ค้าง: ฿${Number(l.amount).toLocaleString()})</option>`;
+    }); 
+    
+    document.getElementById('cUserSelect').innerHTML = optHtml;
+    document.getElementById('payLoanOptions').innerHTML = datalistHtml;
+    renderDashAlerts(); renderRecentPays(res.recentPayments || []); renderUsers(windowUsersData); applyFilters();
+  }
+
   window.onload = () => {
     const urlParams = new URLSearchParams(window.location.search);
     detectedNfcUid = urlParams.get('uid');
@@ -546,11 +564,13 @@
     let authData = sessionStorage.getItem('fintechAuthData');
     if(authData) {
       let parsed = JSON.parse(authData);
-      if(Date.now() - parsed.timestamp < 43200000) { 
-        // 🌟 ดึงรหัสผ่านดั้งเดิมที่เก็บไว้ใน Session มาใช้งานเป็นรหัสความปลอดภัยสำหรับการลบ
-        let rawStorageData = localStorage.getItem('fintechAuthData') || sessionStorage.getItem('fintechAuthData');
-        loggedInPassword = JSON.parse(rawStorageData).pass;
-        
+      
+      // 🌟 ดักจับว่าถ้ามีแท็ก UID ใหม่เข้ามาที่ไม่ตรงกับของคนเดิม ให้เตะออกไปโชว์หน้า PIN ทันที!
+      if (detectedNfcUid && detectedNfcUid !== parsed.userId) {
+        sessionStorage.removeItem('fintechAuthData');
+        checkNfcEntry();
+      } else if(Date.now() - parsed.timestamp < 43200000) { 
+        loggedInPassword = parsed.pass;
         window.history.replaceState({}, document.title, window.location.pathname);
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
@@ -604,16 +624,27 @@
 
   async function submitNfcLogin() {
     toggleL(true);
+    // 🌟 ระบบล็อกอินแบบใหม่ ขอข้อมูล Dashboard พร้อมกันในรอบเดียวเลย
     const res = await api({ action: 'loginNfc', userId: detectedNfcUid, pin: currentPinInput });
     toggleL(false);
     
     if (res.success) {
-      loggedInPassword = currentPinInput; // เก็บกุญแจ PIN ไว้ใช้ไขความปลอดภัยตอนลบประวัติชำระเงิน
+      loggedInPassword = currentPinInput; 
       sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: currentPinInput, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
       window.history.replaceState({}, document.title, window.location.pathname);
+      
+      // อัปเดตสิทธิ์ปุ่ม SuperAdmin
+      if(res.role === 'SuperAdmin') {
+         document.getElementById('btnManageAdmin').style.display = 'block'; document.getElementById('cGroupDiv').style.display = 'block';
+      } else {
+         document.getElementById('btnManageAdmin').style.display = 'none'; document.getElementById('cGroupDiv').style.display = 'none';
+      }
+
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
-      clearPin(); loadDash(); resetInactivityTimer(); 
+      clearPin(); 
+      if(res.dashboard) processDashboardData(res.dashboard); // ประมวลผลจากข้อมูลที่แนบมาเลย (เร็วขึ้นมาก)
+      resetInactivityTimer(); 
     } else {
       showAlert(res.error || 'รหัส PIN ไม่ถูกต้อง!', true); clearPin();
     }
@@ -677,38 +708,18 @@
     if(!authData) return logout();
 
     if(authData.role === 'SuperAdmin') {
-       document.getElementById('btnManageAdmin').style.display = 'block';
-       document.getElementById('cGroupDiv').style.display = 'block';
+       document.getElementById('btnManageAdmin').style.display = 'block'; document.getElementById('cGroupDiv').style.display = 'block';
     } else {
-       document.getElementById('btnManageAdmin').style.display = 'none';
-       document.getElementById('cGroupDiv').style.display = 'none';
+       document.getElementById('btnManageAdmin').style.display = 'none'; document.getElementById('cGroupDiv').style.display = 'none';
     }
 
-    toggleL(true);
-    const res = await api({ action: 'getDashboard', adminId: authData.userId });
-    toggleL(false);
-    
-    allLoans = res.activeLoans || []; rawAllTimeLoans = res.allTimeLoans || []; windowUsersData = res.users || [];
-    updateDashMetrics(); 
-    
-    let optHtml = '<option value="NEW">➕ สร้างบัญชีใหม่ (ระบุด้านล่าง)</option>';
-    let datalistHtml = '';
-    if(res.users) res.users.forEach(u => { optHtml += `<option value="${u.id}">${u.name} (${u.nickname})</option>`; });
-    allLoans.forEach(l => { 
-      let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
-      datalistHtml += `<option value="${l.loanId}">👤 ${name} (ค้าง: ฿${Number(l.amount).toLocaleString()})</option>`;
-    }); 
-    
-    document.getElementById('cUserSelect').innerHTML = optHtml;
-    document.getElementById('payLoanOptions').innerHTML = datalistHtml;
-    renderDashAlerts(); renderRecentPays(res.recentPayments || []); renderUsers(windowUsersData); applyFilters(); 
+    toggleL(true); const res = await api({ action: 'getDashboard', adminId: authData.userId }); toggleL(false);
+    if(res.success) processDashboardData(res);
   }
 
   async function openManageAdmins() {
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    toggleL(true);
-    const res = await api({ action: 'getAdmins', operatorId: authData.userId });
-    toggleL(false);
+    toggleL(true); const res = await api({ action: 'getAdmins', operatorId: authData.userId }); toggleL(false);
 
     if(res.success) {
       let html = '';
@@ -735,43 +746,29 @@
   }
 
   function triggerEditAdmin(id, name, group, status, pin) {
-    document.getElementById('eaId').value = id;
-    document.getElementById('eaName').value = name;
-    document.getElementById('eaGroup').value = group || 'A';
-    document.getElementById('eaStatus').value = status || 'Active';
-    document.getElementById('eaPin').value = pin || '';
-    document.getElementById('eaPass').value = ''; 
+    document.getElementById('eaId').value = id; document.getElementById('eaName').value = name;
+    document.getElementById('eaGroup').value = group || 'A'; document.getElementById('eaStatus').value = status || 'Active';
+    document.getElementById('eaPin').value = pin || ''; document.getElementById('eaPass').value = ''; 
     closeModal('modalManageAdmins'); openModal('modalEditAdmin');
   }
 
   async function submitEditAdmin() {
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    let payload = {
-      action: 'editAdmin', operatorId: authData.userId, targetAdminId: document.getElementById('eaId').value,
-      name: document.getElementById('eaName').value, groupName: document.getElementById('eaGroup').value,
-      status: document.getElementById('eaStatus').value, pinCode: document.getElementById('eaPin').value, password: document.getElementById('eaPass').value
-    };
-
+    let payload = { action: 'editAdmin', operatorId: authData.userId, targetAdminId: document.getElementById('eaId').value, name: document.getElementById('eaName').value, groupName: document.getElementById('eaGroup').value, status: document.getElementById('eaStatus').value, pinCode: document.getElementById('eaPin').value, password: document.getElementById('eaPass').value };
     if(payload.pinCode && payload.pinCode.length !== 4) { showAlert('รหัส PIN ต้องมี 4 หลัก', true); return; }
 
     toggleL(true); const res = await api(payload); toggleL(false);
-    if(res.success) { showAlert('อัปเดตข้อมูลแอดมินสำเร็จ'); closeModal('modalEditAdmin'); } 
-    else showAlert(res.error, true);
+    if(res.success) { showAlert('อัปเดตข้อมูลแอดมินสำเร็จ'); closeModal('modalEditAdmin'); } else showAlert(res.error, true);
   }
 
   async function saveAdmin() {
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    let adId = document.getElementById('caId').value; let adPass = document.getElementById('caPass').value;
-    let adName = document.getElementById('caName').value; let adGroup = document.getElementById('caGroup').value; let adPin = document.getElementById('caPin').value; 
-
+    let adId = document.getElementById('caId').value; let adPass = document.getElementById('caPass').value; let adName = document.getElementById('caName').value; let adGroup = document.getElementById('caGroup').value; let adPin = document.getElementById('caPin').value; 
     if(!adId || !adPass || !adGroup || !adPin) { showAlert('กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงรหัส PIN', true); return; }
     if(adPin.length !== 4) { showAlert('รหัส PIN ต้องมีครบ 4 หลักพอดี', true); return; }
 
-    toggleL(true);
-    const res = await api({ action: 'createAdmin', operatorId: authData.userId, newAdminId: adId, password: adPass, name: adName, groupName: adGroup, pinCode: adPin });
-    toggleL(false);
-    if(res.success) { showAlert('สร้างแอดมินใหม่เรียบร้อยแล้ว'); clearForms(); closeModal('modalCreateAdmin'); loadDash(); } 
-    else showAlert(res.error || 'เกิดข้อผิดพลาด', true);
+    toggleL(true); const res = await api({ action: 'createAdmin', operatorId: authData.userId, newAdminId: adId, password: adPass, name: adName, groupName: adGroup, pinCode: adPin }); toggleL(false);
+    if(res.success) { showAlert('สร้างแอดมินใหม่เรียบร้อยแล้ว'); clearForms(); closeModal('modalCreateAdmin'); loadDash(); } else showAlert(res.error || 'เกิดข้อผิดพลาด', true);
   }
 
   function renderUsers(usersArray) {
@@ -802,16 +799,13 @@
   }
 
   function viewUserHistory(userId) {
-    let user = windowUsersData.find(u => u.id === userId);
-    if(!user) return;
+    let user = windowUsersData.find(u => u.id === userId); if(!user) return;
     let safeFace = getSafeImgUrl(user.photoUrl); let safeId = getSafeImgUrl(user.idCardUrl); let phoneStr = String(user.phone || '').replace(/'/g, '');
     let photo1 = safeFace ? `<img src="${safeFace}" class="img-box mb-2" style="width:110px; height:110px;" onclick="zoomImage('${safeFace}')">` : `<div class="img-box mb-2 mx-auto d-flex justify-content-center align-items-center" style="width:110px; height:110px;"><i class="fa-solid fa-user text-secondary fs-1"></i></div>`;
     let photo2 = safeId ? `<img src="${safeId}" class="img-box mb-2" style="width:110px; height:110px;" onclick="zoomImage('${safeId}')">` : `<div class="img-box mb-2 mx-auto d-flex justify-content-center align-items-center" style="width:110px; height:110px;"><i class="fa-solid fa-id-card text-secondary fs-1"></i></div>`;
 
     document.getElementById('uhProfile').innerHTML = `
-      <div class="d-flex justify-content-center gap-4 mb-3">
-        <div>${photo1}<br><small class="text-muted fw-bold">หน้าตรง</small></div><div>${photo2}<br><small class="text-muted fw-bold">เอกสาร</small></div>
-      </div>
+      <div class="d-flex justify-content-center gap-4 mb-3"><div>${photo1}<br><small class="text-muted fw-bold">หน้าตรง</small></div><div>${photo2}<br><small class="text-muted fw-bold">เอกสาร</small></div></div>
       <h5 class="fw-bold text-primary-corp mb-2">${user.name} ${user.nickname ? `(${user.nickname})` : ''} <i class="fa-solid fa-pen text-warning-corp ms-2" style="cursor:pointer;" onclick="triggerEditUser('${user.id}')"></i></h5>
       <p class="text-muted mb-1"><i class="fa-solid fa-phone me-1"></i>${phoneStr || 'ไม่มีเบอร์โทร'}</p>
       <p class="text-muted small mb-3 px-3">${user.details || 'ไม่มีรายละเอียด'}</p>
@@ -840,23 +834,17 @@
           </div>`;
       });
     }
-    document.getElementById('uhLoansList').innerHTML = html;
-    openModal('modalUserHistory');
+    document.getElementById('uhLoansList').innerHTML = html; openModal('modalUserHistory');
   }
 
   function triggerEditUser(userId) {
-    let user = windowUsersData.find(u => u.id === userId);
-    if(!user) return;
+    let user = windowUsersData.find(u => u.id === userId); if(!user) return;
     document.getElementById('euUserId').value = user.id; document.getElementById('euName').value = user.name;
-    document.getElementById('euNick').value = user.nickname; document.getElementById('euPhone').value = String(user.phone || '').replace(/'/g, '');
-    document.getElementById('euDetails').value = user.details;
-    
+    document.getElementById('euNick').value = user.nickname; document.getElementById('euPhone').value = String(user.phone || '').replace(/'/g, ''); document.getElementById('euDetails').value = user.details;
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     if(authData.role === 'SuperAdmin') { document.getElementById('euGroupDiv').style.display = 'block'; document.getElementById('euGroup').value = user.groupName || 'A'; } 
     else document.getElementById('euGroupDiv').style.display = 'none';
-    
-    document.getElementById('euPhoto').value = ''; document.getElementById('euIdCard').value = '';
-    openModal('modalEditUser');
+    document.getElementById('euPhoto').value = ''; document.getElementById('euIdCard').value = ''; openModal('modalEditUser');
   }
 
   function compressImage(file, maxWidth = 800) {
@@ -876,20 +864,15 @@
 
   async function submitEditUser() {
     toggleL(true);
-    let photoBase64 = await compressImage(document.getElementById('euPhoto').files[0]);
-    let idCardBase64 = await compressImage(document.getElementById('euIdCard').files[0]);
-    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
-
+    let photoBase64 = await compressImage(document.getElementById('euPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('euIdCard').files[0]);
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData')); let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
     const res = await api({ action: 'editUser', operatorId: authData.userId, userId: document.getElementById('euUserId').value, name: document.getElementById('euName').value, nickname: document.getElementById('euNick').value, phone: document.getElementById('euPhone').value, details: document.getElementById('euDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, groupName: group });
     toggleL(false);
-    if(res.success) { showAlert('อัปเดตข้อมูลลูกค้าสำเร็จ'); closeModal('modalEditUser'); closeModal('modalUserHistory'); loadDash(); } 
-    else showAlert('เกิดข้อผิดพลาดในการอัปเดต', true);
+    if(res.success) { showAlert('อัปเดตข้อมูลลูกค้าสำเร็จ'); closeModal('modalEditUser'); closeModal('modalUserHistory'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการอัปเดต', true);
   }
 
   function updateDashMetrics() {
-    let fYear = currentYear; // บังคับดึงปีปัจจุบันพุทธศักราชหลังบ้าน
-    let fMonth = document.getElementById('dashFilterMonth').value;
+    let fYear = currentYear; let fMonth = document.getElementById('dashFilterMonth').value;
     let mTotalLoan = 0, mTotalRemain = 0, m1Loan = 0, m1Remain = 0, m7Loan = 0, m7Remain = 0, m15Loan = 0, m15Remain = 0, m30Loan = 0, m30Remain = 0;
 
     rawAllTimeLoans.forEach(l => {
@@ -899,7 +882,6 @@
         if ((fYear === 'all' || fYear == y.toString()) && (fMonth === 'all' || fMonth == m.toString())) {
           let orig = Number(l.originalPrincipal) || 0; let remain = Number(l.remainingPrincipal) || 0;
           mTotalLoan += orig; if(l.status === 'Active') mTotalRemain += remain;
-          
           if (l.cycle === '1') { m1Loan += orig; if(l.status === 'Active') m1Remain += remain; } 
           else if (l.cycle === '7') { m7Loan += orig; if(l.status === 'Active') m7Remain += remain; }
           else if (l.cycle === '15') { m15Loan += orig; if(l.status === 'Active') m15Remain += remain; } 
@@ -908,24 +890,16 @@
       }
     });
 
-    document.getElementById('mTotalLoan').innerText = Math.round(mTotalLoan).toLocaleString();
-    document.getElementById('mTotalRemain').innerText = Math.round(mTotalRemain).toLocaleString();
-    document.getElementById('m1Loan').innerText = Math.round(m1Loan).toLocaleString();
-    document.getElementById('m1Remain').innerText = Math.round(m1Remain).toLocaleString();
-    document.getElementById('m7Loan').innerText = Math.round(m7Loan).toLocaleString();
-    document.getElementById('m7Remain').innerText = Math.round(m7Remain).toLocaleString();
-    document.getElementById('m15Loan').innerText = Math.round(m15Loan).toLocaleString();
-    document.getElementById('m15Remain').innerText = Math.round(m15Remain).toLocaleString();
-    document.getElementById('m30Loan').innerText = Math.round(m30Loan).toLocaleString();
-    document.getElementById('m30Remain').innerText = Math.round(m30Remain).toLocaleString();
+    ['TotalLoan','TotalRemain','1Loan','1Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => { document.getElementById('m'+k).innerText = Math.round(eval('m'+k)).toLocaleString(); });
   }
 
+  // 🌟 เพิ่มปุ่มลบประวัติลงใน Modal รับชำระเงินล่าสุด
   function renderRecentPays(data) {
     let html = '';
     if (!data || data.length === 0) html = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีประวัติการรับชำระเงิน</div>';
     else {
       data.forEach(p => {
-        let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="btn btn-sm btn-outline-primary rounded-pill mt-2"><i class="fa-solid fa-image me-1"></i>ดูสลิป</a>` : `<span class="badge bg-light text-secondary border mt-2">ไม่มีสลิป</span>`;
+        let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fs-5 mt-2 me-3"><i class="fa-solid fa-file-invoice"></i></a>` : ``;
         html += `
           <div class="pro-card p-3 mb-3 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
             <div class="d-flex justify-content-between align-items-center">
@@ -936,7 +910,10 @@
               </div>
               <div class="text-end">
                 <b class="text-success-corp fs-5 d-block">+ ฿${Number(p.totalPaid || 0).toLocaleString()}</b>
-                ${slipBtn}
+                <div class="d-flex justify-content-end align-items-center mt-2">
+                   ${slipBtn}
+                   <i class="fa-solid fa-trash-can text-danger-corp" style="cursor:pointer; font-size:1.2rem;" onclick="triggerDeletePayment('${p.id}', '${p.loanId}')" title="ลบรายการนี้"></i>
+                </div>
               </div>
             </div>
           </div>`;
@@ -949,9 +926,7 @@
     let alertLoans = allLoans.filter(l => (Number(l.daysLeft) || 0) <= 3);
     let html = '';
     alertLoans.forEach(b => {
-      let dLeft = Number(b.daysLeft) || 0;
-      let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-success-corp');
-      let statusText = dLeft < 0 ? `เกินกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
+      let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
       html += `
         <div class="borrower-card" onclick="viewDetails('${b.loanId}')" style="border-left-color: #dc2626;">
           <div class="d-flex justify-content-between align-items-center">
@@ -973,10 +948,7 @@
   function renderList(data) {
     let html = '';
     data.forEach(b => {
-        let dLeft = Number(b.daysLeft) || 0;
-        let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp');
-        let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
-
+        let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
         html += `
         <div class="borrower-card loan-item" onclick="viewDetails('${b.loanId}')">
             <div class="d-flex justify-content-between align-items-start">
@@ -986,7 +958,6 @@
                     <span class="text-muted small d-block mb-1">รหัส: ${b.loanId}</span>
                     <p class="mb-0 text-primary-corp fw-bold">ยอดหนี้: ฿${Number(b.amount || 0).toLocaleString()}</p>
                     <p class="mb-0 text-muted small mt-1"><i class="fa-regular fa-calendar me-1"></i>ดิว: ${b.dueDate}</p>
-                    
                     <div class="mt-3">
                         <span class="action-icon icon-edit me-2 shadow-sm" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen"></i></span>
                         <span class="action-icon icon-delete shadow-sm" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash"></i></span>
@@ -1004,21 +975,14 @@
 
   function applyFilters() {
     let cycleVal = document.getElementById('filterCycle').value; let statusVal = document.getElementById('filterStatus').value; let sortVal = document.getElementById('filterSort').value; let limitVal = document.getElementById('filterLimit').value; let searchVal = document.getElementById('searchLoan').value.toLowerCase();
-
     let filtered = allLoans.filter(l => {
-      let matchCycle = (cycleVal === 'all' || l.cycle.toString() === cycleVal);
-      let matchStatus = true; let dLeft = Number(l.daysLeft) || 0;
+      let matchCycle = (cycleVal === 'all' || l.cycle.toString() === cycleVal); let matchStatus = true; let dLeft = Number(l.daysLeft) || 0;
       if (statusVal === 'due') matchStatus = (dLeft >= 0 && dLeft <= 3); else if (statusVal === 'overdue') matchStatus = (dLeft < 0); 
-      let matchSearch = (l.userName + l.nickname + l.loanId).toLowerCase().includes(searchVal);
-      return matchCycle && matchStatus && matchSearch;
+      let matchSearch = (l.userName + l.nickname + l.loanId).toLowerCase().includes(searchVal); return matchCycle && matchStatus && matchSearch;
     });
 
-    if (sortVal === 'due') filtered.sort((a, b) => a.daysLeft - b.daysLeft);
-    else if (sortVal === 'amtDesc') filtered.sort((a, b) => Number(b.amount) - Number(a.amount));
-    else if (sortVal === 'amtAsc') filtered.sort((a, b) => Number(a.amount) - Number(b.amount));
-
-    if(limitVal !== 'all') filtered = filtered.slice(0, parseInt(limitVal));
-    renderList(filtered);
+    if (sortVal === 'due') filtered.sort((a, b) => a.daysLeft - b.daysLeft); else if (sortVal === 'amtDesc') filtered.sort((a, b) => Number(b.amount) - Number(a.amount)); else if (sortVal === 'amtAsc') filtered.sort((a, b) => Number(a.amount) - Number(b.amount));
+    if(limitVal !== 'all') filtered = filtered.slice(0, parseInt(limitVal)); renderList(filtered);
   }
 
   function triggerDelete(id) {
@@ -1046,18 +1010,15 @@
   }
 
   async function submitEdit() {
-    toggleL(true);
-    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+    toggleL(true); let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     const res = await api({ action: 'editLoan', operatorId: authData.userId, loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value, amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value, cycle: document.getElementById('eCycle').value, startDate: document.getElementById('eStartDate').value });
-    toggleL(false);
-    if(res.success) { showAlert('อัปเดตข้อมูลสัญญาสำเร็จ'); closeModal('modalEdit'); loadDash(); }
+    toggleL(false); if(res.success) { showAlert('อัปเดตข้อมูลสัญญาสำเร็จ'); closeModal('modalEdit'); loadDash(); }
   }
 
   async function viewDetails(id) {
     toggleL(true); const res = await api({ action: 'getLoanDetails', loanId: id }); toggleL(false);
     if(res.success) {
-      document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`;
-      document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}<br><span class="badge bg-light text-secondary border mt-2 px-2 py-1 shadow-sm">รหัส: ${res.loanId}</span>`;
+      document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}<br><span class="badge bg-light text-secondary border mt-2 px-2 py-1 shadow-sm">รหัส: ${res.loanId}</span>`;
       document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString()}`; document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString()}`; document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString()}`;
       
       let hHtml = '';
@@ -1074,9 +1035,9 @@
                 </div>
                 <div class="text-end">
                   <b class="text-success-corp fs-6 d-block mb-1">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
-                  <div class="d-flex gap-2 justify-content-end align-items-center mt-2">
-                     ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none" style="font-size:0.85rem;"><i class="fa-solid fa-file-invoice"></i></a>` : ''}
-                     <i class="fa-solid fa-trash-can text-danger-corp" style="cursor:pointer; font-size:1rem;" onclick="triggerDeletePayment('${p.id}', '${res.loanId}')" title="ลบรายการรับเงินนี้"></i>
+                  <div class="d-flex gap-3 justify-content-end align-items-center mt-2">
+                     ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none" style="font-size:1.1rem;"><i class="fa-solid fa-file-invoice"></i></a>` : ''}
+                     <i class="fa-solid fa-trash-can text-danger-corp" style="cursor:pointer; font-size:1.2rem;" onclick="triggerDeletePayment('${p.id}', '${res.loanId}')" title="ลบรายการรับเงินนี้"></i>
                   </div>
                 </div>
               </div>
@@ -1088,9 +1049,7 @@
       let sHtml = '';
       if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
       else {
-        res.schedule.forEach(s => {
-          sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-3 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal">${s.date}</span></span><b class="text-primary-corp fs-6">฿${Number(s.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`;
-        });
+        res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-3 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal">${s.date}</span></span><b class="text-primary-corp fs-6">฿${Number(s.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`; });
       }
       document.getElementById('dSchedule').innerHTML = sHtml;
       
@@ -1098,40 +1057,31 @@
     }
   }
 
-  // 🌟 ฟังก์ชันดักจับปุ่มลบรายการรับเงิน -> บังคับให้กรอก Password
   function triggerDeletePayment(paymentId, loanId) {
     promptPassword(() => {
-       if (confirm('คุณต้องการ "ลบประวัติรับชำระเงิน" รหัสงวดนี้ใช่หรือไม่? (ระบบจะดึงยอดเงินต้นคงเหลือในสัญญากลับคืนให้โดยอัตโนมัติ)')) {
+       if (confirm('คุณต้องการ "ลบประวัติรับชำระเงิน" รหัสงวดนี้ใช่หรือไม่? (เงินจะถูกดึงกลับเข้าสัญญา)')) {
           let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
           toggleL(true);
           api({ action: 'deletePayment', paymentId: paymentId, loanId: loanId, operatorId: authData.userId }).then(res => {
              toggleL(false);
              if (res.success) {
-                showAlert('ลบประวัติรับชำระเงิน และคืนยอดเงินต้นหลังบ้านสำเร็จ!');
-                closeModal('modalDetails');
+                showAlert('ลบประวัติรับชำระเงินสำเร็จ!');
+                closeModal('modalDetails'); closeModal('modalRecentPays');
                 loadDash();
-             } else {
-                showAlert(res.error, true);
-             }
+             } else showAlert(res.error, true);
           });
        }
     });
   }
 
   function promptPassword(callback) {
-    pendingAction = callback;
-    document.getElementById('authPassword').value = '';
-    openModal('modalAuth');
+    pendingAction = callback; document.getElementById('authPassword').value = ''; openModal('modalAuth');
   }
 
   function confirmPassword() {
-    // ใช้รหัสผ่านหรือ PIN ที่เก็บในบราวเซอร์ตรวจสอบความปลอดภัยขั้นสอง
     if(document.getElementById('authPassword').value === loggedInPassword) {
-      closeModal('modalAuth');
-      if(pendingAction) pendingAction();
-    } else {
-      showAlert('รหัสผ่านยืนยันไม่ถูกต้อง!', true);
-    }
+      closeModal('modalAuth'); if(pendingAction) pendingAction();
+    } else showAlert('รหัสยืนยันตัวตนไม่ถูกต้อง!', true);
   }
 
   function toggleNewUserForm() { document.getElementById('newUserFormBox').style.display = (document.getElementById('cUserSelect').value === 'NEW') ? 'block' : 'none'; }
@@ -1154,10 +1104,8 @@
     if(!amount || amount <= 0) { showAlert('กรุณาระบุยอดเงินต้นให้ถูกต้อง', true); return; }
     if(uId === 'NEW' && !document.getElementById('cName').value) { showAlert('กรุณากรอกชื่อ-นามสกุลลูกค้า', true); return; }
 
-    toggleL(true);
-    let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
+    toggleL(true); let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    
     await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value });
     toggleL(false); clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();
   }
@@ -1198,8 +1146,7 @@
     const totalPaidVal = document.getElementById('pTotalPaidInput').value; const finePaidVal = document.getElementById('pFinePaidInput').value;
     if(!totalPaidVal || Number(totalPaidVal) <= 0) { showAlert('กรุณาระบุยอดชำระให้ถูกต้อง', true); return; }
 
-    toggleL(true); let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]);
-    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+    toggleL(true); let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]); let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     await api({ action: 'submitPay', loanId: curPay.loanId, userId: authData.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 });
     toggleL(false); clearForms(); showAlert('บันทึกการชำระเงินเสร็จสมบูรณ์!'); closeModal('modalPay'); loadDash();
   }

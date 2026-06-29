@@ -525,6 +525,7 @@
 </div>
 
 <script>
+  // ถ้าเปลี่ยน Google Sheet หรือแก้ไขสคริปต์ใหม่ อย่าลืมอัปเดต GAS_URL นี้ให้ตรงกับการ Deploy ใหม่ด้วยนะครับ
   const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
   let allLoans = []; 
   let rawAllTimeLoans = []; 
@@ -732,8 +733,12 @@
   }
 
   async function api(data) {
-    const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) });
-    return await r.json();
+    try {
+        const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) });
+        return await r.json();
+    } catch (e) {
+        return { success: false, error: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + e.message };
+    }
   }
 
   function logout() {
@@ -754,8 +759,15 @@
        document.getElementById('filterAdminWrap').style.display = 'none';
     }
 
-    toggleL(true); const res = await api({ action: 'getDashboard', adminId: authData.userId }); toggleL(false);
-    if(res.success) processDashboardData(res);
+    toggleL(true); 
+    const res = await api({ action: 'getDashboard', adminId: authData.userId }); 
+    toggleL(false);
+    
+    if(res.success) {
+        processDashboardData(res);
+    } else {
+        showAlert('ข้อผิดพลาด: ' + (res.error || 'โหลดข้อมูลล้มเหลว'), true);
+    }
   }
 
   async function openManageAdmins() {
@@ -918,7 +930,15 @@
   function updateDashMetrics() {
     let fYear = document.getElementById('dashFilterYear').value; 
     let fMonth = document.getElementById('dashFilterMonth').value;
-    let mTotalLoan = 0, mTotalRemain = 0, m1Loan = 0, m1Remain = 0, m7Loan = 0, m7Remain = 0, m15Loan = 0, m15Remain = 0, m30Loan = 0, m30Remain = 0;
+    
+    // แทนที่การใช้ eval ด้วย Object Mapping เพื่อป้องกันการ Error และเว็บบราวเซอร์บล็อก CSP
+    let metrics = {
+      TotalLoan: 0, TotalRemain: 0,
+      '1Loan': 0, '1Remain': 0,
+      '7Loan': 0, '7Remain': 0,
+      '15Loan': 0, '15Remain': 0,
+      '30Loan': 0, '30Remain': 0
+    };
 
     rawAllTimeLoans.forEach(l => {
       let d = new Date(l.startDate);
@@ -926,16 +946,19 @@
         let y = d.getFullYear() + 543; let m = d.getMonth() + 1;
         if ((fYear === 'all' || fYear == y.toString()) && (fMonth === 'all' || fMonth == m.toString())) {
           let orig = Number(l.originalPrincipal) || 0; let remain = Number(l.remainingPrincipal) || 0;
-          mTotalLoan += orig; if(l.status === 'Active') mTotalRemain += remain;
-          if (l.cycle === '1') { m1Loan += orig; if(l.status === 'Active') m1Remain += remain; } 
-          else if (l.cycle === '7') { m7Loan += orig; if(l.status === 'Active') m7Remain += remain; }
-          else if (l.cycle === '15') { m15Loan += orig; if(l.status === 'Active') m15Remain += remain; } 
-          else if (l.cycle === '30') { m30Loan += orig; if(l.status === 'Active') m30Remain += remain; }
+          metrics.TotalLoan += orig; if(l.status === 'Active') metrics.TotalRemain += remain;
+          
+          if (l.cycle === '1') { metrics['1Loan'] += orig; if(l.status === 'Active') metrics['1Remain'] += remain; } 
+          else if (l.cycle === '7') { metrics['7Loan'] += orig; if(l.status === 'Active') metrics['7Remain'] += remain; }
+          else if (l.cycle === '15') { metrics['15Loan'] += orig; if(l.status === 'Active') metrics['15Remain'] += remain; } 
+          else if (l.cycle === '30') { metrics['30Loan'] += orig; if(l.status === 'Active') metrics['30Remain'] += remain; }
         }
       }
     });
 
-    ['TotalLoan','TotalRemain','1Loan','1Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => { document.getElementById('m'+k).innerText = Math.round(eval('m'+k)).toLocaleString(); });
+    ['TotalLoan','TotalRemain','1Loan','1Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => { 
+      document.getElementById('m'+k).innerText = Math.round(metrics[k]).toLocaleString(); 
+    });
   }
 
   function applyRecentPaysLimit() {
@@ -1106,7 +1129,6 @@
     if(res.success) {
       document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}`;
       
-      // 🌟 นำป้ายเริ่มสัญญา และ รหัสสัญญา มาใส่ไว้ใน HTML element ที่สร้างรอไว้
       let badgesHtml = `
         <span class="badge bg-light text-secondary border shadow-sm px-2 py-1"><i class="fa-solid fa-hashtag me-1"></i>รหัส: ${res.loanId}</span>
         <span class="badge bg-light text-secondary border shadow-sm px-2 py-1"><i class="fa-regular fa-calendar me-1"></i>เริ่ม: ${res.startDate}</span>

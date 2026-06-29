@@ -108,13 +108,11 @@
 <div class="container" style="max-width: 600px;">
   
   <div id="loginPage" class="glass-card p-4 text-center mt-5 shadow-lg">
-    <div id="normalLoginBox">
-      <h3 class="fw-bold mb-4">Fintech <span class="text-info">Pro</span></h3>
-      <label class="text-start">รหัสแอดมิน (Admin ID)</label>
-      <input type="text" id="userId" class="form-control mb-3" placeholder="กรอกรหัส Admin" onkeypress="if(event.key === 'Enter') login()">
-      <label class="text-start">รหัสผ่าน</label>
-      <input type="password" id="password" class="form-control mb-4" placeholder="กรอกรหัสผ่าน" onkeypress="if(event.key === 'Enter') login()">
-      <button onclick="login()" class="btn btn-info w-100 py-3 fw-bold shadow text-white fs-5">เข้าสู่ระบบ</button>
+    
+    <div id="noNfcWarning" class="text-center py-4" style="display:block;">
+      <i class="fa-solid fa-mobile-screen-button mb-3" style="font-size: 4rem; color: #475569;"></i>
+      <h4 class="fw-bold text-white mb-2">ระบบความปลอดภัยสูง</h4>
+      <p class="text-muted small mb-0">กรุณานำสมาร์ตโฟนแตะที่ TAG NFC<br>เพื่อเข้าสู่ระบบ</p>
     </div>
 
     <div id="nfcLoginBox" style="display:none;">
@@ -275,7 +273,7 @@
     <label>รหัสแอดมิน (ใช้ล็อกอิน)</label>
     <input type="text" id="caId" class="form-control mb-2" placeholder="เช่น admin1">
     
-    <label>รหัสผ่าน</label>
+    <label>รหัสผ่าน (สำรอง)</label>
     <input type="password" id="caPass" class="form-control mb-2">
     
     <label>ชื่อแอดมิน</label>
@@ -596,7 +594,7 @@
   
   let currentPinInput = "";
   let detectedNfcUid = "";
-  let timeLogoutVar; // ตัวแปรสำหรับจับเวลาถอยหลังล็อกเอาท์
+  let timeLogoutVar;
 
   document.getElementById('cStartDate').valueAsDate = new Date();
 
@@ -626,44 +624,49 @@
     document.getElementById('imageViewer').style.display = 'none';
   }
 
-  // 🌟 ฟังก์ชันจัดการเรื่องการนับเวลาถอยหลังล็อกเอาท์อัตโนมัติ 5 นาทีเมื่อไม่มีการเลื่อน/กดหน้าจอ
   function resetInactivityTimer() {
     clearTimeout(timeLogoutVar);
     if (sessionStorage.getItem('fintechAuthData')) {
-      timeLogoutVar = setTimeout(logout, 300000); // 300000 ms = 5 นาที
+      timeLogoutVar = setTimeout(logout, 300000); 
     }
   }
 
   window.onload = () => {
-    // 1. ตรวจสอบพารามิเตอร์ URL จากการแตะแท็ก NFC
     const urlParams = new URLSearchParams(window.location.search);
     detectedNfcUid = urlParams.get('uid');
     
-    if (detectedNfcUid) {
-      document.getElementById('normalLoginBox').style.display = 'none';
-      document.getElementById('nfcLoginBox').style.display = 'block';
-      document.getElementById('nfcUserDisplay').innerText = detectedNfcUid;
-    }
-
-    // 2. ตรวจสอบประวัติการล็อกอินค้างไว้จาก Session
+    // 🌟 ขั้นตอนที่ 1: ตรวจสอบ Session ล็อกอินก่อน
     let authData = sessionStorage.getItem('fintechAuthData');
     if(authData) {
       let parsed = JSON.parse(authData);
       if(Date.now() - parsed.timestamp < 43200000) { 
         loggedInPassword = parsed.pass;
-        
-        // ลบพารามิเตอร์บน URL ทันทีหลังจากโหลดหน้าเว็บผ่านเพื่อความปลอดภัย
         window.history.replaceState({}, document.title, window.location.pathname);
-        
         document.getElementById('loginPage').style.display = 'none';
         document.getElementById('mainApp').style.display = 'block';
         loadDash();
       } else {
         sessionStorage.removeItem('fintechAuthData');
+        checkNfcEntry();
+      }
+    } else {
+      checkNfcEntry();
+    }
+
+    // 🌟 ขั้นตอนที่ 2: ถ้าไม่มี Session ให้เช็คว่าแตะ TAG มาหรือไม่
+    function checkNfcEntry() {
+      if (detectedNfcUid) {
+        // แตะ TAG มา = ปิดคำเตือน, โชว์แป้นกด PIN
+        document.getElementById('noNfcWarning').style.display = 'none';
+        document.getElementById('nfcLoginBox').style.display = 'block';
+        document.getElementById('nfcUserDisplay').innerText = detectedNfcUid;
+      } else {
+        // ไม่ได้แตะ TAG = โชว์คำเตือน, ปิดหน้าต่างล็อกอินทั้งหมด
+        document.getElementById('noNfcWarning').style.display = 'block';
+        document.getElementById('nfcLoginBox').style.display = 'none';
       }
     }
 
-    // 3. 🌟 เริ่มเปิดระบบดักจับพฤติกรรมเพื่อจับเวลาถอยหลังล็อกเอาท์อัตโนมัติ โดยไม่ไปเขียนทับฟังก์ชัน onload อีกแล้ว
     resetInactivityTimer();
     document.addEventListener('mousemove', resetInactivityTimer);
     document.addEventListener('keypress', resetInactivityTimer);
@@ -702,8 +705,9 @@
     currentPinInput = "";
     updatePinDots();
     detectedNfcUid = "";
+    // 🌟 หากกดยกเลิกการใส่ PIN ให้เด้งกลับไปหน้าคำเตือน
     document.getElementById('nfcLoginBox').style.display = 'none';
-    document.getElementById('normalLoginBox').style.display = 'block';
+    document.getElementById('noNfcWarning').style.display = 'block';
     window.history.replaceState({}, document.title, window.location.pathname);
   }
 
@@ -722,7 +726,7 @@
       document.getElementById('mainApp').style.display = 'block';
       clearPin();
       loadDash();
-      resetInactivityTimer(); // เปิดตัวจับเวลาทันทีหลังล็อกอิน
+      resetInactivityTimer(); 
     } else {
       showAlert(res.error || 'รหัส PIN ไม่ถูกต้อง!', true);
       clearPin();
@@ -792,19 +796,19 @@
     return await r.json();
   }
 
+  // ล็อกอินแบบธรรมดายังค้างฟังก์ชันไว้เผื่อจำเป็นต้องใช้งาน (เรียกจาก Console ได้) 
+  // แต่ปุ่มหน้าเว็บถูกซ่อนไปแล้ว
   async function login() {
     toggleL(true);
-    const userId = document.getElementById('userId').value;
-    const pass = document.getElementById('password').value;
+    const userId = document.getElementById('userId') ? document.getElementById('userId').value : '';
+    const pass = document.getElementById('password') ? document.getElementById('password').value : '';
     const res = await api({ action: 'login', userId: userId, password: pass });
     toggleL(false);
     
     if(res.success && (res.role === 'Admin' || res.role === 'SuperAdmin')) {
       loggedInPassword = pass; 
       sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: pass, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
-      
       window.history.replaceState({}, document.title, window.location.pathname);
-      
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
       loadDash();
@@ -1161,7 +1165,7 @@
       let dLeft = Number(b.daysLeft) || 0;
       let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-primary');
       let statusText = dLeft < 0 ? `เลยกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
-      let displayName = b.userName ? b.userName : 'ไม่ระ捕ชื่อ';
+      let displayName = b.userName ? b.userName : 'ไม่ระบุชื่อ';
       html += `
         <div class="borrower-card p-2 mb-2 border-danger" onclick="viewDetails('${b.loanId}')" style="border-left-width: 4px;">
           <div class="d-flex justify-content-between align-items-center">

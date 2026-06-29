@@ -988,8 +988,8 @@
                     <p class="mb-0 text-primary-corp fw-bold small">ยอดหนี้: ฿${Number(b.amount || 0).toLocaleString()}</p>
                     <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;"><i class="fa-regular fa-calendar me-1"></i>ดิว: ${b.dueDate}</p>
                     <div class="mt-2">
-                        <span class="action-icon icon-edit me-1 shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen small"></i></span>
-                        <span class="action-icon icon-delete shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash small"></i></span>
+                        <span class="action-icon icon-edit me-1 shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen" style="font-size:0.85rem;"></i></span>
+                        <span class="action-icon icon-delete shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash-can" style="font-size:0.85rem;"></i></span>
                     </div>
                 </div>
                 <div class="text-end d-flex flex-column justify-content-between" style="height: 100%;">
@@ -1074,7 +1074,7 @@
               <div class="d-flex justify-content-between align-items-center">
                 <div>
                   <b class="text-dark small">งวดที่ ${p.no} <span class="text-muted fw-normal" style="font-size:0.75rem;">(${p.date})</span></b>
-                  <span class="text-muted d-block mt-1" style="font-size:0.75rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString()} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString()} ${fineText}</span>
+                  <span class="text-muted d-block mt-1" style="font-size:0.80rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString()} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString()} ${fineText}</span>
                 </div>
                 <div class="text-end">
                   <b class="text-success-corp d-block mb-1" style="font-size:1.1rem;">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
@@ -1154,7 +1154,6 @@
 
   function quickPay(id) { document.getElementById('loanIdInput').value = id; document.getElementById('pPayDate').valueAsDate = new Date(); openModal('modalPay'); fetchPreview(); }
 
-  // 🌟 เพิ่ม Try...Catch และดักจับปัญหาให้แสดง Error แถบแดงเวลาเกิดบัคหลังบ้าน
   async function fetchPreview() {
     let query = String(document.getElementById('loanIdInput').value).trim(); 
     let targetLoanId = query;
@@ -1195,7 +1194,6 @@
     document.getElementById('pTotalPaidInput').value = ((Number(curPay.suggestedPay) || 0) - (Number(curPay.fineAmount) || 0)) + (Number(document.getElementById('pFinePaidInput').value) || 0);
   }
 
-  // 🌟 เพิ่ม Try...Catch และดักจับปัญหา Error ดักการกดผ่านโดยไม่ตรวจสอบ
   async function submitPay() {
     const totalPaidVal = document.getElementById('pTotalPaidInput').value; 
     const finePaidVal = document.getElementById('pFinePaidInput').value;

@@ -76,7 +76,7 @@
     .nav-tabs-custom div { padding: 10px 15px; cursor: pointer; font-weight: 600; color: #64748b; border-bottom: 2px solid transparent; margin-bottom: -2px; font-size: 0.90rem; text-align: center; flex: 1;}
     .nav-tabs-custom div.active { color: #1e3a8a; border-bottom: 2px solid #1e3a8a; }
 
-    .action-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer;}
+    .action-icon { width: 32px; height: 32px; display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; cursor: pointer; font-size: 0.95rem;}
     .icon-edit { background: #fef3c7; color: #b45309; }
     .icon-delete { background: #fee2e2; color: #b91c1c; }
     
@@ -565,7 +565,6 @@
     allLoans = res.activeLoans || []; rawAllTimeLoans = res.allTimeLoans || []; windowUsersData = res.users || [];
     windowRecentPays = res.recentPayments || []; 
     
-    // 🌟 ดึงข้อมูลรายชื่อ Admin ไปใส่ใน Dropdown ตัวกรอง (ถ้ามีสิทธิ์)
     if(res.allAdmins && res.allAdmins.length > 0) {
       let filterAdminHtml = '<option value="all">ทั้งหมด</option>';
       res.allAdmins.forEach(ad => {
@@ -668,7 +667,7 @@
       if(res.role === 'SuperAdmin') {
          document.getElementById('btnManageAdmin').style.display = 'block'; 
          document.getElementById('cGroupDiv').style.display = 'block';
-         document.getElementById('filterAdminWrap').style.display = 'block'; // 🌟 โชว์ตัวกรองแอดมินสำหรับ SuperAdmin
+         document.getElementById('filterAdminWrap').style.display = 'block'; 
       } else {
          document.getElementById('btnManageAdmin').style.display = 'none'; 
          document.getElementById('cGroupDiv').style.display = 'none';
@@ -1016,7 +1015,7 @@
                     </div>
                 </div>
                 <div class="text-end d-flex flex-column justify-content-between" style="height: 100%;">
-                    <span class="status-badge ${statusClass} d-block shadow-sm mb-4">${statusText}</span>
+                    <span class="status-badge ${statusClass} d-block shadow-sm mb-3">${statusText}</span>
                     <button class="btn btn-sm bg-primary-corp rounded-pill px-3 py-1 fw-bold shadow-sm mt-auto" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
                 </div>
             </div>
@@ -1032,7 +1031,6 @@
     let limitVal = document.getElementById('filterLimit').value; 
     let searchVal = document.getElementById('searchLoan').value.toLowerCase();
     
-    // 🌟 ดึงค่าจากตัวกรองแอดมิน (ถ้ามี)
     let adminFilter = document.getElementById('filterAdmin') ? document.getElementById('filterAdmin').value : 'all';
 
     let filtered = allLoans.filter(l => {
@@ -1043,8 +1041,6 @@
       else if (statusVal === 'overdue') matchStatus = (dLeft < 0); 
       
       let matchSearch = (l.userName + l.nickname + l.loanId).toLowerCase().includes(searchVal); 
-      
-      // 🌟 เช็คเงื่อนไขแอดมิน
       let matchAdmin = (adminFilter === 'all' || String(l.operatorId).trim() === String(adminFilter).trim());
 
       return matchCycle && matchStatus && matchSearch && matchAdmin;
@@ -1107,7 +1103,6 @@
     if(res.success) {
       document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}<br><span class="badge bg-light text-secondary border mt-2 px-2 py-1 shadow-sm">รหัส: ${res.loanId}</span>`;
       
-      // 🌟 แสดงชื่อแอดมินผู้ปล่อยกู้ในหน้าต่าง Details
       document.getElementById('dAdminName').innerHTML = `<i class="fa-solid fa-user-tie me-1"></i> ผู้ปล่อยกู้: ${res.adminName}`;
       
       document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString()}`; document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString()}`; document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString()}`;

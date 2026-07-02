@@ -236,7 +236,18 @@
         <details>
           <summary class="fw-bold text-primary-corp small" style="cursor:pointer;"><i class="fa-solid fa-filter me-1"></i> ตัวกรองขั้นสูง</summary>
           <div class="row g-2 mt-1 pt-2 border-top stack-form">
-            <div class="col-6"><label>รอบส่ง</label><select id="filterCycle" class="form-select form-select-sm" onchange="applyFilters()"><option value="all">ทั้งหมด</option><option value="1">1 วัน</option><option value="3">3 วัน</option><option value="5">5 วัน</option><option value="7">สัปดาห์</option><option value="15">ครึ่งเดือน</option><option value="30">เดือน</option></select></div>
+            <div class="col-6">
+              <label>รูปแบบ</label>
+              <select id="filterCycleType" class="form-select form-select-sm" onchange="applyFilters()">
+                <option value="all">ทั้งหมด</option>
+                <option value="1">1 วัน</option>
+                <option value="3">3 วัน</option>
+                <option value="5">5 วัน</option>
+                <option value="7">สัปดาห์ (7 วัน)</option>
+                <option value="15">ครึ่งเดือน</option>
+                <option value="30">เดือน</option>
+              </select>
+            </div>
             <div class="col-6"><label>สถานะ</label><select id="filterStatus" class="form-select form-select-sm" onchange="applyFilters()"><option value="all">ทั้งหมด</option><option value="due">ใกล้ครบดิว</option><option value="overdue">เกินกำหนด</option></select></div>
             <div class="col-6"><label>เรียงลำดับ</label><select id="filterSort" class="form-select form-select-sm" onchange="applyFilters()"><option value="due">วันที่ครบกำหนด</option><option value="amtDesc">ยอดหนี้ (มาก-น้อย)</option><option value="amtAsc">ยอดหนี้ (น้อย-มาก)</option></select></div>
             <div class="col-6"><label>แสดงผล</label><select id="filterLimit" class="form-select form-select-sm" onchange="applyFilters()"><option value="30">30 รายการ</option><option value="50">50 รายการ</option><option value="100">100 รายการ</option><option value="all">ทั้งหมด</option></select></div>
@@ -497,13 +508,21 @@
     <div class="row g-2 mb-2">
       <div class="col-6"><label>ยอดเงินต้น (฿)</label><input type="number" id="cAmount" class="form-control fw-bold fs-5 text-primary-corp py-2" min="0" placeholder="10000" oninput="generateSchedulePreview()"></div>
       <div class="col-6"><label>ดอกเบี้ย (%)</label><input type="number" id="cRate" class="form-control py-2" min="0" value="5" oninput="generateSchedulePreview()"></div>
-      <div class="col-6"><label>รอบการส่ง</label>
-        <select id="cCycle" class="form-select py-2" onchange="toggleDayOfWeek(); generateSchedulePreview()">
+      
+      <div class="col-6">
+        <label>รูปแบบการเก็บเงิน</label>
+        <select id="cCycleMode" class="form-select py-2" onchange="toggleCycleMode(); generateSchedulePreview()">
+          <option value="interval">ชำระตามรอบจำนวนวัน</option>
+          <option value="fixed_day">ชำระตามวันในสัปดาห์</option>
+        </select>
+      </div>
+      <div class="col-6" id="cIntervalContainer">
+        <label>รอบการส่ง</label>
+        <select id="cCycleInterval" class="form-select py-2" onchange="generateSchedulePreview()">
           <option value="1">1 วัน</option>
           <option value="3">3 วัน</option>
           <option value="5">5 วัน</option>
           <option value="7">สัปดาห์ (7 วัน)</option>
-          <option value="fixed_day">ทุกสัปดาห์ (ระบุวัน)</option>
           <option value="15">ครึ่งเดือน (15 วัน)</option>
           <option value="30">เดือน (30 วัน)</option>
         </select>
@@ -520,8 +539,9 @@
           <option value="0">วันอาทิตย์</option>
         </select>
       </div>
+      
       <div class="col-6"><label>จำนวนงวด</label><input type="number" id="cInstallments" class="form-control py-2" min="1" value="1" oninput="generateSchedulePreview()"></div>
-      <div class="col-12"><label>วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control py-2" oninput="generateSchedulePreview()"></div>
+      <div class="col-6"><label>วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control py-2" oninput="generateSchedulePreview()"></div>
     </div>
     
     <div class="form-check mt-1 mb-2">
@@ -548,16 +568,25 @@
     <div class="pro-card p-3 mb-3">
       <label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control mb-2 fs-5 fw-bold text-primary-corp py-2" min="0">
       <label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control mb-2 py-2" min="0" readonly>
-      <label>เปลี่ยนรอบส่ง</label>
-      <select id="eCycle" class="form-select mb-2 py-2" onchange="toggleEditDayOfWeek()">
-          <option value="1">1 วัน</option>
-          <option value="3">3 วัน</option>
-          <option value="5">5 วัน</option>
-          <option value="7">สัปดาห์ (7 วัน)</option>
-          <option value="fixed_day">ทุกสัปดาห์ (ระบุวัน)</option>
-          <option value="15">ครึ่งเดือน (15 วัน)</option>
-          <option value="30">เดือน (30 วัน)</option>
+      
+      <label>รูปแบบการเก็บเงิน</label>
+      <select id="eCycleMode" class="form-select mb-2 py-2" onchange="toggleEditCycleMode()">
+        <option value="interval">ชำระตามรอบจำนวนวัน</option>
+        <option value="fixed_day">ชำระตามวันในสัปดาห์</option>
       </select>
+      
+      <div id="eIntervalContainer">
+        <label>เปลี่ยนรอบส่ง</label>
+        <select id="eCycleInterval" class="form-select mb-2 py-2">
+            <option value="1">1 วัน</option>
+            <option value="3">3 วัน</option>
+            <option value="5">5 วัน</option>
+            <option value="7">สัปดาห์ (7 วัน)</option>
+            <option value="15">ครึ่งเดือน (15 วัน)</option>
+            <option value="30">เดือน (30 วัน)</option>
+        </select>
+      </div>
+      
       <div id="eDayOfWeekContainer" style="display:none;">
         <label class="text-primary-corp fw-bold mb-2">เลือกวันเก็บเงินใหม่</label>
         <select id="eDayOfWeek" class="form-select py-2 mb-2">
@@ -570,6 +599,7 @@
           <option value="0">วันอาทิตย์</option>
         </select>
       </div>
+      
       <label>แก้ไขวันที่เริ่ม</label><input type="date" id="eStartDate" class="form-control py-2">
     </div>
     <button onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold fs-6 rounded-pill shadow-sm">บันทึกข้อมูล</button>
@@ -764,6 +794,28 @@
   function openModal(id) { document.getElementById(id).style.display = 'flex'; }
   function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+  function toggleCycleMode() {
+    let mode = document.getElementById('cCycleMode').value;
+    if (mode === 'fixed_day') {
+      document.getElementById('cIntervalContainer').style.display = 'none';
+      document.getElementById('cDayOfWeekContainer').style.display = 'block';
+    } else {
+      document.getElementById('cIntervalContainer').style.display = 'block';
+      document.getElementById('cDayOfWeekContainer').style.display = 'none';
+    }
+  }
+  
+  function toggleEditCycleMode() {
+    let mode = document.getElementById('eCycleMode').value;
+    if (mode === 'fixed_day') {
+      document.getElementById('eIntervalContainer').style.display = 'none';
+      document.getElementById('eDayOfWeekContainer').style.display = 'block';
+    } else {
+      document.getElementById('eIntervalContainer').style.display = 'block';
+      document.getElementById('eDayOfWeekContainer').style.display = 'none';
+    }
+  }
+
   function clearForms() {
     ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cAmount','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin','authPassword'].forEach(id => {
       if(document.getElementById(id)) document.getElementById(id).value = '';
@@ -771,8 +823,11 @@
     document.getElementById('cSchedulePreview').innerHTML = '';
     document.getElementById('cUserSelect').value = 'NEW';
     document.getElementById('cUpfrontInt').checked = false;
-    document.getElementById('cCycle').value = '1';
-    toggleDayOfWeek(); toggleNewUserForm();
+    
+    document.getElementById('cCycleMode').value = 'interval';
+    document.getElementById('cCycleInterval').value = '1';
+    toggleCycleMode(); 
+    toggleNewUserForm();
     
     document.getElementById('payDetails').style.display = 'none';
     document.getElementById('pWarning').style.display = 'none';
@@ -1192,38 +1247,24 @@
         if(res.startDateRaw) document.getElementById('eStartDate').value = res.startDateRaw;
         document.getElementById('eAmount').value = Number(res.principal || 0); document.getElementById('eRate').value = Number(res.rate || 0); 
         
-        let selectCycle = document.getElementById('eCycle');
-        // กำหนดค่า cycle ใน dropdown หรือแสดง/ซ่อนวันตามความเหมาะสม
-        let optExists = Array.from(selectCycle.options).some(o => o.value == res.cycle);
-        if(!optExists && res.cycle == 7) { 
-           // หาก cycle 7 อาจจะเป็นสัปดาห์ หรือ fixed_day, ให้ default เป็นสัปดาห์ไปก่อน
-           selectCycle.value = 7;
-        } else {
-           selectCycle.value = res.cycle || 1;
-        }
+        // Populate current value in form
+        document.getElementById('eCycleMode').value = 'interval';
+        document.getElementById('eCycleInterval').value = res.cycle || 1;
+        toggleEditCycleMode();
         
-        toggleEditDayOfWeek();
         openModal('modalEdit');
       }
     });
   }
 
-  function toggleDayOfWeek() {
-     let cycle = document.getElementById('cCycle').value;
-     document.getElementById('cDayOfWeekContainer').style.display = (cycle === 'fixed_day') ? 'block' : 'none';
-  }
-  
-  function toggleEditDayOfWeek() {
-     let cycle = document.getElementById('eCycle').value;
-     document.getElementById('eDayOfWeekContainer').style.display = (cycle === 'fixed_day') ? 'block' : 'none';
-  }
-
   async function submitEdit() {
     toggleL(true); let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
-    let targetDay = (document.getElementById('eCycle').value === 'fixed_day') ? document.getElementById('eDayOfWeek').value : null;
+    let cycleMode = document.getElementById('eCycleMode').value;
+    let cycleVal = cycleMode === 'fixed_day' ? 'fixed_day' : document.getElementById('eCycleInterval').value;
+    let targetDay = cycleMode === 'fixed_day' ? document.getElementById('eDayOfWeek').value : null;
     
-    const res = await api({ action: 'editLoan', operatorId: authData.userId, loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value, amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value, cycle: document.getElementById('eCycle').value, targetDay: targetDay, startDate: document.getElementById('eStartDate').value });
+    const res = await api({ action: 'editLoan', operatorId: authData.userId, loanId: document.getElementById('eLoanId').value, userId: document.getElementById('eUserId').value, amount: document.getElementById('eAmount').value, rate: document.getElementById('eRate').value, cycle: cycleVal, targetDay: targetDay, startDate: document.getElementById('eStartDate').value });
     toggleL(false); if(res.success) { showAlert('อัปเดตข้อมูลสัญญาสำเร็จ'); closeModal('modalEdit'); loadDash(); }
   }
 
@@ -1320,8 +1361,8 @@
     let inst = Number(document.getElementById('cInstallments').value) || 1; 
     let dateStr = document.getElementById('cStartDate').value;
     
-    let cycleType = document.getElementById('cCycle').value;
-    let cycle = cycleType === 'fixed_day' ? 7 : Number(cycleType) || 1;
+    let cycleMode = document.getElementById('cCycleMode').value;
+    let cycle = cycleMode === 'fixed_day' ? 7 : Number(document.getElementById('cCycleInterval').value) || 1;
     
     let isUpfront = document.getElementById('cUpfrontInt').checked;
     
@@ -1331,10 +1372,10 @@
     if(isNaN(start.getTime())) { document.getElementById('cSchedulePreview').innerHTML = '<div class="text-danger text-center p-2 small">รูปแบบวันที่ไม่ถูกต้อง</div>'; return; }
     
     let firstDue = new Date(start);
-    if (cycleType === 'fixed_day') {
+    if (cycleMode === 'fixed_day') {
        let targetDay = Number(document.getElementById('cDayOfWeek').value);
        let diff = targetDay - start.getDay();
-       if (diff <= 0) diff += 7; // ปัดเป็นสัปดาห์หน้า
+       if (diff <= 0) diff += 7; 
        firstDue.setDate(firstDue.getDate() + diff);
     } else {
        firstDue.setDate(firstDue.getDate() + cycle);
@@ -1345,7 +1386,6 @@
 
     let html = '';
     
-    // พรีวิวส่วนของการหักล่วงหน้า
     if (isUpfront) {
        html += `
        <div class="d-flex justify-content-between text-danger-corp small border-bottom py-2 px-2 rounded" style="background-color: #fef2f2;">
@@ -1358,7 +1398,6 @@
        </div>`;
     }
     
-    // ตารางผ่อนงวดปกติ
     for(let i = 1; i <= inst; i++) {
       let d = new Date(firstDue);
       d.setDate(d.getDate() + ((i-1) * cycle));
@@ -1377,10 +1416,11 @@
     toggleL(true); let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
-    let targetDay = document.getElementById('cDayOfWeek').value;
+    let cycleVal = document.getElementById('cCycleMode').value === 'fixed_day' ? 'fixed_day' : document.getElementById('cCycleInterval').value;
+    let targetDay = cycleVal === 'fixed_day' ? document.getElementById('cDayOfWeek').value : null;
     let isUpfront = document.getElementById('cUpfrontInt').checked;
     
-    await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: document.getElementById('cCycle').value, targetDay: targetDay, isUpfront: isUpfront, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value, groupName: authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName });
+    await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: cycleVal, targetDay: targetDay, isUpfront: isUpfront, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value, groupName: authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName });
     toggleL(false); clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();
   }
 

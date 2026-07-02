@@ -22,6 +22,14 @@
 
     .pro-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 2px 6px rgba(0, 0, 0, 0.03); margin-bottom: 12px; }
     
+    /* CSS Grid สำหรับแสดงผล 3-4 คอลัมน์บนจอใหญ่ */
+    .card-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 15px;
+      align-items: start;
+    }
+
     .form-control, .form-select { 
       background-color: #f8fafc; border: 1.5px solid #cbd5e1; color: #1e293b; 
       border-radius: 8px; padding: 10px 12px; font-weight: 500; font-size: 0.95rem;
@@ -49,9 +57,11 @@
 
     .loader { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(255,255,255,0.95); display: none; z-index: 9999; justify-content: center; align-items: center; flex-direction: column; }
 
+    /* ปรับ margin-bottom ให้เป็น 0 เพราะเราใช้ gap ของ grid แทนแล้ว */
     .borrower-card { 
-      background: #ffffff; border-left: 5px solid #1e3a8a; border-radius: 10px; margin-bottom: 12px; 
+      background: #ffffff; border-left: 5px solid #1e3a8a; border-radius: 10px; margin-bottom: 0; 
       padding: 14px; cursor: pointer; transition: 0.2s; box-shadow: 0 1px 4px rgba(0,0,0,0.05); border: 1px solid #f1f5f9;
+      height: 100%;
     }
     
     .top-header {
@@ -161,7 +171,7 @@
     </div>
   </div>
 
-  <div class="container" style="max-width: 600px; padding-left: 12px; padding-right: 12px;">
+  <div class="container-fluid" style="max-width: 1400px; padding-left: 15px; padding-right: 15px;">
     <div id="viewDash">
       <div class="pro-card p-3">
         <div class="d-flex justify-content-between align-items-center mb-3">
@@ -174,14 +184,19 @@
           </div>
         </div>
 
-        <div class="p-2 mb-2 rounded-3" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #e2e8f0;">
-          <label class="fw-bold d-block text-primary-corp" style="font-size: 0.85rem; margin-bottom: 2px;">ยอดปล่อยกู้สะสม</label>
-          <h3 class="fw-bold m-0 text-primary-corp">฿<span id="mTotalLoan">0</span></h3>
-        </div>
-
-        <div class="p-2 mb-2 rounded-3" style="background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%); border: 1px solid #fde68a;">
-          <label class="fw-bold d-block text-warning-corp" style="font-size: 0.85rem; margin-bottom: 2px;">ยอดหนี้คงค้างทั้งหมด</label>
-          <h3 class="fw-bold m-0 text-warning-corp">฿<span id="mTotalRemain">0</span></h3>
+        <div class="row g-2 mb-2">
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 h-100" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #e2e8f0;">
+              <label class="fw-bold d-block text-primary-corp" style="font-size: 0.85rem; margin-bottom: 2px;">ยอดปล่อยกู้สะสม</label>
+              <h3 class="fw-bold m-0 text-primary-corp">฿<span id="mTotalLoan">0</span></h3>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="p-3 rounded-3 h-100" style="background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%); border: 1px solid #fde68a;">
+              <label class="fw-bold d-block text-warning-corp" style="font-size: 0.85rem; margin-bottom: 2px;">ยอดหนี้คงค้างทั้งหมด</label>
+              <h3 class="fw-bold m-0 text-warning-corp">฿<span id="mTotalRemain">0</span></h3>
+            </div>
+          </div>
         </div>
 
         <div class="row text-center mt-3 pt-2 border-top g-1">
@@ -219,12 +234,12 @@
       </div>
 
       <div class="row g-2 mb-3">
-        <div class="col-12"><button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-2"><i class="fa-solid fa-hand-holding-dollar fs-4"></i> บันทึกรับชำระเงิน</button></div>
-        <div class="col-12"><button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-2"><i class="fa-solid fa-file-signature fs-4"></i> เปิดสัญญาลูกค้าใหม่</button></div>
+        <div class="col-12 col-md-6"><button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-2 h-100"><i class="fa-solid fa-hand-holding-dollar fs-4"></i> บันทึกรับชำระเงิน</button></div>
+        <div class="col-12 col-md-6"><button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-2 h-100"><i class="fa-solid fa-file-signature fs-4"></i> เปิดสัญญาลูกค้าใหม่</button></div>
       </div>
 
       <span class="fw-bold d-block mb-2 text-danger-corp small px-1"><i class="fa-solid fa-bell me-1"></i>รายการใกล้ครบกำหนด / ค้างชำระ</span>
-      <div id="dashAlertContainer"></div>
+      <div id="dashAlertContainer" class="card-grid"></div>
     </div>
 
     <div id="viewList" style="display:none;">
@@ -255,7 +270,7 @@
           </div>
         </details>
       </div>
-      <div id="loanContainer"></div>
+      <div id="loanContainer" class="card-grid"></div>
     </div>
     
     <div id="viewUsers" style="display:none;">
@@ -271,7 +286,7 @@
             </select>
         </div>
       </div>
-      <div id="usersContainer"></div>
+      <div id="usersContainer" class="card-grid"></div>
     </div>
   </div>
 
@@ -976,7 +991,7 @@
             <div class="me-3">${photoHtml}</div>
             <div>
               <h6 class="fw-bold mb-1 text-dark">${u.name} ${u.nickname ? `(${u.nickname})` : ''}</h6>
-              <span class="text-muted small"><i class="fa-solid fa-file-contract me-1"></i>กู้ ${userLoans.length} ครั้ง | ฿${totalBorrowed.toLocaleString()}</span>
+              <span class="text-muted small"><i class="fa-solid fa-users me-1"></i>กลุ่ม: ${u.groupName || '-'} | กู้ ${userLoans.length} ครั้ง</span>
             </div>
           </div>
         </div>`;
@@ -1157,34 +1172,39 @@
     data.forEach(b => {
         let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
         html += `
-        <div class="borrower-card loan-item p-3" onclick="viewDetails('${b.loanId}')">
-            <div class="d-flex justify-content-between align-items-start">
+        <div class="borrower-card loan-item p-3 d-flex flex-column" onclick="viewDetails('${b.loanId}')">
+            <div class="d-flex justify-content-between align-items-start mb-2">
                 <div>
                     <h6 class="fw-bold mb-1 text-dark small">${b.userName} ${b.nickname ? `(${b.nickname})` : ''}</h6>
                     <span class="badge bg-light text-secondary border mb-1 px-2" style="font-size:0.70rem;">รอบ ${b.cycle} วัน</span>
                     <span class="text-muted d-block mb-1" style="font-size:0.75rem;">รหัส: ${b.loanId}</span>
-                    <p class="mb-0 text-primary-corp fw-bold small">ยอดหนี้: ฿${Number(b.amount || 0).toLocaleString()}</p>
-                    <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;"><i class="fa-regular fa-calendar me-1"></i>ดิว: ${b.dueDate}</p>
-                    
-                    <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;"><i class="fa-solid fa-user-tie me-1"></i>แอดมิน: ${b.adminName || 'ไม่ระบุ'}</p>
+                </div>
+                <div class="text-end">
+                    <span class="status-badge ${statusClass} d-block shadow-sm">${statusText}</span>
+                </div>
+            </div>
+            
+            <div>
+                <p class="mb-0 text-primary-corp fw-bold small">ยอดหนี้: ฿${Number(b.amount || 0).toLocaleString()}</p>
+                <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;"><i class="fa-regular fa-calendar me-1"></i>ดิว: ${b.dueDate}</p>
+                <p class="mb-0 text-muted mt-1" style="font-size:0.75rem;">
+                   <i class="fa-solid fa-user-tie me-1"></i>แอดมิน: ${b.adminName || 'ไม่ระบุ'} | <i class="fa-solid fa-users mx-1"></i>กลุ่ม: ${b.groupName || '-'}
+                </p>
+            </div>
 
-                    <div class="mt-2">
-                        <span class="action-icon icon-edit me-1 shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen" style="font-size:0.85rem;"></i></span>
-                        <span class="action-icon icon-delete shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash-can" style="font-size:0.85rem;"></i></span>
-                    </div>
+            <div class="d-flex justify-content-between align-items-end mt-auto pt-3">
+                <div>
+                    <span class="action-icon icon-edit me-1 shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerEdit('${b.loanId}')"><i class="fa-solid fa-pen" style="font-size:0.85rem;"></i></span>
+                    <span class="action-icon icon-delete shadow-sm" style="width:28px; height:28px;" onclick="event.stopPropagation(); triggerDelete('${b.loanId}')"><i class="fa-solid fa-trash-can" style="font-size:0.85rem;"></i></span>
                 </div>
-                <div class="text-end d-flex flex-column justify-content-between" style="height: 100%;">
-                    <span class="status-badge ${statusClass} d-block shadow-sm mb-4">${statusText}</span>
-                    <button class="btn btn-sm bg-primary-corp rounded-pill px-3 py-1 fw-bold shadow-sm mt-auto" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
-                </div>
+                <button class="btn btn-sm bg-primary-corp rounded-pill px-3 py-1 fw-bold shadow-sm" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
             </div>
         </div>`;
     });
-    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลที่ค้นหา</div>';
+    document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4 border rounded bg-white" style="grid-column: 1 / -1;">ไม่มีข้อมูลที่ค้นหา</div>';
   }
 
   function applyFilters() {
-    // แก้ไขข้อผิดพลาดของ ID เรียบร้อย
     let cycleVal = document.getElementById('filterCycle').value; 
     let statusVal = document.getElementById('filterStatus').value; 
     let sortVal = document.getElementById('filterSort').value; 
@@ -1258,6 +1278,22 @@
     });
   }
 
+  function toggleDayOfWeek() {
+     let cycle = document.getElementById('cCycle').value;
+     document.getElementById('cDayOfWeekContainer').style.display = (cycle === 'fixed_day') ? 'block' : 'none';
+  }
+  
+  function toggleEditCycleMode() {
+     let mode = document.getElementById('eCycleMode').value;
+     if (mode === 'fixed_day') {
+       document.getElementById('eIntervalContainer').style.display = 'none';
+       document.getElementById('eDayOfWeekContainer').style.display = 'block';
+     } else {
+       document.getElementById('eIntervalContainer').style.display = 'block';
+       document.getElementById('eDayOfWeekContainer').style.display = 'none';
+     }
+  }
+
   async function submitEdit() {
     toggleL(true); let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
@@ -1280,7 +1316,7 @@
       `;
       document.getElementById('dBadges').innerHTML = badgesHtml;
       
-      document.getElementById('dAdminName').innerHTML = `<i class="fa-solid fa-user-tie me-1"></i> ผู้ปล่อยกู้: ${res.adminName}`;
+      document.getElementById('dAdminName').innerHTML = `<i class="fa-solid fa-user-tie me-1"></i> ผู้ปล่อยกู้: ${res.adminName} | <i class="fa-solid fa-users ms-1 me-1"></i> กลุ่ม: ${res.groupName || '-'}`;
       
       document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString()}`; document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString()}`; document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString()}`;
       

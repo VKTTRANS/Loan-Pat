@@ -230,7 +230,7 @@
     <div id="viewList" style="display:none;">
       <div class="pro-card p-3 mb-3">
         <div class="input-group shadow-sm rounded-3 mb-2">
-          <span class="input-group-text bg-white border-end-0 py-2"><i class="fa-solid fa-search text-muted" style="font-size: 0.9rem;"></i></span>
+          <span class="input-group-text bg-white border-end-0 py-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size: 0.9rem;"></i></span>
           <input class="form-control border-start-0 ps-0 py-2" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
         </div>
         <details>
@@ -250,7 +250,7 @@
     <div id="viewUsers" style="display:none;">
       <div class="pro-card p-3 mb-3">
         <div class="input-group shadow-sm rounded-3 mb-2">
-          <span class="input-group-text bg-white border-end-0 py-2"><i class="fa-solid fa-search text-muted" style="font-size: 0.9rem;"></i></span>
+          <span class="input-group-text bg-white border-end-0 py-2"><i class="fa-solid fa-magnifying-glass text-muted" style="font-size: 0.9rem;"></i></span>
           <input class="form-control border-start-0 ps-0 py-2" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="filterUsers()">
         </div>
         <div class="d-flex justify-content-end align-items-center mt-2">
@@ -422,7 +422,7 @@
     <div class="input-group mb-3 shadow-sm rounded-3">
       <input list="payLoanOptions" id="loanIdInput" class="form-control py-2 border-end-0" placeholder="รหัสสัญญา / ชื่อลูกค้า...">
       <datalist id="payLoanOptions"></datalist>
-      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-3"><i class="fa-solid fa-search"></i></button>
+      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-3"><i class="fa-solid fa-magnifying-glass"></i></button>
     </div>
     
     <div id="payDetails" style="display:none">
@@ -550,6 +550,8 @@
   let detectedNfcUid = "";
   let timeLogoutVar;
   let pendingAction = null; 
+  
+  const DAY_NAMES = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 
   document.getElementById('cStartDate').valueAsDate = new Date();
   
@@ -557,6 +559,12 @@
   let yearHtml = '<option value="all">ทุกปี</option>';
   for(let y = currentYear - 2; y <= currentYear + 2; y++) yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
+
+  function formatThaiDateWithDay(dateString) {
+    let d = new Date(dateString);
+    if(isNaN(d.getTime())) return '-';
+    return DAY_NAMES[d.getDay()] + ' ' + d.toLocaleDateString('th-TH');
+  }
 
   function getSafeImgUrl(url) {
     if (!url || url === 'ไม่มี') return '';
@@ -891,7 +899,7 @@
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 <b class="text-dark small d-block mb-1">ยอดกู้: ฿${Number(l.originalPrincipal).toLocaleString()}</b>
-                <span class="text-muted d-block mb-1" style="font-size:0.75rem;"><i class="fa-regular fa-calendar me-1"></i>${l.startDate && !isNaN(new Date(l.startDate).getTime()) ? new Date(l.startDate).toLocaleDateString('th-TH') : '-'}</span>
+                <span class="text-muted d-block mb-1" style="font-size:0.75rem;"><i class="fa-regular fa-calendar me-1"></i>${formatThaiDateWithDay(l.startDate)}</span>
                 <span class="text-primary-corp d-block mt-1" style="font-size:0.70rem;"><i class="fa-solid fa-user-tie me-1"></i>แอดมิน: ${l.adminName || 'ไม่ระบุ'}</span>
               </div>
               <div class="text-end">
@@ -1225,8 +1233,9 @@
     
     let html = '';
     for(let i = 1; i <= inst; i++) {
-      let d = new Date(start); d.setDate(d.getDate() + (i * cycle));
-      html += `<div class="d-flex justify-content-between text-muted small border-bottom py-2"><span>งวดที่ ${i}: <span class="fw-bold text-dark">${d.toLocaleDateString('th-TH')}</span></span><b class="text-primary-corp">฿${((amount / inst) + (amount * (rate / 100))).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`;
+      let d = new Date(start); d.setDate(d.getDate() + ((i-1) * cycle));
+      let dayStr = DAY_NAMES[d.getDay()] + ' ' + d.toLocaleDateString('th-TH');
+      html += `<div class="d-flex justify-content-between text-muted small border-bottom py-2"><span>งวดที่ ${i}: <span class="fw-bold text-dark">${dayStr}</span></span><b class="text-primary-corp">฿${((amount / inst) + (amount * (rate / 100))).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`;
     }
     document.getElementById('cSchedulePreview').innerHTML = html;
   }

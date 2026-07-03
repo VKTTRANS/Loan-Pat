@@ -116,6 +116,17 @@
   <img id="fullSizeImage" src="" alt="Full Size">
 </div>
 
+<div class="container" id="logoutScreen" style="display:none; max-width: 600px; padding-top: 80px;">
+  <div class="pro-card p-4 text-center shadow-lg" style="border-top: 5px solid #dc2626;">
+    <i class="fa-solid fa-person-falling-burst text-danger-corp mb-3" style="font-size: 5rem;"></i>
+    <h3 class="fw-bold mb-2 text-dark">เตะออกจากระบบแล้วจ้า! 🥾</h3>
+    <p class="text-muted mb-4">แหม... ปล่อยจอทิ้งไว้นาน นึกว่าโดนลูกหนี้อุ้มไปแล้ว!<br><br>ไม่ต้องห่วง ระบบล้างข้อมูลการเข้าระบบให้เกลี้ยงแล้ว ปลอดภัย 100%<br><br><b class="text-danger-corp">ปิดเบราว์เซอร์หน้านี้ทิ้งซะ</b><br>แล้วเอาเวลาไปทำมาหากินต่อเถอะวัยรุ่น 💸</p>
+    <button class="btn btn-outline-secondary rounded-pill px-4 py-2 fw-bold w-100" onclick="location.reload()">
+      <i class="fa-solid fa-rotate-right me-1"></i> แตะ NFC เพื่อเข้าสู่ระบบใหม่
+    </button>
+  </div>
+</div>
+
 <div class="container" id="loginPage" style="max-width: 600px; padding-top: 40px;">
   <div id="noNfcWarning" class="text-center py-5">
     <i class="fa-solid fa-shield-halved mb-3" style="font-size: 4.5rem; color: #1e3a8a;"></i>
@@ -541,7 +552,7 @@
       </div>
       
       <div class="col-6"><label>จำนวนงวด</label><input type="number" id="cInstallments" class="form-control py-2" min="1" value="1" oninput="generateSchedulePreview()"></div>
-      <div class="col-6"><label>วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control py-2" oninput="generateSchedulePreview()"></div>
+      <div class="col-12"><label>วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control py-2" oninput="generateSchedulePreview()"></div>
     </div>
     
     <div class="form-check mt-1 mb-2">
@@ -872,7 +883,16 @@
   }
 
   function logout() {
-    clearTimeout(timeLogoutVar); sessionStorage.removeItem('fintechAuthData'); location.reload();
+    clearTimeout(timeLogoutVar); 
+    sessionStorage.removeItem('fintechAuthData'); 
+    
+    // ซ่อนหน้าแอปทั้งหมด และแสดงหน้า Safe Logout
+    document.getElementById('loginPage').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'none';
+    document.getElementById('logoutScreen').style.display = 'block';
+    
+    // เปลี่ยน URL เคลียร์ UID ทิ้ง ป้องกันการ Auto-trigger
+    window.history.replaceState({}, document.title, window.location.pathname);
   }
 
   async function loadDash() {

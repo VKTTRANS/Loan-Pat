@@ -356,8 +356,13 @@
       <label>ชื่อเล่น</label><input type="text" id="euNick" class="form-control mb-2 py-2">
       <label>เบอร์โทร</label><input type="text" id="euPhone" class="form-control mb-2 py-2">
       <label>ที่อยู่/รายละเอียด</label><input type="text" id="euDetails" class="form-control mb-2 py-2">
+      
       <label class="text-muted">อัปเดตรูปหน้าตรง</label><input type="file" id="euPhoto" class="form-control mb-2 py-1" accept="image/*">
       <label class="text-muted">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control mb-2 py-1" accept="image/*">
+      <label class="text-muted">อัปเดตรูปเพิ่มเติม 1</label><input type="file" id="euImg3" class="form-control mb-2 py-1" accept="image/*">
+      <label class="text-muted">อัปเดตรูปเพิ่มเติม 2</label><input type="file" id="euImg4" class="form-control mb-2 py-1" accept="image/*">
+      <label class="text-muted">อัปเดตรูปเพิ่มเติม 3</label><input type="file" id="euImg5" class="form-control mb-2 py-1" accept="image/*">
+      
       <div id="euGroupDiv" style="display:none;">
         <label class="text-primary-corp fw-bold mt-1">ย้ายกลุ่มดูแล</label>
         <select id="euGroup" class="form-select py-2 mb-1"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
@@ -505,10 +510,16 @@
       <label>ชื่อเล่น</label><input type="text" id="cNick" class="form-control mb-2 py-2">
       <label>เบอร์โทรศัพท์</label><input type="text" id="cPhone" class="form-control mb-2 py-2">
       <label>ที่อยู่/รายละเอียด</label><input type="text" id="cDetails" class="form-control mb-2 py-2">
+      
       <div class="row g-2 mt-1">
           <div class="col-6"><label class="text-muted small">รูปภาพหน้าตรง</label><input type="file" id="cPhoto" class="form-control py-1" accept="image/*"></div>
           <div class="col-6"><label class="text-muted small">เอกสาร/บัตร ปชช.</label><input type="file" id="cIdCard" class="form-control py-1" accept="image/*"></div>
+          
+          <div class="col-4"><label class="text-muted small">รูปที่ 3</label><input type="file" id="cImg3" class="form-control py-1" accept="image/*"></div>
+          <div class="col-4"><label class="text-muted small">รูปที่ 4</label><input type="file" id="cImg4" class="form-control py-1" accept="image/*"></div>
+          <div class="col-4"><label class="text-muted small">รูปที่ 5</label><input type="file" id="cImg5" class="form-control py-1" accept="image/*"></div>
       </div>
+      
       <div id="cGroupDiv" style="display:none;" class="mt-2">
         <label class="fw-bold text-primary-corp small">กลุ่มดูแล</label><select id="cGroup" class="form-select py-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
       </div>
@@ -522,21 +533,16 @@
       <div class="col-6">
         <label>รูปแบบการเก็บเงิน</label>
         <select id="cCycleMode" class="form-select py-2" onchange="toggleCycleMode(); generateSchedulePreview()">
-          <option value="interval">ชำระตามรอบจำนวนวัน</option>
-          <option value="fixed_day">ชำระตามวันในสัปดาห์</option>
+          <option value="interval">ชำระตามรอบจำนวนวัน (นับถอยหลัง)</option>
+          <option value="fixed_day">ชำระตามวันในสัปดาห์ (เช่น ทุกวันจันทร์)</option>
         </select>
       </div>
+      
       <div class="col-6" id="cIntervalContainer">
-        <label>รอบการส่ง</label>
-        <select id="cCycleInterval" class="form-select py-2" onchange="generateSchedulePreview()">
-          <option value="1">1 วัน</option>
-          <option value="3">3 วัน</option>
-          <option value="5">5 วัน</option>
-          <option value="7">สัปดาห์ (7 วัน)</option>
-          <option value="15">ครึ่งเดือน (15 วัน)</option>
-          <option value="30">เดือน (30 วัน)</option>
-        </select>
+        <label>รอบการส่ง (จำนวนวัน 1-120 วัน)</label>
+        <input type="number" id="cCycleInterval" class="form-control py-2" min="1" max="120" value="1" oninput="generateSchedulePreview()">
       </div>
+      
       <div class="col-6" id="cDayOfWeekContainer" style="display:none;">
         <label class="text-primary-corp fw-bold">เลือกวันเก็บเงิน</label>
         <select id="cDayOfWeek" class="form-select py-2" onchange="generateSchedulePreview()">
@@ -581,20 +587,13 @@
       
       <label>รูปแบบการเก็บเงิน</label>
       <select id="eCycleMode" class="form-select mb-2 py-2" onchange="toggleEditCycleMode()">
-        <option value="interval">ชำระตามรอบจำนวนวัน</option>
-        <option value="fixed_day">ชำระตามวันในสัปดาห์</option>
+        <option value="interval">ชำระตามรอบจำนวนวัน (นับถอยหลัง)</option>
+        <option value="fixed_day">ชำระตามวันในสัปดาห์ (เช่น ทุกวันจันทร์)</option>
       </select>
       
       <div id="eIntervalContainer">
-        <label>เปลี่ยนรอบส่ง</label>
-        <select id="eCycleInterval" class="form-select mb-2 py-2">
-            <option value="1">1 วัน</option>
-            <option value="3">3 วัน</option>
-            <option value="5">5 วัน</option>
-            <option value="7">สัปดาห์ (7 วัน)</option>
-            <option value="15">ครึ่งเดือน (15 วัน)</option>
-            <option value="30">เดือน (30 วัน)</option>
-        </select>
+        <label>เปลี่ยนรอบส่ง (จำนวนวัน 1-120 วัน)</label>
+        <input type="number" id="eCycleInterval" class="form-control mb-2 py-2" min="1" max="120" value="1">
       </div>
       
       <div id="eDayOfWeekContainer" style="display:none;">
@@ -827,7 +826,7 @@
   }
 
   function clearForms() {
-    ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cAmount','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin','authPassword'].forEach(id => {
+    ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cImg3','cImg4','cImg5','cAmount','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin','authPassword'].forEach(id => {
       if(document.getElementById(id)) document.getElementById(id).value = '';
     });
     document.getElementById('cSchedulePreview').innerHTML = '';
@@ -1006,12 +1005,28 @@
 
   function viewUserHistory(userId) {
     let user = windowUsersData.find(u => String(u.id).trim() === String(userId).trim()); if(!user) return;
-    let safeFace = getSafeImgUrl(user.photoUrl); let safeId = getSafeImgUrl(user.idCardUrl); let phoneStr = String(user.phone || '').replace(/'/g, '');
-    let photo1 = safeFace ? `<img src="${safeFace}" class="img-box mb-1" style="width:100px; height:100px;" onclick="zoomImage('${safeFace}')">` : `<div class="img-box mb-1 mx-auto d-flex justify-content-center align-items-center" style="width:100px; height:100px;"><i class="fa-solid fa-user text-secondary fs-1"></i></div>`;
-    let photo2 = safeId ? `<img src="${safeId}" class="img-box mb-1" style="width:100px; height:100px;" onclick="zoomImage('${safeId}')">` : `<div class="img-box mb-1 mx-auto d-flex justify-content-center align-items-center" style="width:100px; height:100px;"><i class="fa-solid fa-id-card text-secondary fs-1"></i></div>`;
+    let safeFace = getSafeImgUrl(user.photoUrl); 
+    let safeId = getSafeImgUrl(user.idCardUrl); 
+    let safeImg3 = getSafeImgUrl(user.img3Url);
+    let safeImg4 = getSafeImgUrl(user.img4Url);
+    let safeImg5 = getSafeImgUrl(user.img5Url);
+    
+    let phoneStr = String(user.phone || '').replace(/'/g, '');
+    
+    let photo1 = safeFace ? `<img src="${safeFace}" class="img-box mb-1" style="width:70px; height:70px;" onclick="zoomImage('${safeFace}')">` : `<div class="img-box mb-1 mx-auto d-flex justify-content-center align-items-center" style="width:70px; height:70px;"><i class="fa-solid fa-user text-secondary fs-3"></i></div>`;
+    let photo2 = safeId ? `<img src="${safeId}" class="img-box mb-1" style="width:70px; height:70px;" onclick="zoomImage('${safeId}')">` : `<div class="img-box mb-1 mx-auto d-flex justify-content-center align-items-center" style="width:70px; height:70px;"><i class="fa-solid fa-id-card text-secondary fs-3"></i></div>`;
+    let photo3 = safeImg3 ? `<img src="${safeImg3}" class="img-box mb-1" style="width:70px; height:70px;" onclick="zoomImage('${safeImg3}')">` : ``;
+    let photo4 = safeImg4 ? `<img src="${safeImg4}" class="img-box mb-1" style="width:70px; height:70px;" onclick="zoomImage('${safeImg4}')">` : ``;
+    let photo5 = safeImg5 ? `<img src="${safeImg5}" class="img-box mb-1" style="width:70px; height:70px;" onclick="zoomImage('${safeImg5}')">` : ``;
 
     document.getElementById('uhProfile').innerHTML = `
-      <div class="d-flex justify-content-center gap-3 mb-3"><div>${photo1}<br><span class="text-muted fw-bold small">หน้าตรง</span></div><div>${photo2}<br><span class="text-muted fw-bold small">เอกสาร</span></div></div>
+      <div class="d-flex justify-content-center flex-wrap gap-2 mb-3">
+        <div class="text-center">${photo1}<br><span class="text-muted fw-bold" style="font-size:0.6rem;">หน้าตรง</span></div>
+        <div class="text-center">${photo2}<br><span class="text-muted fw-bold" style="font-size:0.6rem;">เอกสาร</span></div>
+        ${photo3 ? `<div class="text-center">${photo3}<br><span class="text-muted fw-bold" style="font-size:0.6rem;">รูปเพิ่มเติม</span></div>` : ''}
+        ${photo4 ? `<div class="text-center">${photo4}<br><span class="text-muted fw-bold" style="font-size:0.6rem;">รูปเพิ่มเติม</span></div>` : ''}
+        ${photo5 ? `<div class="text-center">${photo5}<br><span class="text-muted fw-bold" style="font-size:0.6rem;">รูปเพิ่มเติม</span></div>` : ''}
+      </div>
       <h6 class="fw-bold text-primary-corp mb-2">${user.name} ${user.nickname ? `(${user.nickname})` : ''} <i class="fa-solid fa-pen text-warning-corp ms-2" style="cursor:pointer;" onclick="triggerEditUser('${user.id}')"></i></h6>
       <p class="text-muted small mb-1"><i class="fa-solid fa-phone me-1"></i>${phoneStr || 'ไม่มีเบอร์โทร'}</p>
       <p class="text-muted small mb-2 px-2">${user.details || 'ไม่มีรายละเอียด'}</p>
@@ -1047,10 +1062,19 @@
     let user = windowUsersData.find(u => String(u.id).trim() === String(userId).trim()); if(!user) return;
     document.getElementById('euUserId').value = user.id; document.getElementById('euName').value = user.name;
     document.getElementById('euNick').value = user.nickname; document.getElementById('euPhone').value = String(user.phone || '').replace(/'/g, ''); document.getElementById('euDetails').value = user.details;
+    
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-    if(authData.role === 'SuperAdmin') { document.getElementById('euGroupDiv').style.display = 'block'; document.getElementById('euGroup').value = user.groupName || 'A'; } 
-    else document.getElementById('euGroupDiv').style.display = 'none';
-    document.getElementById('euPhoto').value = ''; document.getElementById('euIdCard').value = ''; openModal('modalEditUser');
+    if(authData.role === 'SuperAdmin') { 
+        document.getElementById('euGroupDiv').style.display = 'block'; 
+        document.getElementById('euGroup').value = user.groupName || 'A'; 
+    } else document.getElementById('euGroupDiv').style.display = 'none';
+    
+    document.getElementById('euPhoto').value = ''; 
+    document.getElementById('euIdCard').value = ''; 
+    document.getElementById('euImg3').value = '';
+    document.getElementById('euImg4').value = '';
+    document.getElementById('euImg5').value = '';
+    openModal('modalEditUser');
   }
 
   function compressImage(file, maxWidth = 800) {
@@ -1070,9 +1094,30 @@
 
   async function submitEditUser() {
     toggleL(true);
-    let photoBase64 = await compressImage(document.getElementById('euPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('euIdCard').files[0]);
-    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData')); let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
-    const res = await api({ action: 'editUser', operatorId: authData.userId, userId: document.getElementById('euUserId').value, name: document.getElementById('euName').value, nickname: document.getElementById('euNick').value, phone: document.getElementById('euPhone').value, details: document.getElementById('euDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, groupName: group });
+    let photoBase64 = await compressImage(document.getElementById('euPhoto').files[0]); 
+    let idCardBase64 = await compressImage(document.getElementById('euIdCard').files[0]);
+    let img3Base64 = await compressImage(document.getElementById('euImg3').files[0]);
+    let img4Base64 = await compressImage(document.getElementById('euImg4').files[0]);
+    let img5Base64 = await compressImage(document.getElementById('euImg5').files[0]);
+    
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData')); 
+    let group = authData.role === 'SuperAdmin' ? document.getElementById('euGroup').value : undefined;
+    
+    const res = await api({ 
+        action: 'editUser', 
+        operatorId: authData.userId, 
+        userId: document.getElementById('euUserId').value, 
+        name: document.getElementById('euName').value, 
+        nickname: document.getElementById('euNick').value, 
+        phone: document.getElementById('euPhone').value, 
+        details: document.getElementById('euDetails').value, 
+        photoBase64: photoBase64, 
+        idCardBase64: idCardBase64, 
+        img3Base64: img3Base64,
+        img4Base64: img4Base64,
+        img5Base64: img5Base64,
+        groupName: group 
+    });
     toggleL(false);
     if(res.success) { showAlert('อัปเดตข้อมูลลูกค้าสำเร็จ'); closeModal('modalEditUser'); closeModal('modalUserHistory'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการอัปเดต', true);
   }
@@ -1282,17 +1327,6 @@
      document.getElementById('cDayOfWeekContainer').style.display = (cycle === 'fixed_day') ? 'block' : 'none';
   }
   
-  function toggleEditCycleMode() {
-     let mode = document.getElementById('eCycleMode').value;
-     if (mode === 'fixed_day') {
-       document.getElementById('eIntervalContainer').style.display = 'none';
-       document.getElementById('eDayOfWeekContainer').style.display = 'block';
-     } else {
-       document.getElementById('eIntervalContainer').style.display = 'block';
-       document.getElementById('eDayOfWeekContainer').style.display = 'none';
-     }
-  }
-
   async function submitEdit() {
     toggleL(true); let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
@@ -1398,7 +1432,7 @@
     let dateStr = document.getElementById('cStartDate').value;
     
     let cycleMode = document.getElementById('cCycleMode').value;
-    let cycle = cycleMode === 'fixed_day' ? 7 : Number(document.getElementById('cCycleInterval').value) || 1;
+    let cycle = cycleMode === 'fixed_day' ? 7 : (Number(document.getElementById('cCycleInterval').value) || 1);
     
     let isUpfront = document.getElementById('cUpfrontInt').checked;
     
@@ -1449,14 +1483,41 @@
     if(!amount || amount <= 0) { showAlert('กรุณาระบุยอดเงินต้นให้ถูกต้อง', true); return; }
     if(uId === 'NEW' && !document.getElementById('cName').value) { showAlert('กรุณากรอกชื่อ-นามสกุลลูกค้า', true); return; }
 
-    toggleL(true); let photoBase64 = await compressImage(document.getElementById('cPhoto').files[0]); let idCardBase64 = await compressImage(document.getElementById('cIdCard').files[0]); 
+    toggleL(true); 
+    let photoBase64 = document.getElementById('cPhoto').files[0] ? await compressImage(document.getElementById('cPhoto').files[0]) : ''; 
+    let idCardBase64 = document.getElementById('cIdCard').files[0] ? await compressImage(document.getElementById('cIdCard').files[0]) : ''; 
+    let img3Base64 = document.getElementById('cImg3').files[0] ? await compressImage(document.getElementById('cImg3').files[0]) : '';
+    let img4Base64 = document.getElementById('cImg4').files[0] ? await compressImage(document.getElementById('cImg4').files[0]) : '';
+    let img5Base64 = document.getElementById('cImg5').files[0] ? await compressImage(document.getElementById('cImg5').files[0]) : '';
+
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
     let cycleVal = document.getElementById('cCycleMode').value === 'fixed_day' ? 'fixed_day' : document.getElementById('cCycleInterval').value;
     let targetDay = cycleVal === 'fixed_day' ? document.getElementById('cDayOfWeek').value : null;
     let isUpfront = document.getElementById('cUpfrontInt').checked;
     
-    await api({ action: 'saveLoan', operatorId: authData.userId, userId: uId, name: document.getElementById('cName').value, nickname: document.getElementById('cNick').value, phone: document.getElementById('cPhone').value, details: document.getElementById('cDetails').value, photoBase64: photoBase64, idCardBase64: idCardBase64, amount: amount, rate: document.getElementById('cRate').value, cycle: cycleVal, targetDay: targetDay, isUpfront: isUpfront, installments: document.getElementById('cInstallments').value, startDate: document.getElementById('cStartDate').value, groupName: authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName });
+    await api({ 
+      action: 'saveLoan', 
+      operatorId: authData.userId, 
+      userId: uId, 
+      name: document.getElementById('cName').value, 
+      nickname: document.getElementById('cNick').value, 
+      phone: document.getElementById('cPhone').value, 
+      details: document.getElementById('cDetails').value, 
+      photoBase64: photoBase64, 
+      idCardBase64: idCardBase64, 
+      img3Base64: img3Base64,
+      img4Base64: img4Base64,
+      img5Base64: img5Base64,
+      amount: amount, 
+      rate: document.getElementById('cRate').value, 
+      cycle: cycleVal, 
+      targetDay: targetDay, 
+      isUpfront: isUpfront, 
+      installments: document.getElementById('cInstallments').value, 
+      startDate: document.getElementById('cStartDate').value, 
+      groupName: authData.role === 'SuperAdmin' ? document.getElementById('cGroup').value : authData.groupName 
+    });
     toggleL(false); clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();
   }
 
@@ -1510,7 +1571,7 @@
 
     toggleL(true); 
     try {
-      let slipBase64 = await compressImage(document.getElementById('pSlip').files[0]); 
+      let slipBase64 = document.getElementById('pSlip').files[0] ? await compressImage(document.getElementById('pSlip').files[0]) : ''; 
       let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
       
       const res = await api({ action: 'submitPay', loanId: String(curPay.loanId).trim(), userId: authData.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 });

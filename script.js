@@ -608,7 +608,6 @@ function renderRecentPays(data) {
   document.getElementById('recentPaysContainer').innerHTML = html;
 }
 
-// 🟢 อัปเดต: หน้า Dash Alerts จัดระเบียบการ์ดใหม่ให้สั้นกะทัดรัด (Flexbox Layout)
 function renderDashAlerts() {
   let alertLoans = allLoans.filter(l => (Number(l.daysLeft) || 0) <= 3);
   let html = '';
@@ -623,7 +622,6 @@ function renderDashAlerts() {
 
     html += `
       <div class="borrower-card p-3 mb-3 shadow-sm" onclick="viewDetails('${b.loanId}')" style="border-left-color: var(--danger); border-radius: 16px;">
-          <!-- แถว 1: ชื่อ & สถานะ -->
           <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
               <h6 class="fw-bold m-0 text-dark text-truncate pe-2" style="max-width: 70%;">
                   <i class="fa-solid fa-circle-user text-secondary me-2"></i>${b.userName || 'ไม่ระบุชื่อ'}
@@ -631,7 +629,6 @@ function renderDashAlerts() {
               <span class="status-badge ${statusClass} shadow-sm" style="font-size:0.75rem; padding: 4px 10px;">${statusText}</span>
           </div>
 
-          <!-- แถว 2: ยอดหนี้ & ค่างวด -->
           <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">รหัส: ${b.loanId}</span>
@@ -643,7 +640,6 @@ function renderDashAlerts() {
               </div>
           </div>
 
-          <!-- แถว 3: ปุ่มจ่ายเงิน -->
           <div class="text-end mt-2 pt-2 border-top">
               <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold w-100" style="font-size:0.85rem;" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
           </div>
@@ -652,7 +648,6 @@ function renderDashAlerts() {
   document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-4 border rounded bg-white mx-2 mb-3">ไม่มีรายการค้างชำระ / ใกล้ครบดิว</div>';
 }
 
-// 🟢 อัปเดต: หน้า Loan List จัดระเบียบการ์ดใหม่ให้สั้นกะทัดรัด (Flexbox Layout)
 function renderList(data) {
   let html = '';
   data.forEach(b => {
@@ -666,7 +661,6 @@ function renderList(data) {
 
       html += `
       <div class="borrower-card loan-item p-3 mb-3 shadow-sm" onclick="viewDetails('${b.loanId}')" style="border-left-color: var(--primary); border-radius: 16px;">
-          <!-- แถว 1: ชื่อลูกค้า & รอบบิล -->
           <div class="d-flex justify-content-between align-items-center mb-2">
               <h6 class="fw-bold m-0 text-dark text-truncate pe-2" style="max-width: 70%;">
                   <i class="fa-solid fa-circle-user text-secondary me-2"></i>${b.userName} ${b.nickname ? `(${b.nickname})` : ''}
@@ -674,13 +668,11 @@ function renderList(data) {
               <span class="badge bg-light text-secondary border px-2 py-1" style="font-size:0.75rem; white-space:nowrap;">รอบ ${b.cycle} วัน</span>
           </div>
           
-          <!-- แถว 2: รหัสสัญญา & สถานะ -->
           <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
               <span class="text-muted small m-0" style="font-size:0.8rem;"><i class="fa-solid fa-hashtag me-1"></i>${b.loanId}</span>
               <span class="status-badge ${statusClass} shadow-sm" style="font-size:0.75rem; padding: 4px 10px;">${statusText}</span>
           </div>
 
-          <!-- แถว 3: ยอดหนี้ & ค่างวด (จัดเรียงแนวนอน) -->
           <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ยอดหนี้คงค้าง</span>
@@ -692,7 +684,6 @@ function renderList(data) {
               </div>
           </div>
 
-          <!-- แถว 4: ดิว/แอดมิน/กลุ่ม & ปุ่มจ่ายเงิน -->
           <div class="d-flex justify-content-between align-items-end mt-2 pt-2 border-top">
               <div class="text-muted" style="font-size:0.75rem;">
                   <div class="mb-1"><i class="fa-regular fa-calendar me-1"></i>ดิว: <span class="text-dark fw-bold">${b.dueDate}</span></div>
@@ -808,18 +799,35 @@ async function submitEdit() {
   toggleL(false); if(res.success) { showAlert('อัปเดตข้อมูลสัญญาสำเร็จ'); closeModal('modalEdit'); loadDash(); }
 }
 
+// 🟢 อัปเดต: ใช้ Grid ในการเรียงข้อมูลลูกค้าให้อยู่แบบ 2 คอลัมน์ซ้ายขวา 100%
 async function viewDetails(id) {
   toggleL(true); const res = await api({ action: 'getLoanDetails', loanId: id }); toggleL(false);
   if(res.success) {
-    document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}`;
+    document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; 
+    document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}`;
     
-    let badgesHtml = `
-      <span class="badge bg-light text-secondary border shadow-sm px-3 py-2 fs-6"><i class="fa-solid fa-hashtag me-2"></i>รหัส: ${res.loanId}</span>
-      <span class="badge bg-light text-secondary border shadow-sm px-3 py-2 fs-6"><i class="fa-regular fa-calendar me-2"></i>เริ่ม: ${res.startDate}</span>
+    // ใช้ display: grid และบังคับให้เรียงซ้ายขวาแบบไม่มีเพี้ยน
+    let infoHtml = `
+      <div style="display: grid; grid-template-columns: 1fr 1fr; row-gap: 8px; column-gap: 4px;" class="text-muted small">
+        <div class="d-flex align-items-center text-truncate">
+          <i class="fa-solid fa-hashtag me-2 text-primary-corp opacity-75" style="width: 14px;"></i>
+          รหัส:<span class="text-dark ms-1 fw-bold text-truncate">${res.loanId}</span>
+        </div>
+        <div class="d-flex align-items-center text-truncate">
+          <i class="fa-regular fa-calendar me-2 text-primary-corp opacity-75" style="width: 14px;"></i>
+          เริ่ม:<span class="text-dark ms-1 fw-bold text-truncate">${res.startDate}</span>
+        </div>
+        <div class="d-flex align-items-center text-truncate">
+          <i class="fa-solid fa-user-tie me-2 text-primary-corp opacity-75" style="width: 14px;"></i>
+          แอดมิน:<span class="text-dark ms-1 fw-bold text-truncate">${res.adminName}</span>
+        </div>
+        <div class="d-flex align-items-center text-truncate">
+          <i class="fa-solid fa-users me-2 text-primary-corp opacity-75" style="width: 14px;"></i>
+          กลุ่ม:<span class="text-dark ms-1 fw-bold text-truncate">${res.groupName || '-'}</span>
+        </div>
+      </div>
     `;
-    document.getElementById('dBadges').innerHTML = badgesHtml;
-    
-    document.getElementById('dAdminName').innerHTML = `<i class="fa-solid fa-user-tie me-2"></i> ผู้ปล่อยกู้: ${res.adminName} | <i class="fa-solid fa-users ms-2 me-1"></i> กลุ่ม: ${res.groupName || '-'}`;
+    document.getElementById('dInfoGrid').innerHTML = infoHtml;
     
     document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString()}`; document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString()}`; document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString()}`;
     
@@ -839,23 +847,23 @@ async function viewDetails(id) {
         
         let titleRow = '';
         if(String(p.no) === '0') {
-           titleRow = `<b class="text-danger-corp fs-6">หักดอกเบี้ยล่วงหน้า ณ วันทำสัญญา <span class="text-muted fw-normal d-block mt-1" style="font-size:0.85rem;">(${p.date})</span></b>`;
+           titleRow = `<b class="text-danger-corp fs-6">หักดอกเบี้ยล่วงหน้า <span class="text-muted fw-normal d-block mt-1" style="font-size:0.75rem;">(${p.date})</span></b>`;
         } else {
-           titleRow = `<b class="text-dark fs-6">งวดที่ ${p.no} <span class="text-muted fw-normal d-block mt-1" style="font-size:0.85rem;">(${p.date})</span></b>`;
+           titleRow = `<b class="text-dark fs-6">งวดที่ ${p.no} <span class="text-muted fw-normal d-block mt-1" style="font-size:0.75rem;">(${p.date})</span></b>`;
         }
         
         hHtml += `
-          <div class="pro-card p-3 mb-3 border-0 shadow-sm" style="border-left: 5px solid #10b981 !important;">
+          <div class="pro-card p-3 mb-3 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 ${titleRow}
-                <span class="text-muted d-block mt-2 small">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString()} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString()} ${fineText}</span>
+                <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString()} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString()} ${fineText}</span>
               </div>
               <div class="text-end">
-                <b class="text-success-corp d-block mb-2" style="font-size:1.3rem;">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
-                <div class="d-flex gap-3 justify-content-end align-items-center mt-2">
-                   ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none" style="font-size:1.3rem;"><i class="fa-solid fa-file-invoice"></i></a>` : ''}
-                   <i class="fa-solid fa-trash-can text-danger-corp p-2 bg-light rounded" style="cursor:pointer; font-size:1.3rem;" onclick="triggerDeletePayment('${p.id}', '${res.loanId}')" title="ลบรายการรับเงินนี้"></i>
+                <b class="text-success-corp d-block mb-1" style="font-size:1.1rem;">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
+                <div class="d-flex gap-2 justify-content-end align-items-center mt-1">
+                   ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none fs-5"><i class="fa-solid fa-file-invoice"></i></a>` : ''}
+                   <i class="fa-solid fa-trash-can text-danger-corp p-2 bg-light rounded" style="cursor:pointer; font-size:1.1rem;" onclick="triggerDeletePayment('${p.id}', '${res.loanId}')" title="ลบรายการรับเงินนี้"></i>
                 </div>
               </div>
             </div>
@@ -867,7 +875,7 @@ async function viewDetails(id) {
     let sHtml = '';
     if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
     else {
-      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-3 fs-6"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Number(s.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`; });
+      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Number(s.amount || 0).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`; });
     }
     document.getElementById('dSchedule').innerHTML = sHtml;
     
@@ -944,13 +952,13 @@ function generateSchedulePreview() {
   
   if (isUpfront) {
      html += `
-     <div class="d-flex justify-content-between text-danger-corp border-bottom py-3 px-3 rounded mb-2" style="background-color: #fef2f2;">
-       <span><b class="fs-6">หัก ณ วันรับเงิน (งวด 0):</b></span>
-       <b class="fs-6">ดอกเบี้ย ฿${intPerPeriod.toLocaleString(undefined, {minimumFractionDigits: 2})}</b>
+     <div class="d-flex justify-content-between text-danger-corp border-bottom py-2 px-3 rounded mb-2" style="background-color: #fef2f2;">
+       <span><b class="small">หัก ณ วันทำสัญญา:</b></span>
+       <b class="small">ดอกเบี้ย ฿${intPerPeriod.toLocaleString(undefined, {minimumFractionDigits: 2})}</b>
      </div>
-     <div class="d-flex justify-content-between text-success-corp border-bottom py-3 px-3 rounded mb-3" style="background-color: #f0fdf4;">
-       <span><b class="fs-6">ลูกค้าจะได้รับเงินสุทธิ:</b></span>
-       <b style="font-size: 1.3rem;">฿${(amount - intPerPeriod).toLocaleString(undefined, {minimumFractionDigits: 2})}</b>
+     <div class="d-flex justify-content-between text-success-corp border-bottom py-2 px-3 rounded mb-3" style="background-color: #f0fdf4;">
+       <span><b class="small">ลูกค้ารับเงินสุทธิ:</b></span>
+       <b style="font-size: 1.1rem;">฿${(amount - intPerPeriod).toLocaleString(undefined, {minimumFractionDigits: 2})}</b>
      </div>`;
   }
   
@@ -958,7 +966,7 @@ function generateSchedulePreview() {
     let d = new Date(firstDue);
     d.setDate(d.getDate() + ((i-1) * cycle));
     let dayStr = DAY_NAMES[d.getDay()] + ' ' + d.toLocaleDateString('th-TH');
-    html += `<div class="d-flex justify-content-between text-muted fs-6 border-bottom py-3"><span>งวดที่ ${i}: <span class="fw-bold text-dark ms-2">${dayStr}</span></span><b class="text-primary-corp">฿${(prinPerPeriod + intPerPeriod).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`;
+    html += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span>งวดที่ ${i}: <span class="fw-bold text-dark ms-2">${dayStr}</span></span><b class="text-primary-corp">฿${(prinPerPeriod + intPerPeriod).toLocaleString(undefined, {minimumFractionDigits: 2})}</b></div>`;
   }
   
   document.getElementById('cSchedulePreview').innerHTML = html;

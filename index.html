@@ -97,77 +97,76 @@
 
   <div class="container" style="max-width: 600px; padding-left: 12px; padding-right: 12px;">
     <div id="viewDash">
-      <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
-        <span class="fw-bold m-0 text-dark fs-4"><i class="fa-solid fa-chart-pie me-2 text-primary-corp"></i>ภาพรวมระบบ</span>
+      <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
+        <span class="fw-bold m-0 text-dark fs-5"><i class="fa-solid fa-chart-pie me-2 text-primary-corp"></i>ภาพรวมระบบ</span>
         <div class="d-flex gap-2">
-          <select id="dashFilterMonth" class="form-select form-select-sm px-3 py-2 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 12px; background-color: #f1f5f9;" onchange="updateDashMetrics()">
+          <select id="dashFilterMonth" class="form-select form-select-sm px-2 py-1 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 8px; background-color: #f1f5f9;" onchange="updateDashMetrics()">
             <option value="all">ทุกเดือน</option><option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option><option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option><option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
           </select>
-          <select id="dashFilterYear" class="form-select form-select-sm px-3 py-2 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 12px; background-color: #f1f5f9;" onchange="updateDashMetrics()"></select>
+          <select id="dashFilterYear" class="form-select form-select-sm px-2 py-1 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 8px; background-color: #f1f5f9;" onchange="updateDashMetrics()"></select>
         </div>
       </div>
 
-      <div class="pro-card p-4 mb-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border: none; border-radius: 24px;">
+      <div class="pro-card p-4 mb-3 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border: none; border-radius: 20px;">
         <i class="fa-solid fa-vault position-absolute" style="font-size: 10rem; opacity: 0.1; right: -20px; bottom: -20px;"></i>
         <div class="position-relative z-1">
           <label class="fw-bold d-block text-light mb-1 opacity-75 fs-6"><i class="fa-solid fa-coins me-2"></i>ยอดปล่อยกู้สะสมทั้งหมด</label>
-          <h1 class="fw-bold m-0 text-white mb-4" style="font-size: 2.5rem; letter-spacing: -1px;">฿<span id="mTotalLoan">0</span></h1>
+          <h1 class="fw-bold m-0 text-white mb-3" style="font-size: 2.2rem; letter-spacing: -1px;">฿<span id="mTotalLoan">0</span></h1>
           
           <div class="d-flex justify-content-between bg-white bg-opacity-10 p-3 rounded-4" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
              <div>
                 <span class="d-block text-light opacity-75 small fw-bold mb-1"><i class="fa-solid fa-file-invoice-dollar me-1"></i>ยอดหนี้คงค้าง</span>
-                <span class="d-block fw-bold text-warning" style="font-size: 1.25rem;">฿<span id="mTotalRemain">0</span></span>
+                <span class="d-block fw-bold text-warning fs-5">฿<span id="mTotalRemain">0</span></span>
              </div>
              <div class="text-end border-start border-light border-opacity-25 ps-3">
                 <span class="d-block text-light opacity-75 small fw-bold mb-1"><i class="fa-solid fa-users me-1"></i>ลูกค้า (คน)</span>
-                <span class="d-block fw-bold text-white" style="font-size: 1.25rem;" id="mTotalUsers">0</span>
+                <span class="d-block fw-bold text-white fs-5" id="mTotalUsers">0</span>
              </div>
           </div>
         </div>
       </div>
 
-      <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bolt me-2 text-warning-corp"></i> เมนูด่วน (Quick Actions)</h6>
-      <div class="row g-3 mb-4">
+      <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-bolt me-2 text-warning-corp"></i> เมนูด่วน (Quick Actions)</h6>
+      <div class="row g-2 mb-4">
         <div class="col-6">
-           <button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-4 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 4px solid #172554;">
-              <i class="fa-solid fa-hand-holding-dollar fs-1 mb-2 text-white opacity-75"></i> 
+           <button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-3 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 3px solid #172554;">
+              <i class="fa-solid fa-hand-holding-dollar fs-2 mb-1 text-white opacity-75"></i> 
               <span class="d-block fs-6 text-white fw-bold">รับชำระเงิน</span>
            </button>
         </div>
         <div class="col-6">
-           <button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-4 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 4px solid #065f46;">
-              <i class="fa-solid fa-file-signature fs-1 mb-2 text-white opacity-75"></i> 
+           <button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-3 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 3px solid #065f46;">
+              <i class="fa-solid fa-file-signature fs-2 mb-1 text-white opacity-75"></i> 
               <span class="d-block fs-6 text-white fw-bold">เปิดสัญญาใหม่</span>
            </button>
         </div>
       </div>
 
-      <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-column me-2 text-primary-corp"></i> สัดส่วนหนี้คงค้างตามรอบบิล</h6>
-      <div id="cycleBreakdownContainer" class="pro-card p-0 overflow-hidden mb-4 shadow-sm" style="border-radius: 20px;">
+      <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-chart-column me-2 text-primary-corp"></i> สัดส่วนหนี้คงค้างตามรอบบิล</h6>
+      <div id="cycleBreakdownContainer" class="pro-card p-0 overflow-hidden mb-4 shadow-sm" style="border-radius: 16px;">
          <!-- ข้อมูลจะถูกดึงมาใส่ตรงนี้โดย script.js -->
       </div>
 
-      <span class="fw-bold d-block mb-3 text-danger-corp px-2"><i class="fa-solid fa-bell me-2"></i>รายการใกล้ครบกำหนด / ค้างชำระ</span>
+      <span class="fw-bold d-block mb-2 text-danger-corp px-2"><i class="fa-solid fa-bell me-2"></i>รายการใกล้ครบกำหนด / ค้างชำระ</span>
       <div id="dashAlertContainer"></div>
     </div>
 
     <div id="viewList" style="display:none;">
-      <div class="pro-card p-3 mb-3">
-        <div class="input-group shadow-sm rounded-3 mb-3" style="border-radius: 12px; overflow: hidden;">
-          <!-- 🟢 อัปเดต: ใช้ Inline SVG แทน Font Awesome เพื่อป้องกันปัญหาโหลดไม่ขึ้น 100% -->
-          <span class="input-group-text bg-white border-end-0 py-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
+      <div class="pro-card p-2 mb-3">
+        <div class="input-group shadow-sm rounded-3 mb-2" style="border-radius: 10px; overflow: hidden;">
+          <span class="input-group-text bg-white border-end-0 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
               <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
           </span>
-          <input class="form-control border-start-0 ps-0 py-3 form-control-lg fs-6" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
+          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
         </div>
         <details class="mb-1">
-          <summary class="fw-bold text-primary-corp p-2 bg-light rounded-3" style="cursor:pointer;"><i class="fa-solid fa-filter me-2"></i> ตัวกรองขั้นสูง</summary>
-          <div class="row g-3 mt-1 pt-3 border-top stack-form">
+          <summary class="fw-bold text-primary-corp p-2 bg-light rounded-3 small" style="cursor:pointer;"><i class="fa-solid fa-filter me-2"></i> ตัวกรองขั้นสูง</summary>
+          <div class="row g-2 mt-1 pt-2 border-top stack-form">
             <div class="col-12">
-              <label>รูปแบบ</label>
-              <select id="filterCycle" class="form-select form-select-lg fs-6" onchange="applyFilters()">
+              <label class="small">รูปแบบ</label>
+              <select id="filterCycle" class="form-select form-select-sm" onchange="applyFilters()">
                 <option value="all">ทั้งหมด</option>
                 <option value="1">1 วัน</option>
                 <option value="3">3 วัน</option>
@@ -178,10 +177,10 @@
                 <option value="30">30 วัน (เดือน)</option>
               </select>
             </div>
-            <div class="col-12"><label>สถานะ</label><select id="filterStatus" class="form-select form-select-lg fs-6" onchange="applyFilters()"><option value="all">ทั้งหมด</option><option value="due">ใกล้ครบดิว</option><option value="overdue">เกินกำหนด</option></select></div>
-            <div class="col-12"><label>เรียงลำดับ</label><select id="filterSort" class="form-select form-select-lg fs-6" onchange="applyFilters()"><option value="due">วันที่ครบกำหนด</option><option value="amtDesc">ยอดหนี้ (มาก-น้อย)</option><option value="amtAsc">ยอดหนี้ (น้อย-มาก)</option></select></div>
-            <div class="col-12"><label>แสดงผล</label><select id="filterLimit" class="form-select form-select-lg fs-6" onchange="applyFilters()"><option value="30">30 รายการ</option><option value="50">50 รายการ</option><option value="100">100 รายการ</option><option value="all">ทั้งหมด</option></select></div>
-            <div class="col-12" id="filterAdminWrap" style="display:none;"><label>ค้นหาตามผู้ปล่อยกู้</label><select id="filterAdmin" class="form-select form-select-lg fs-6" onchange="applyFilters()"><option value="all">ทั้งหมด</option></select></div>
+            <div class="col-12"><label class="small">สถานะ</label><select id="filterStatus" class="form-select form-select-sm" onchange="applyFilters()"><option value="all">ทั้งหมด</option><option value="due">ใกล้ครบดิว</option><option value="overdue">เกินกำหนด</option></select></div>
+            <div class="col-12"><label class="small">เรียงลำดับ</label><select id="filterSort" class="form-select form-select-sm" onchange="applyFilters()"><option value="due">วันที่ครบกำหนด</option><option value="amtDesc">ยอดหนี้ (มาก-น้อย)</option><option value="amtAsc">ยอดหนี้ (น้อย-มาก)</option></select></div>
+            <div class="col-12"><label class="small">แสดงผล</label><select id="filterLimit" class="form-select form-select-sm" onchange="applyFilters()"><option value="30">30 รายการ</option><option value="50">50 รายการ</option><option value="100">100 รายการ</option><option value="all">ทั้งหมด</option></select></div>
+            <div class="col-12" id="filterAdminWrap" style="display:none;"><label class="small">ค้นหาตามผู้ปล่อยกู้</label><select id="filterAdmin" class="form-select form-select-sm" onchange="applyFilters()"><option value="all">ทั้งหมด</option></select></div>
           </div>
         </details>
       </div>
@@ -189,19 +188,18 @@
     </div>
     
     <div id="viewUsers" style="display:none;">
-      <div class="pro-card p-3 mb-3">
-        <div class="input-group shadow-sm rounded-3 mb-3" style="border-radius: 12px; overflow: hidden;">
-          <!-- 🟢 อัปเดต: ใช้ Inline SVG แทน Font Awesome -->
-          <span class="input-group-text bg-white border-end-0 py-3">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
+      <div class="pro-card p-2 mb-3">
+        <div class="input-group shadow-sm rounded-3 mb-2" style="border-radius: 10px; overflow: hidden;">
+          <span class="input-group-text bg-white border-end-0 py-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
               <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
           </span>
-          <input class="form-control border-start-0 ps-0 py-3 form-control-lg fs-6" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="filterUsers()">
+          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="filterUsers()">
         </div>
-        <div class="d-flex justify-content-end align-items-center mt-2 p-2">
-            <label class="mb-0 me-3 fw-bold text-muted">แสดงผล:</label>
-            <select id="userFilterLimit" class="form-select form-select-lg fs-6 w-auto" onchange="filterUsers()">
+        <div class="d-flex justify-content-end align-items-center p-1">
+            <label class="mb-0 me-2 fw-bold text-muted small">แสดงผล:</label>
+            <select id="userFilterLimit" class="form-select form-select-sm w-auto" onchange="filterUsers()">
               <option value="30">30 คน</option><option value="50">50 คน</option><option value="100">100 คน</option><option value="all">ทั้งหมด</option>
             </select>
         </div>
@@ -220,14 +218,14 @@
 
 <div id="modalManageAdmins" class="modal-overlay">
   <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-users-gear me-2"></i>จัดการแอดมิน</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalManageAdmins')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalManageAdmins')" style="cursor:pointer"></i>
     </div>
     
-    <div class="row g-3 mb-4">
-        <div class="col-6"><button class="btn btn-success w-100 py-3 fw-bold rounded-4 shadow-sm fs-6" onclick="closeModal('modalManageAdmins'); clearForms(); openModal('modalCreateAdmin')"><i class="fa-solid fa-plus me-1"></i> เพิ่มแอดมิน</button></div>
-        <div class="col-6"><button class="btn btn-outline-danger w-100 py-3 fw-bold rounded-4 shadow-sm fs-6" onclick="triggerArchive()"><i class="fa-solid fa-box-archive me-1"></i> ย้ายข้อมูลเก่า</button></div>
+    <div class="row g-2 mb-3">
+        <div class="col-6"><button class="btn btn-success w-100 py-2 fw-bold rounded-3 shadow-sm small" onclick="closeModal('modalManageAdmins'); clearForms(); openModal('modalCreateAdmin')"><i class="fa-solid fa-plus me-1"></i> เพิ่มแอดมิน</button></div>
+        <div class="col-6"><button class="btn btn-outline-danger w-100 py-2 fw-bold rounded-3 shadow-sm small" onclick="triggerArchive()"><i class="fa-solid fa-box-archive me-1"></i> ย้ายข้อมูลเก่า</button></div>
     </div>
     
     <div id="adminsListContainer"></div>
@@ -236,88 +234,88 @@
 
 <div id="modalCreateAdmin" class="modal-overlay">
   <div class="modal-content-custom stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-success-corp"><i class="fa-solid fa-user-plus me-2"></i>สร้างบัญชีแอดมิน</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalCreateAdmin')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalCreateAdmin')" style="cursor:pointer"></i>
     </div>
-    <label>รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control form-control-lg mb-3" placeholder="admin01">
-    <label>ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control form-control-lg mb-3">
-    <label class="text-primary-corp fw-bold">รหัส PIN 4 หลัก (สแกน NFC)</label><input type="text" id="caPin" class="form-control form-control-lg mb-3 fw-bold fs-4 text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <label>กลุ่มดูแล</label><select id="caGroup" class="form-select form-select-lg mb-3"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
-    <label>รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control form-control-lg mb-4">
-    <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-3 fw-bold fs-5 rounded-pill shadow-sm">บันทึกข้อมูล</button>
+    <label class="small">รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control form-control-sm mb-2" placeholder="admin01">
+    <label class="small">ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control form-control-sm mb-2">
+    <label class="text-primary-corp fw-bold small">รหัส PIN 4 หลัก (สแกน NFC)</label><input type="text" id="caPin" class="form-control form-control-sm mb-2 fw-bold text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <label class="small">กลุ่มดูแล</label><select id="caGroup" class="form-select form-select-sm mb-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
+    <label class="small">รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control form-control-sm mb-3">
+    <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
 </div>
 
 <div id="modalEditAdmin" class="modal-overlay" style="z-index: 1010;">
   <div class="modal-content-custom stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-warning-corp"><i class="fa-solid fa-user-pen me-2"></i>แก้ไขแอดมิน</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalEditAdmin')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalEditAdmin')" style="cursor:pointer"></i>
     </div>
     <input type="hidden" id="eaId">
-    <label>ชื่อที่ใช้แสดงผล</label><input type="text" id="eaName" class="form-control form-control-lg mb-3">
-    <label class="text-primary-corp fw-bold">แก้ไขรหัส PIN</label><input type="text" id="eaPin" class="form-control form-control-lg mb-3 fw-bold text-center fs-4" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <label>สถานะบัญชี</label>
-    <select id="eaStatus" class="form-select form-select-lg mb-3 fw-bold">
+    <label class="small">ชื่อที่ใช้แสดงผล</label><input type="text" id="eaName" class="form-control form-control-sm mb-2">
+    <label class="text-primary-corp fw-bold small">แก้ไขรหัส PIN</label><input type="text" id="eaPin" class="form-control form-control-sm mb-2 fw-bold text-center" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <label class="small">สถานะบัญชี</label>
+    <select id="eaStatus" class="form-select form-select-sm mb-2 fw-bold">
       <option value="Active" class="text-success-corp">เปิดใช้งาน (Active)</option>
       <option value="Suspended" class="text-danger-corp">ระงับสิทธิ์ (Suspended)</option>
     </select>
-    <label>กลุ่มดูแล</label><select id="eaGroup" class="form-select form-select-lg mb-3"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
-    <label>แก้ไขรหัสผ่าน (เว้นว่างได้)</label><input type="password" id="eaPass" class="form-control form-control-lg mb-4" placeholder="รหัสผ่านใหม่">
-    <button onclick="submitEditAdmin()" class="btn bg-primary-corp w-100 py-3 fw-bold fs-5 rounded-pill shadow-sm">บันทึกการอัปเดต</button>
+    <label class="small">กลุ่มดูแล</label><select id="eaGroup" class="form-select form-select-sm mb-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
+    <label class="small">แก้ไขรหัสผ่าน (เว้นว่างได้)</label><input type="password" id="eaPass" class="form-control form-control-sm mb-3" placeholder="รหัสผ่านใหม่">
+    <button onclick="submitEditAdmin()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกการอัปเดต</button>
   </div>
 </div>
 
 <div id="modalEditUser" class="modal-overlay" style="z-index: 1010;">
   <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-warning-corp"><i class="fa-solid fa-user-pen me-2"></i>แก้ไขข้อมูลลูกค้า</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalEditUser')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalEditUser')" style="cursor:pointer"></i>
     </div>
     <input type="hidden" id="euUserId">
-    <div class="pro-card p-4 mb-4">
-      <label>ชื่อ-นามสกุล</label><input type="text" id="euName" class="form-control form-control-lg mb-3">
-      <label>ชื่อเล่น</label><input type="text" id="euNick" class="form-control form-control-lg mb-3">
-      <label>เบอร์โทร</label><input type="text" id="euPhone" class="form-control form-control-lg mb-3">
-      <label>ที่อยู่/รายละเอียด</label><input type="text" id="euDetails" class="form-control form-control-lg mb-4">
+    <div class="pro-card p-3 mb-3">
+      <label class="small">ชื่อ-นามสกุล</label><input type="text" id="euName" class="form-control form-control-sm mb-2">
+      <label class="small">ชื่อเล่น</label><input type="text" id="euNick" class="form-control form-control-sm mb-2">
+      <label class="small">เบอร์โทร</label><input type="text" id="euPhone" class="form-control form-control-sm mb-2">
+      <label class="small">ที่อยู่/รายละเอียด</label><input type="text" id="euDetails" class="form-control form-control-sm mb-3">
       
-      <label class="text-muted">อัปเดตรูปหน้าตรง</label><input type="file" id="euPhoto" class="form-control form-control-lg mb-3" accept="image/*">
-      <label class="text-muted">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control form-control-lg mb-3" accept="image/*">
-      <label class="text-muted">อัปเดตรูปเพิ่มเติม 1</label><input type="file" id="euImg3" class="form-control form-control-lg mb-3" accept="image/*">
-      <label class="text-muted">อัปเดตรูปเพิ่มเติม 2</label><input type="file" id="euImg4" class="form-control form-control-lg mb-3" accept="image/*">
-      <label class="text-muted">อัปเดตรูปเพิ่มเติม 3</label><input type="file" id="euImg5" class="form-control form-control-lg mb-3" accept="image/*">
+      <label class="text-muted small">อัปเดตรูปหน้าตรง</label><input type="file" id="euPhoto" class="form-control form-control-sm mb-2" accept="image/*">
+      <label class="text-muted small">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control form-control-sm mb-2" accept="image/*">
+      <label class="text-muted small">อัปเดตรูปเพิ่มเติม 1</label><input type="file" id="euImg3" class="form-control form-control-sm mb-2" accept="image/*">
+      <label class="text-muted small">อัปเดตรูปเพิ่มเติม 2</label><input type="file" id="euImg4" class="form-control form-control-sm mb-2" accept="image/*">
+      <label class="text-muted small">อัปเดตรูปเพิ่มเติม 3</label><input type="file" id="euImg5" class="form-control form-control-sm mb-2" accept="image/*">
       
-      <div id="euGroupDiv" style="display:none;" class="mt-4 pt-3 border-top">
-        <label class="text-primary-corp fw-bold fs-6 mb-2">ย้ายกลุ่มดูแล</label>
-        <select id="euGroup" class="form-select form-select-lg"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
+      <div id="euGroupDiv" style="display:none;" class="mt-3 pt-2 border-top">
+        <label class="text-primary-corp fw-bold small mb-1">ย้ายกลุ่มดูแล</label>
+        <select id="euGroup" class="form-select form-select-sm"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
       </div>
     </div>
-    <button onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-3 fw-bold fs-5 rounded-pill shadow-sm">บันทึกข้อมูล</button>
+    <button onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
 </div>
 
 <div id="modalUserHistory" class="modal-overlay">
   <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-folder-open me-2"></i>แฟ้มข้อมูลลูกค้า</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalUserHistory')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalUserHistory')" style="cursor:pointer"></i>
     </div>
-    <div id="uhProfile" class="text-center mb-4 pb-3 border-bottom"></div>
-    <span class="text-primary-corp fw-bold fs-6 mb-3 d-block"><i class="fa-solid fa-list me-2"></i>ประวัติสัญญาทั้งหมด</span>
+    <div id="uhProfile" class="text-center mb-3 pb-2 border-bottom"></div>
+    <span class="text-primary-corp fw-bold small mb-2 d-block"><i class="fa-solid fa-list me-2"></i>ประวัติสัญญาทั้งหมด</span>
     <div id="uhLoansList"></div>
   </div>
 </div>
 
 <div id="modalRecentPays" class="modal-overlay">
   <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-receipt me-2"></i>ประวัติรับเงินล่าสุด</h5>
       <div class="d-flex align-items-center">
-        <select id="recentPaysLimit" class="form-select form-select-sm w-auto d-inline-block border-0 shadow-sm me-2 py-2 px-3 fw-bold" onchange="applyRecentPaysLimit()">
+        <select id="recentPaysLimit" class="form-select form-select-sm w-auto d-inline-block border-0 shadow-sm me-2 py-1 px-2 fw-bold" onchange="applyRecentPaysLimit()">
           <option value="30">30</option><option value="50">50</option><option value="100">100</option><option value="all">ทั้งหมด</option>
         </select>
-        <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalRecentPays')" style="cursor:pointer;"></i>
+        <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalRecentPays')" style="cursor:pointer;"></i>
       </div>
     </div>
     <div id="recentPaysContainer"></div>
@@ -326,152 +324,150 @@
 
 <div id="modalDetails" class="modal-overlay" style="z-index: 1005;">
   <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-file-invoice-dollar me-2"></i>รายละเอียดสัญญา</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2 bg-white rounded-circle shadow-sm" style="cursor:pointer; width: 35px; height: 35px; display:flex; align-items:center; justify-content:center;" onclick="closeModal('modalDetails')"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2 bg-white rounded-circle shadow-sm" style="cursor:pointer; width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;" onclick="closeModal('modalDetails')"></i>
     </div>
     
-    <div class="pro-card p-4 mb-3" style="background: linear-gradient(to bottom right, #eff6ff, #ffffff);">
-      <h5 class="fw-bold text-primary-corp mb-2" id="dName">ชื่อผู้กู้</h5>
-      <p class="text-muted mb-3" id="dDetails">รายละเอียดเพิ่มเติม</p>
+    <div class="pro-card p-3 mb-3 shadow-sm" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
+      <h6 class="fw-bold text-primary-corp mb-1 fs-5" id="dName">ชื่อผู้กู้</h6>
+      <p class="text-muted mb-3 small" id="dDetails">รายละเอียดเพิ่มเติม</p>
 
-      <div id="dBadges" class="mb-3 d-flex flex-wrap gap-2"></div>
-
-      <span class="badge bg-white text-primary-corp border shadow-sm px-3 py-2 mb-3 fs-6 w-100 text-start" id="dAdminName"><i class="fa-solid fa-user-tie me-2"></i> ผู้ปล่อยกู้: -</span>
+      <!-- 🟢 อัปเดต: Grid จัดเรียงข้อมูลลูกค้า ซ้าย-ขวา ประหยัดพื้นที่ -->
+      <div id="dInfoGrid" class="mb-3 pb-3 border-bottom"></div>
       
-      <div class="row text-center mt-3 pt-3 border-top g-2">
+      <div class="row text-center g-2 align-items-center">
         <div class="col-4 border-end">
-          <label class="text-muted small fw-bold mb-1">เงินต้น</label>
-          <b class="text-dark fs-5" id="dPrin">0</b>
+          <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">เงินต้น</label>
+          <b class="text-dark fs-6" id="dPrin">0</b>
         </div>
         <div class="col-4 border-end">
-          <label class="text-muted small fw-bold mb-1">ชำระแล้ว</label>
-          <b class="text-success-corp fs-5" id="dPaid">0</b>
+          <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">ชำระแล้ว</label>
+          <b class="text-success-corp fs-6" id="dPaid">0</b>
         </div>
         <div class="col-4">
-          <label class="fw-bold small text-warning-corp mb-1">ต้นคงเหลือ</label>
-          <b class="text-warning-corp fs-5" id="dRemain">0</b>
+          <label class="fw-bold text-warning-corp mb-1 small" style="font-size:0.75rem;">ต้นคงเหลือ</label>
+          <b class="text-warning-corp fs-6" id="dRemain">0</b>
         </div>
       </div>
     </div>
 
-    <div class="row g-2 mb-4">
-      <div class="col-12"><button id="btnDetailPay" class="btn bg-success-corp w-100 fw-bold py-3 rounded-4 shadow-sm text-white fs-6"><i class="fa-solid fa-hand-holding-dollar me-2"></i>บันทึกรับชำระเงิน</button></div>
-      <div class="col-4"><button id="btnDetailHistory" class="btn btn-white border w-100 fw-bold py-2 rounded-4 text-primary-corp small"><i class="fa-solid fa-folder-open mb-1 d-block fs-5"></i>แฟ้มลูกค้า</button></div>
-      <div class="col-4"><button id="btnDetailEdit" class="btn btn-white border w-100 fw-bold py-2 rounded-4 text-warning-corp small"><i class="fa-solid fa-pen mb-1 d-block fs-5"></i>แก้ไข</button></div>
-      <div class="col-4"><button id="btnDetailDelete" class="btn btn-white border w-100 fw-bold py-2 rounded-4 text-danger-corp small"><i class="fa-solid fa-trash-can mb-1 d-block fs-5"></i>ลบสัญญา</button></div>
+    <div class="row g-2 mb-3">
+      <div class="col-12"><button id="btnDetailPay" class="btn bg-success-corp w-100 fw-bold py-2 rounded-3 shadow-sm text-white"><i class="fa-solid fa-hand-holding-dollar me-2"></i>บันทึกรับชำระเงิน</button></div>
+      <div class="col-4"><button id="btnDetailHistory" class="btn btn-white border w-100 fw-bold py-2 rounded-3 text-primary-corp small"><i class="fa-solid fa-folder-open mb-1 d-block fs-6"></i>แฟ้มลูกค้า</button></div>
+      <div class="col-4"><button id="btnDetailEdit" class="btn btn-white border w-100 fw-bold py-2 rounded-3 text-warning-corp small"><i class="fa-solid fa-pen mb-1 d-block fs-6"></i>แก้ไข</button></div>
+      <div class="col-4"><button id="btnDetailDelete" class="btn btn-white border w-100 fw-bold py-2 rounded-3 text-danger-corp small"><i class="fa-solid fa-trash-can mb-1 d-block fs-6"></i>ลบสัญญา</button></div>
     </div>
 
-    <div class="nav-tabs-custom mb-3">
-      <div id="tabBtnHistory" class="active py-3 fs-6" onclick="switchDetailTab('History')">ประวัติชำระ</div>
-      <div id="tabBtnSchedule" class="py-3 fs-6" onclick="switchDetailTab('Schedule')">ตารางงวด</div>
+    <div class="nav-tabs-custom mb-2">
+      <div id="tabBtnHistory" class="active py-2 small fw-bold" onclick="switchDetailTab('History')">ประวัติชำระ</div>
+      <div id="tabBtnSchedule" class="py-2 small fw-bold" onclick="switchDetailTab('Schedule')">ตารางงวด</div>
     </div>
     
-    <div id="dHistory" style="max-height: 45vh; overflow-y: auto;"></div>
-    <div id="dSchedule" style="display: none; max-height: 45vh; overflow-y: auto;"></div>
+    <div id="dHistory" style="max-height: 40vh; overflow-y: auto;"></div>
+    <div id="dSchedule" style="display: none; max-height: 40vh; overflow-y: auto;"></div>
   </div>
 </div>
 
 <div id="modalPay" class="modal-overlay">
   <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-hand-holding-dollar me-2"></i>รับชำระเงิน</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalPay')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalPay')" style="cursor:pointer"></i>
     </div>
     
-    <div class="input-group mb-4 shadow-sm rounded-3" style="border-radius: 12px; overflow: hidden;">
-      <input list="payLoanOptions" id="loanIdInput" class="form-control form-control-lg border-end-0 py-3" placeholder="รหัสสัญญา / ชื่อลูกค้า...">
+    <div class="input-group mb-3 shadow-sm rounded-3" style="border-radius: 10px; overflow: hidden;">
+      <input list="payLoanOptions" id="loanIdInput" class="form-control form-control-sm border-end-0 py-2" placeholder="รหัสสัญญา / ชื่อลูกค้า...">
       <datalist id="payLoanOptions"></datalist>
-      <!-- 🟢 อัปเดต: ใช้ Inline SVG แทน Font Awesome -->
-      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-4">
-        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-3">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
           <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
         </svg>
       </button>
     </div>
     
     <div id="payDetails" style="display:none">
-      <div id="pWarning" class="alert alert-danger py-3 px-3 mb-3 fw-bold shadow-sm" style="display:none; border-left: 5px solid #ef4444;"></div>
+      <div id="pWarning" class="alert alert-danger py-2 px-2 mb-2 fw-bold shadow-sm small" style="display:none; border-left: 4px solid #ef4444;"></div>
       
-      <div class="pro-card p-4 mb-3">
-        <h5 class="m-0 fw-bold border-bottom pb-3 mb-3 text-primary-corp text-center" id="pName">...</h5>
-        <div class="text-center mb-3">
-            <span class="text-muted d-block fw-bold mb-1">เงินต้นคงเหลือ</span>
-            <b class="text-dark fs-3" id="pRemainingPrin">0</b>
+      <div class="pro-card p-3 mb-3">
+        <h6 class="m-0 fw-bold border-bottom pb-2 mb-2 text-primary-corp text-center" id="pName">...</h6>
+        <div class="text-center mb-2">
+            <span class="text-muted d-block fw-bold mb-1 small">เงินต้นคงเหลือ</span>
+            <b class="text-dark fs-4" id="pRemainingPrin">0</b>
         </div>
-        <div class="row pt-3 pb-2 text-center border-top">
-          <div class="col-4 border-end"><span class="text-muted d-block small mb-1">เงินต้น</span><b class="text-dark fs-5" id="pExpectedPrin">0</b></div>
-          <div class="col-4 border-end"><span class="text-muted d-block small mb-1">ดอกเบี้ย</span><b class="text-warning-corp fs-5" id="pExpectedInt">0</b></div>
-          <div class="col-4"><span class="text-danger-corp fw-bold d-block small mb-1">ค่าปรับ</span><b class="text-danger-corp fs-5" id="pFine">0</b></div>
+        <div class="row pt-2 pb-1 text-center border-top">
+          <div class="col-4 border-end"><span class="text-muted d-block small mb-1" style="font-size:0.7rem;">เงินต้น</span><b class="text-dark fs-6" id="pExpectedPrin">0</b></div>
+          <div class="col-4 border-end"><span class="text-muted d-block small mb-1" style="font-size:0.7rem;">ดอกเบี้ย</span><b class="text-warning-corp fs-6" id="pExpectedInt">0</b></div>
+          <div class="col-4"><span class="text-danger-corp fw-bold d-block small mb-1" style="font-size:0.7rem;">ค่าปรับ</span><b class="text-danger-corp fs-6" id="pFine">0</b></div>
         </div>
-        <div class="mt-3 pt-3 border-top text-center rounded-4 py-3" style="background: linear-gradient(135deg, #f0fdf4, #ffffff);">
-            <span class="text-primary-corp fw-bold d-block mb-1 fs-6">ยอดเรียกเก็บงวดนี้ (รวมปรับ)</span>
-            <b class="text-success-corp" style="font-size: 2.2rem;" id="pExpectedTotal">0</b>
+        <div class="mt-2 pt-2 border-top text-center rounded-3 py-2" style="background: linear-gradient(135deg, #f0fdf4, #ffffff);">
+            <span class="text-primary-corp fw-bold d-block mb-1 small">ยอดเรียกเก็บงวดนี้ (รวมปรับ)</span>
+            <b class="text-success-corp" style="font-size: 1.8rem;" id="pExpectedTotal">0</b>
         </div>
       </div>
 
-      <div class="pro-card p-4 mb-4">
-        <label class="text-danger-corp fw-bold fs-6 mb-2">จัดการค่าปรับ</label>
-        <select id="pChargeFine" class="form-select form-select-lg mb-3 fw-bold" onchange="toggleFineInput()">
+      <div class="pro-card p-3 mb-3">
+        <label class="text-danger-corp fw-bold small mb-1">จัดการค่าปรับ</label>
+        <select id="pChargeFine" class="form-select form-select-sm mb-2 fw-bold" onchange="toggleFineInput()">
           <option value="Yes">คิดค่าปรับตามจริง</option><option value="No">ยกเว้นค่าปรับให้ลูกค้า</option>
         </select>
 
-        <label class="text-danger-corp fw-bold mt-2 mb-2">หักเป็นค่าปรับ (฿)</label>
-        <input type="number" id="pFinePaidInput" class="form-control form-control-lg mb-3 fw-bold fs-4 text-danger-corp" min="0" oninput="syncTotalPay()" style="background:#fff1f2;">
+        <label class="text-danger-corp fw-bold mt-2 mb-1 small">หักเป็นค่าปรับ (฿)</label>
+        <input type="number" id="pFinePaidInput" class="form-control form-control-sm mb-2 fw-bold fs-5 text-danger-corp" min="0" oninput="syncTotalPay()" style="background:#fff1f2;">
         
-        <label class="text-primary-corp fw-bold mt-3 mb-2 fs-6">ลูกค้าโอน/เงินสดจริง (฿)</label>
-        <input type="number" id="pTotalPaidInput" class="form-control form-control-lg mb-2 fw-bold text-primary-corp text-center" min="0" style="font-size: 2rem; background:#eff6ff; border:2px solid #2563eb !important; height: 70px;">
+        <label class="text-primary-corp fw-bold mt-2 mb-1 small">ลูกค้าโอน/เงินสดจริง (฿)</label>
+        <input type="number" id="pTotalPaidInput" class="form-control form-control-sm mb-1 fw-bold text-primary-corp text-center" min="0" style="font-size: 1.5rem; background:#eff6ff; border:2px solid #2563eb !important; height: 50px;">
       </div>
       
-      <div class="row g-3 mb-4">
-        <div class="col-12"><label class="fw-bold text-muted mb-2">วันที่รับชำระ</label><input type="date" id="pPayDate" class="form-control form-control-lg bg-white fw-bold"></div>
-        <div class="col-6"><label class="fw-bold text-muted mb-2">ช่องทางชำระ</label><select id="pMethod" class="form-select form-select-lg bg-white fw-bold"><option value="เงินโอน">โอนเข้าบัญชี</option><option value="เงินสด">รับเงินสด</option></select></div>
-        <div class="col-6"><label class="fw-bold text-muted mb-2">แนบสลิป</label><input type="file" id="pSlip" class="form-control form-control-lg bg-white" style="padding: 10px;" accept="image/*"></div>
+      <div class="row g-2 mb-3">
+        <div class="col-12"><label class="fw-bold text-muted mb-1 small">วันที่รับชำระ</label><input type="date" id="pPayDate" class="form-control form-control-sm bg-white fw-bold"></div>
+        <div class="col-6"><label class="fw-bold text-muted mb-1 small">ช่องทางชำระ</label><select id="pMethod" class="form-select form-select-sm bg-white fw-bold"><option value="เงินโอน">โอนเข้าบัญชี</option><option value="เงินสด">รับเงินสด</option></select></div>
+        <div class="col-6"><label class="fw-bold text-muted mb-1 small">แนบสลิป</label><input type="file" id="pSlip" class="form-control form-control-sm bg-white" style="padding: 5px;" accept="image/*"></div>
       </div>
       
-      <button onclick="submitPay()" class="btn bg-primary-corp w-100 fw-bold py-3 fs-5 shadow-sm rounded-pill"><i class="fa-solid fa-check-circle me-2"></i> ยืนยันทำรายการ</button>
+      <button onclick="submitPay()" class="btn bg-primary-corp w-100 fw-bold py-2 shadow-sm rounded-pill"><i class="fa-solid fa-check-circle me-2"></i> ยืนยันทำรายการ</button>
     </div>
   </div>
 </div>
 
 <div id="modalCreate" class="modal-overlay">
   <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-success-corp"><i class="fa-solid fa-file-signature me-2"></i>เปิดสัญญาใหม่</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalCreate')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalCreate')" style="cursor:pointer"></i>
     </div>
     
-    <label class="fw-bold text-primary-corp fs-6 mb-2">เลือกลูกค้า</label>
-    <select id="cUserSelect" class="form-select form-select-lg mb-4 shadow-sm fw-bold" style="border-color: #2563eb;" onchange="toggleNewUserForm()"><option value="NEW">➕ สร้างประวัติใหม่ (ระบุด้านล่าง)</option></select>
+    <label class="fw-bold text-primary-corp small mb-1">เลือกลูกค้า</label>
+    <select id="cUserSelect" class="form-select form-select-sm mb-3 shadow-sm fw-bold" style="border-color: #2563eb;" onchange="toggleNewUserForm()"><option value="NEW">➕ สร้างประวัติใหม่ (ระบุด้านล่าง)</option></select>
     
-    <div id="newUserFormBox" class="pro-card p-4 mb-4 border-start border-4" style="border-color: #2563eb !important;">
-      <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-user-plus me-2"></i>ประวัติลูกค้าใหม่</h6>
-      <label>ชื่อ-นามสกุล</label><input type="text" id="cName" class="form-control form-control-lg mb-3">
-      <label>ชื่อเล่น</label><input type="text" id="cNick" class="form-control form-control-lg mb-3">
-      <label>เบอร์โทรศัพท์</label><input type="text" id="cPhone" class="form-control form-control-lg mb-3">
-      <label>ที่อยู่/รายละเอียด</label><input type="text" id="cDetails" class="form-control form-control-lg mb-4">
+    <div id="newUserFormBox" class="pro-card p-3 mb-3 border-start border-4" style="border-color: #2563eb !important;">
+      <h6 class="fw-bold text-dark mb-2 small"><i class="fa-solid fa-user-plus me-2"></i>ประวัติลูกค้าใหม่</h6>
+      <label class="small">ชื่อ-นามสกุล</label><input type="text" id="cName" class="form-control form-control-sm mb-2">
+      <label class="small">ชื่อเล่น</label><input type="text" id="cNick" class="form-control form-control-sm mb-2">
+      <label class="small">เบอร์โทรศัพท์</label><input type="text" id="cPhone" class="form-control form-control-sm mb-2">
+      <label class="small">ที่อยู่/รายละเอียด</label><input type="text" id="cDetails" class="form-control form-control-sm mb-3">
       
-      <div class="row g-3">
-          <div class="col-12"><label class="text-muted fw-bold">รูปภาพหน้าตรง</label><input type="file" id="cPhoto" class="form-control form-control-lg" accept="image/*"></div>
-          <div class="col-12"><label class="text-muted fw-bold">เอกสาร/บัตร ปชช.</label><input type="file" id="cIdCard" class="form-control form-control-lg" accept="image/*"></div>
-          <div class="col-12 col-md-4"><label class="text-muted fw-bold">รูปที่ 3</label><input type="file" id="cImg3" class="form-control form-control-lg" accept="image/*"></div>
-          <div class="col-12 col-md-4"><label class="text-muted fw-bold">รูปที่ 4</label><input type="file" id="cImg4" class="form-control form-control-lg" accept="image/*"></div>
-          <div class="col-12 col-md-4"><label class="text-muted fw-bold">รูปที่ 5</label><input type="file" id="cImg5" class="form-control form-control-lg" accept="image/*"></div>
+      <div class="row g-2">
+          <div class="col-12"><label class="text-muted fw-bold small">รูปภาพหน้าตรง</label><input type="file" id="cPhoto" class="form-control form-control-sm" accept="image/*"></div>
+          <div class="col-12"><label class="text-muted fw-bold small">เอกสาร/บัตร ปชช.</label><input type="file" id="cIdCard" class="form-control form-control-sm" accept="image/*"></div>
+          <div class="col-12 col-md-4"><label class="text-muted fw-bold small">รูปที่ 3</label><input type="file" id="cImg3" class="form-control form-control-sm" accept="image/*"></div>
+          <div class="col-12 col-md-4"><label class="text-muted fw-bold small">รูปที่ 4</label><input type="file" id="cImg4" class="form-control form-control-sm" accept="image/*"></div>
+          <div class="col-12 col-md-4"><label class="text-muted fw-bold small">รูปที่ 5</label><input type="file" id="cImg5" class="form-control form-control-sm" accept="image/*"></div>
       </div>
       
-      <div id="cGroupDiv" style="display:none;" class="mt-4 pt-3 border-top">
-        <label class="fw-bold text-primary-corp fs-6 mb-2">กลุ่มดูแล</label><select id="cGroup" class="form-select form-select-lg fw-bold"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
+      <div id="cGroupDiv" style="display:none;" class="mt-3 pt-2 border-top">
+        <label class="fw-bold text-primary-corp small mb-1">กลุ่มดูแล</label><select id="cGroup" class="form-select form-select-sm fw-bold"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
       </div>
     </div>
 
-    <h6 class="fw-bold text-primary-corp mt-2 mb-3 pb-2 border-bottom"><i class="fa-solid fa-file-lines me-2"></i>รายละเอียดสัญญา</h6>
-    <div class="row g-3 mb-3">
-      <div class="col-12"><label class="fw-bold">ยอดเงินต้น (฿)</label><input type="number" id="cAmount" class="form-control form-control-lg fw-bold text-primary-corp" style="font-size: 1.8rem; height: 65px;" min="0" placeholder="10000" oninput="generateSchedulePreview()"></div>
-      <div class="col-12"><label>ดอกเบี้ย (%)</label><input type="number" id="cRate" class="form-control form-control-lg" min="0" value="5" oninput="generateSchedulePreview()"></div>
+    <h6 class="fw-bold text-primary-corp mt-1 mb-2 pb-2 border-bottom small"><i class="fa-solid fa-file-lines me-2"></i>รายละเอียดสัญญา</h6>
+    <div class="row g-2 mb-2">
+      <div class="col-12"><label class="fw-bold small">ยอดเงินต้น (฿)</label><input type="number" id="cAmount" class="form-control form-control-sm fw-bold text-primary-corp" style="font-size: 1.5rem; height: 50px;" min="0" placeholder="10000" oninput="generateSchedulePreview()"></div>
+      <div class="col-12"><label class="small">ดอกเบี้ย (%)</label><input type="number" id="cRate" class="form-control form-control-sm" min="0" value="5" oninput="generateSchedulePreview()"></div>
       
       <div class="col-12">
-        <label>รูปแบบการเก็บเงิน</label>
-        <select id="cCycleMode" class="form-select form-select-lg fw-bold" onchange="toggleCycleMode(); generateSchedulePreview()">
+        <label class="small">รูปแบบการเก็บเงิน</label>
+        <select id="cCycleMode" class="form-select form-select-sm fw-bold" onchange="toggleCycleMode(); generateSchedulePreview()">
           <option value="preset">ตามรอบที่กำหนด</option>
           <option value="fixed_day">ระบุวันในสัปดาห์</option>
           <option value="custom">กำหนดจำนวนวันเอง</option>
@@ -479,8 +475,8 @@
       </div>
       
       <div class="col-12" id="cPresetContainer">
-        <label>เลือกรอบการส่ง</label>
-        <select id="cPresetInterval" class="form-select form-select-lg fw-bold" onchange="generateSchedulePreview()">
+        <label class="small">เลือกรอบการส่ง</label>
+        <select id="cPresetInterval" class="form-select form-select-sm fw-bold" onchange="generateSchedulePreview()">
           <option value="1">1 วัน</option>
           <option value="3">3 วัน</option>
           <option value="5">5 วัน</option>
@@ -492,8 +488,8 @@
       </div>
       
       <div class="col-12" id="cDayOfWeekContainer" style="display:none;">
-        <label class="text-primary-corp fw-bold">เลือกวันเก็บเงิน</label>
-        <select id="cDayOfWeek" class="form-select form-select-lg fw-bold" onchange="generateSchedulePreview()">
+        <label class="text-primary-corp fw-bold small">เลือกวันเก็บเงิน</label>
+        <select id="cDayOfWeek" class="form-select form-select-sm fw-bold" onchange="generateSchedulePreview()">
           <option value="1">วันจันทร์</option>
           <option value="2">วันอังคาร</option>
           <option value="3">วันพุธ</option>
@@ -505,47 +501,47 @@
       </div>
 
       <div class="col-12" id="cCustomContainer" style="display:none;">
-        <label>ระบุจำนวนวัน (1-120)</label>
-        <input type="number" id="cCustomInterval" class="form-control form-control-lg fw-bold" min="1" max="120" value="1" oninput="generateSchedulePreview()">
+        <label class="small">ระบุจำนวนวัน (1-120)</label>
+        <input type="number" id="cCustomInterval" class="form-control form-control-sm fw-bold" min="1" max="120" value="1" oninput="generateSchedulePreview()">
       </div>
       
-      <div class="col-6"><label>จำนวนงวด</label><input type="number" id="cInstallments" class="form-control form-control-lg fw-bold" min="1" value="1" oninput="generateSchedulePreview()"></div>
-      <div class="col-6"><label>วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control form-control-lg fw-bold" oninput="generateSchedulePreview()"></div>
+      <div class="col-6"><label class="small">จำนวนงวด</label><input type="number" id="cInstallments" class="form-control form-control-sm fw-bold" min="1" value="1" oninput="generateSchedulePreview()"></div>
+      <div class="col-6"><label class="small">วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control form-control-sm fw-bold" oninput="generateSchedulePreview()"></div>
     </div>
     
-    <label class="d-flex align-items-center mt-3 mb-4 bg-white p-3 rounded-4 border shadow-sm" style="cursor: pointer;">
-      <input class="form-check-input m-0 flex-shrink-0" type="checkbox" id="cUpfrontInt" style="width: 24px; height: 24px; cursor: pointer;" onchange="generateSchedulePreview()">
-      <span class="text-danger-corp fw-bold ms-3 mb-0" style="font-size: 1rem;">หักดอกเบี้ยล่วงหน้า (ณ วันทำสัญญา)</span>
+    <label class="d-flex align-items-center mt-2 mb-3 bg-white p-2 rounded-3 border shadow-sm" style="cursor: pointer;">
+      <input class="form-check-input m-0 flex-shrink-0" type="checkbox" id="cUpfrontInt" style="width: 20px; height: 20px; cursor: pointer;" onchange="generateSchedulePreview()">
+      <span class="text-danger-corp fw-bold ms-2 mb-0 small">หักดอกเบี้ยล่วงหน้า (ณ วันทำสัญญา)</span>
     </label>
     
-    <label class="fw-bold text-muted fs-6 mb-2">ตารางประมาณการชำระ</label>
-    <div id="cSchedulePreview" class="pro-card p-3 mb-4 bg-white" style="max-height: 250px; overflow-y:auto;"></div>
+    <label class="fw-bold text-muted small mb-1">ตารางประมาณการชำระ</label>
+    <div id="cSchedulePreview" class="pro-card p-2 mb-3 bg-white" style="max-height: 200px; overflow-y:auto; font-size: 0.85rem;"></div>
     
-    <button onclick="saveLoan()" class="btn bg-success-corp w-100 py-3 fw-bold fs-5 shadow-sm rounded-pill"><i class="fa-solid fa-check me-2"></i> อนุมัติสัญญา</button>
+    <button onclick="saveLoan()" class="btn bg-success-corp w-100 py-2 fw-bold shadow-sm rounded-pill"><i class="fa-solid fa-check me-2"></i> อนุมัติสัญญา</button>
   </div>
 </div>
 
 <div id="modalEdit" class="modal-overlay">
   <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-4 border-bottom pb-3">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
       <h5 class="fw-bold m-0 text-warning-corp"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขสัญญา</h5>
-      <i class="fa-solid fa-xmark fs-3 text-secondary p-2" onclick="closeModal('modalEdit')" style="cursor:pointer"></i>
+      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalEdit')" style="cursor:pointer"></i>
     </div>
     <input type="hidden" id="eLoanId"><input type="hidden" id="eUserId">
-    <div class="pro-card p-4 mb-4">
-      <label>ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-lg mb-3 fw-bold text-primary-corp" min="0">
-      <label>ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-lg mb-3" min="0" readonly>
+    <div class="pro-card p-3 mb-3">
+      <label class="small">ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm mb-2 fw-bold text-primary-corp" min="0">
+      <label class="small">ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm mb-2" min="0" readonly>
       
-      <label>รูปแบบการเก็บเงิน</label>
-      <select id="eCycleMode" class="form-select form-select-lg mb-3 fw-bold" onchange="toggleEditCycleMode()">
+      <label class="small">รูปแบบการเก็บเงิน</label>
+      <select id="eCycleMode" class="form-select form-select-sm mb-2 fw-bold" onchange="toggleEditCycleMode()">
         <option value="preset">ตามรอบที่กำหนด</option>
         <option value="fixed_day">ระบุวันในสัปดาห์</option>
         <option value="custom">กำหนดจำนวนวันเอง</option>
       </select>
       
       <div id="ePresetContainer">
-        <label>เลือกรอบการส่ง</label>
-        <select id="ePresetInterval" class="form-select form-select-lg mb-3 fw-bold">
+        <label class="small">เลือกรอบการส่ง</label>
+        <select id="ePresetInterval" class="form-select form-select-sm mb-2 fw-bold">
           <option value="1">1 วัน</option>
           <option value="3">3 วัน</option>
           <option value="5">5 วัน</option>
@@ -557,8 +553,8 @@
       </div>
       
       <div id="eDayOfWeekContainer" style="display:none;">
-        <label class="text-primary-corp fw-bold mb-2">เลือกวันเก็บเงินใหม่</label>
-        <select id="eDayOfWeek" class="form-select form-select-lg mb-3 fw-bold">
+        <label class="text-primary-corp fw-bold small mb-1">เลือกวันเก็บเงินใหม่</label>
+        <select id="eDayOfWeek" class="form-select form-select-sm mb-2 fw-bold">
           <option value="1">วันจันทร์</option>
           <option value="2">วันอังคาร</option>
           <option value="3">วันพุธ</option>
@@ -570,13 +566,13 @@
       </div>
 
       <div id="eCustomContainer" style="display:none;">
-        <label>ระบุจำนวนวัน (1-120)</label>
-        <input type="number" id="eCustomInterval" class="form-control form-control-lg mb-3 fw-bold" min="1" max="120" value="1">
+        <label class="small">ระบุจำนวนวัน (1-120)</label>
+        <input type="number" id="eCustomInterval" class="form-control form-control-sm mb-2 fw-bold" min="1" max="120" value="1">
       </div>
       
-      <label>แก้ไขวันที่เริ่ม</label><input type="date" id="eStartDate" class="form-control form-control-lg fw-bold">
+      <label class="small">แก้ไขวันที่เริ่ม</label><input type="date" id="eStartDate" class="form-control form-control-sm fw-bold">
     </div>
-    <button onclick="submitEdit()" class="btn bg-primary-corp w-100 py-3 fw-bold fs-5 rounded-pill shadow-sm">บันทึกข้อมูล</button>
+    <button onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
 </div>
 

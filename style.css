@@ -265,16 +265,26 @@ label, .small, .text-muted {
 details > summary { list-style: none; outline: none; padding-left: 0.25rem; transition: 0.2s; }
 details > summary::-webkit-details-marker { display: none; }
 
+/* 🟢 ย่อขนาดทุกอย่างบนมือถือ ให้พอดี ไม่ล้นจอ */
 @media (max-width: 600px) {
-  body { padding-top: 55px; padding-bottom: 75px; font-size: 0.95rem; }
-  h5 { font-size: 1.1rem; }
-  h6 { font-size: 0.95rem; }
+  body { padding-top: 50px; padding-bottom: 70px; font-size: 0.85rem; }
+  h5 { font-size: 1rem !important; margin-bottom: 0.3rem !important; }
+  h6 { font-size: 0.9rem !important; }
+  h1.fw-bold { font-size: 2rem !important; }
   .pro-card { padding: 12px; border-radius: 16px; margin-bottom: 12px; }
-  .form-control, .form-select { padding: 10px 12px; font-size: 0.95rem; }
-  .btn-action { padding: 14px; font-size: 1rem; }
+  .form-control, .form-select { padding: 8px 12px; font-size: 0.9rem; border-radius: 10px; }
+  .btn-action { padding: 12px; font-size: 0.95rem; }
+  .btn { font-size: 0.85rem; padding: 10px; }
   .bottom-nav-item i { font-size: 1.25rem; }
-  .bottom-nav { padding: 8px 0 16px 0; }
-  .img-box { width: 60px; height: 60px; }
-  .status-badge { padding: 4px 10px; font-size: 0.75rem; }
-  .modal-content-custom { padding: 20px 15px 25px 15px; }
+  .bottom-nav { padding: 8px 0 16px 0; border-radius: 16px 16px 0 0;}
+  .img-box { width: 50px; height: 50px; }
+  .status-badge { padding: 4px 10px; font-size: 0.7rem; }
+  .modal-content-custom { padding: 16px 12px 20px 12px; border-radius: 20px 20px 0 0; }
+  .fs-3 { font-size: 1.25rem !important; }
+  .fs-4 { font-size: 1.1rem !important; }
+  .fs-5 { font-size: 1rem !important; }
+  .fs-6 { font-size: 0.85rem !important; }
+  .small { font-size: 0.75rem !important; }
+  .btn-action i { font-size: 2rem !important; }
+  .borrower-card { padding: 12px; border-radius: 12px; }
 }

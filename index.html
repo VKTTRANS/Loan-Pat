@@ -6,7 +6,7 @@
   <title>Fintech Admin Pro</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   
   <link rel="stylesheet" href="style.css">
 </head>
@@ -97,64 +97,54 @@
 
   <div class="container" style="max-width: 600px; padding-left: 12px; padding-right: 12px;">
     <div id="viewDash">
-      <div class="pro-card p-4">
-        <div class="d-flex justify-content-between align-items-center mb-3">
-          <span class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-chart-pie me-1"></i>ภาพรวม</span>
-          <div class="d-flex gap-2">
-            <select id="dashFilterMonth" class="form-select form-select-sm px-2 py-2 fw-bold" style="width: auto; border-radius: 20px;" onchange="updateDashMetrics()">
-              <option value="all">ทุกเดือน</option><option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option><option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option><option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
-            </select>
-            <select id="dashFilterYear" class="form-select form-select-sm px-2 py-2 fw-bold" style="width: auto; border-radius: 20px;" onchange="updateDashMetrics()"></select>
-          </div>
+      <div class="d-flex justify-content-between align-items-center mb-4 mt-2">
+        <span class="fw-bold m-0 text-dark fs-4"><i class="fa-solid fa-chart-pie me-2 text-primary-corp"></i>ภาพรวมระบบ</span>
+        <div class="d-flex gap-2">
+          <select id="dashFilterMonth" class="form-select form-select-sm px-3 py-2 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 12px; background-color: #f1f5f9;" onchange="updateDashMetrics()">
+            <option value="all">ทุกเดือน</option><option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option><option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option><option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
+          </select>
+          <select id="dashFilterYear" class="form-select form-select-sm px-3 py-2 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 12px; background-color: #f1f5f9;" onchange="updateDashMetrics()"></select>
         </div>
+      </div>
 
-        <div class="p-3 mb-2 rounded-4 text-center" style="background: linear-gradient(135deg, #eff6ff 0%, #ffffff 100%); border: 1px solid #dbeafe;">
-          <label class="fw-bold d-block text-primary-corp mb-1">ยอดปล่อยกู้สะสม</label>
-          <h2 class="fw-bold m-0 text-primary-corp">฿<span id="mTotalLoan">0</span></h2>
-        </div>
-
-        <div class="p-3 mb-3 rounded-4 text-center" style="background: linear-gradient(135deg, #fffbeb 0%, #ffffff 100%); border: 1px solid #fef3c7;">
-          <label class="fw-bold d-block text-warning-corp mb-1">ยอดหนี้คงค้างทั้งหมด</label>
-          <h2 class="fw-bold m-0 text-warning-corp">฿<span id="mTotalRemain">0</span></h2>
-        </div>
-
-        <div class="row text-center mt-3 pt-3 border-top g-2">
-          <div class="col-4 border-end border-bottom pb-3">
-            <span class="text-muted d-block fw-bold mb-1 small">1 วัน</span>
-            <span class="d-block text-primary-corp fw-bold">฿<span id="m1Loan">0</span></span>
-            <span class="d-block text-warning-corp fw-bold">฿<span id="m1Remain">0</span></span>
-          </div>
-          <div class="col-4 border-end border-bottom pb-3">
-            <span class="text-muted d-block fw-bold mb-1 small">3 วัน</span>
-            <span class="d-block text-primary-corp fw-bold">฿<span id="m3Loan">0</span></span>
-            <span class="d-block text-warning-corp fw-bold">฿<span id="m3Remain">0</span></span>
-          </div>
-          <div class="col-4 border-bottom pb-3">
-            <span class="text-muted d-block fw-bold mb-1 small">5 วัน</span>
-            <span class="d-block text-primary-corp fw-bold">฿<span id="m5Loan">0</span></span>
-            <span class="d-block text-warning-corp fw-bold">฿<span id="m5Remain">0</span></span>
-          </div>
-          <div class="col-4 border-end pt-3">
-            <span class="text-muted d-block fw-bold mb-1 small">สัปดาห์</span>
-            <span class="d-block text-primary-corp fw-bold">฿<span id="m7Loan">0</span></span>
-            <span class="d-block text-warning-corp fw-bold">฿<span id="m7Remain">0</span></span>
-          </div>
-          <div class="col-4 border-end pt-3">
-            <span class="text-muted d-block fw-bold mb-1 small">15 วัน</span>
-            <span class="d-block text-primary-corp fw-bold">฿<span id="m15Loan">0</span></span>
-            <span class="d-block text-warning-corp fw-bold">฿<span id="m15Remain">0</span></span>
-          </div>
-          <div class="col-4 pt-3">
-            <span class="text-muted d-block fw-bold mb-1 small">รายเดือน</span>
-            <span class="d-block text-primary-corp fw-bold">฿<span id="m30Loan">0</span></span>
-            <span class="d-block text-warning-corp fw-bold">฿<span id="m30Remain">0</span></span>
+      <div class="pro-card p-4 mb-4 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border: none; border-radius: 24px;">
+        <i class="fa-solid fa-vault position-absolute" style="font-size: 10rem; opacity: 0.1; right: -20px; bottom: -20px;"></i>
+        <div class="position-relative z-1">
+          <label class="fw-bold d-block text-light mb-1 opacity-75 fs-6"><i class="fa-solid fa-coins me-2"></i>ยอดปล่อยกู้สะสมทั้งหมด</label>
+          <h1 class="fw-bold m-0 text-white mb-4" style="font-size: 2.5rem; letter-spacing: -1px;">฿<span id="mTotalLoan">0</span></h1>
+          
+          <div class="d-flex justify-content-between bg-white bg-opacity-10 p-3 rounded-4" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
+             <div>
+                <span class="d-block text-light opacity-75 small fw-bold mb-1"><i class="fa-solid fa-file-invoice-dollar me-1"></i>ยอดหนี้คงค้าง</span>
+                <span class="d-block fw-bold text-warning" style="font-size: 1.25rem;">฿<span id="mTotalRemain">0</span></span>
+             </div>
+             <div class="text-end border-start border-light border-opacity-25 ps-3">
+                <span class="d-block text-light opacity-75 small fw-bold mb-1"><i class="fa-solid fa-users me-1"></i>ลูกค้า (คน)</span>
+                <span class="d-block fw-bold text-white" style="font-size: 1.25rem;" id="mTotalUsers">0</span>
+             </div>
           </div>
         </div>
       </div>
 
+      <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-bolt me-2 text-warning-corp"></i> เมนูด่วน (Quick Actions)</h6>
       <div class="row g-3 mb-4">
-        <div class="col-12"><button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-3"><i class="fa-solid fa-hand-holding-dollar fs-3 mb-2"></i> บันทึกรับชำระเงิน</button></div>
-        <div class="col-12"><button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-3"><i class="fa-solid fa-file-signature fs-3 mb-2"></i> เปิดสัญญาลูกค้าใหม่</button></div>
+        <div class="col-6">
+           <button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-4 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 4px solid #172554;">
+              <i class="fa-solid fa-hand-holding-dollar fs-1 mb-2 text-white opacity-75"></i> 
+              <span class="d-block fs-6 text-white fw-bold">รับชำระเงิน</span>
+           </button>
+        </div>
+        <div class="col-6">
+           <button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-4 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 4px solid #065f46;">
+              <i class="fa-solid fa-file-signature fs-1 mb-2 text-white opacity-75"></i> 
+              <span class="d-block fs-6 text-white fw-bold">เปิดสัญญาใหม่</span>
+           </button>
+        </div>
+      </div>
+
+      <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-chart-column me-2 text-primary-corp"></i> สัดส่วนหนี้คงค้างตามรอบบิล</h6>
+      <div id="cycleBreakdownContainer" class="pro-card p-0 overflow-hidden mb-4 shadow-sm" style="border-radius: 20px;">
+         <!-- ข้อมูลจะถูกดึงมาใส่ตรงนี้โดย script.js -->
       </div>
 
       <span class="fw-bold d-block mb-3 text-danger-corp px-2"><i class="fa-solid fa-bell me-2"></i>รายการใกล้ครบกำหนด / ค้างชำระ</span>
@@ -164,7 +154,12 @@
     <div id="viewList" style="display:none;">
       <div class="pro-card p-3 mb-3">
         <div class="input-group shadow-sm rounded-3 mb-3" style="border-radius: 12px; overflow: hidden;">
-          <span class="input-group-text bg-white border-end-0 py-3"><i class="fa-solid fa-magnifying-glass text-muted fs-5"></i></span>
+          <!-- 🟢 อัปเดต: ใช้ Inline SVG แทน Font Awesome เพื่อป้องกันปัญหาโหลดไม่ขึ้น 100% -->
+          <span class="input-group-text bg-white border-end-0 py-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+            </svg>
+          </span>
           <input class="form-control border-start-0 ps-0 py-3 form-control-lg fs-6" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
         </div>
         <details class="mb-1">
@@ -196,7 +191,12 @@
     <div id="viewUsers" style="display:none;">
       <div class="pro-card p-3 mb-3">
         <div class="input-group shadow-sm rounded-3 mb-3" style="border-radius: 12px; overflow: hidden;">
-          <span class="input-group-text bg-white border-end-0 py-3"><i class="fa-solid fa-magnifying-glass text-muted fs-5"></i></span>
+          <!-- 🟢 อัปเดต: ใช้ Inline SVG แทน Font Awesome -->
+          <span class="input-group-text bg-white border-end-0 py-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
+              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+            </svg>
+          </span>
           <input class="form-control border-start-0 ps-0 py-3 form-control-lg fs-6" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="filterUsers()">
         </div>
         <div class="d-flex justify-content-end align-items-center mt-2 p-2">
@@ -324,7 +324,6 @@
   </div>
 </div>
 
-<!-- หน้าต่างรายละเอียดสัญญา (พร้อมปุ่มคำสั่งด่วน) -->
 <div id="modalDetails" class="modal-overlay" style="z-index: 1005;">
   <div class="modal-content-custom bg-light">
     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-3">
@@ -356,7 +355,6 @@
       </div>
     </div>
 
-    <!-- เมนูคำสั่งด่วนภายในหน้ารายละเอียดสัญญา -->
     <div class="row g-2 mb-4">
       <div class="col-12"><button id="btnDetailPay" class="btn bg-success-corp w-100 fw-bold py-3 rounded-4 shadow-sm text-white fs-6"><i class="fa-solid fa-hand-holding-dollar me-2"></i>บันทึกรับชำระเงิน</button></div>
       <div class="col-4"><button id="btnDetailHistory" class="btn btn-white border w-100 fw-bold py-2 rounded-4 text-primary-corp small"><i class="fa-solid fa-folder-open mb-1 d-block fs-5"></i>แฟ้มลูกค้า</button></div>
@@ -384,7 +382,12 @@
     <div class="input-group mb-4 shadow-sm rounded-3" style="border-radius: 12px; overflow: hidden;">
       <input list="payLoanOptions" id="loanIdInput" class="form-control form-control-lg border-end-0 py-3" placeholder="รหัสสัญญา / ชื่อลูกค้า...">
       <datalist id="payLoanOptions"></datalist>
-      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-4"><i class="fa-solid fa-magnifying-glass fs-5"></i></button>
+      <!-- 🟢 อัปเดต: ใช้ Inline SVG แทน Font Awesome -->
+      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-4">
+        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+        </svg>
+      </button>
     </div>
     
     <div id="payDetails" style="display:none">
@@ -469,9 +472,9 @@
       <div class="col-12">
         <label>รูปแบบการเก็บเงิน</label>
         <select id="cCycleMode" class="form-select form-select-lg fw-bold" onchange="toggleCycleMode(); generateSchedulePreview()">
-          <option value="preset">ตามรอบที่กำหนด (1,3,5,7,14,21,30 วัน)</option>
-          <option value="fixed_day">ตามวันในสัปดาห์ (จันทร์-อาทิตย์)</option>
-          <option value="custom">ระบุจำนวนวันเอง (1-120 วัน)</option>
+          <option value="preset">ตามรอบที่กำหนด</option>
+          <option value="fixed_day">ระบุวันในสัปดาห์</option>
+          <option value="custom">กำหนดจำนวนวันเอง</option>
         </select>
       </div>
       
@@ -510,12 +513,10 @@
       <div class="col-6"><label>วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control form-control-lg fw-bold" oninput="generateSchedulePreview()"></div>
     </div>
     
-    <div class="form-check mt-3 mb-4 bg-white p-3 rounded-4 border">
-      <input class="form-check-input ms-1" type="checkbox" id="cUpfrontInt" style="transform: scale(1.5);" onchange="generateSchedulePreview()">
-      <label class="form-check-label text-danger-corp fw-bold ms-3" for="cUpfrontInt" style="cursor: pointer; padding-top: 2px;">
-        หักดอกเบี้ยล่วงหน้า (ณ วันทำสัญญา)
-      </label>
-    </div>
+    <label class="d-flex align-items-center mt-3 mb-4 bg-white p-3 rounded-4 border shadow-sm" style="cursor: pointer;">
+      <input class="form-check-input m-0 flex-shrink-0" type="checkbox" id="cUpfrontInt" style="width: 24px; height: 24px; cursor: pointer;" onchange="generateSchedulePreview()">
+      <span class="text-danger-corp fw-bold ms-3 mb-0" style="font-size: 1rem;">หักดอกเบี้ยล่วงหน้า (ณ วันทำสัญญา)</span>
+    </label>
     
     <label class="fw-bold text-muted fs-6 mb-2">ตารางประมาณการชำระ</label>
     <div id="cSchedulePreview" class="pro-card p-3 mb-4 bg-white" style="max-height: 250px; overflow-y:auto;"></div>
@@ -537,9 +538,9 @@
       
       <label>รูปแบบการเก็บเงิน</label>
       <select id="eCycleMode" class="form-select form-select-lg mb-3 fw-bold" onchange="toggleEditCycleMode()">
-        <option value="preset">ตามรอบที่กำหนด (1,3,5,7,14,21,30 วัน)</option>
-        <option value="fixed_day">ตามวันในสัปดาห์ (จันทร์-อาทิตย์)</option>
-        <option value="custom">ระบุจำนวนวันเอง (1-120 วัน)</option>
+        <option value="preset">ตามรอบที่กำหนด</option>
+        <option value="fixed_day">ระบุวันในสัปดาห์</option>
+        <option value="custom">กำหนดจำนวนวันเอง</option>
       </select>
       
       <div id="ePresetContainer">

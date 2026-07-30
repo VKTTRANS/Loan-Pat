@@ -572,16 +572,18 @@ function renderRecentPays(data) {
   document.getElementById('recentPaysContainer').innerHTML = html;
 }
 
-// 🟢 แก้ไข: เพิ่มตัวแปรแสดงค่างวดในหน้า Dash Alerts
+// 🟢 อัปเดต: หน้า Dash Alerts ดึง (currentInst / totalInst) มาแสดงผล
 function renderDashAlerts() {
   let alertLoans = allLoans.filter(l => (Number(l.daysLeft) || 0) <= 3);
   let html = '';
   alertLoans.forEach(b => {
     let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
     
-    // ดึงค่างวดจาก Backend (รองรับได้หลายชื่อตัวแปรเผื่อไว้)
+    // คำนวณค่างวด + นำงวดปัจจุบัน/ทั้งหมดมาแสดง
     let installmentPay = Number(b.installment || b.installmentAmount || b.perInstallment || 0);
-    let installmentHtml = installmentPay > 0 ? `<span class="text-success-corp fw-bold small ms-2 border-start border-2 ps-2"><i class="fa-solid fa-coins me-1"></i>งวดละ: ฿${installmentPay.toLocaleString()}</span>` : '';
+    let cInst = b.currentInst || 1;
+    let tInst = b.totalInst || 1;
+    let installmentHtml = installmentPay > 0 ? `<span class="text-success-corp fw-bold small ms-2 border-start border-2 ps-2"><i class="fa-solid fa-coins me-1"></i>งวดละ: ฿${installmentPay.toLocaleString()} <span style="font-size:0.8rem; color:#64748b;">(${cInst}/${tInst})</span></span>` : '';
 
     html += `
       <div class="borrower-card p-3 mb-3" onclick="viewDetails('${b.loanId}')" style="border-left-color: #ef4444;">
@@ -604,15 +606,17 @@ function renderDashAlerts() {
   document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-4 border rounded bg-white mx-2 mb-3">ไม่มีรายการค้างชำระ / ใกล้ครบดิว</div>';
 }
 
-// 🟢 แก้ไข: เพิ่มตัวแปรแสดงค่างวดในหน้า Loan List
+// 🟢 อัปเดต: หน้า Loan List ดึง (currentInst / totalInst) มาแสดงผล
 function renderList(data) {
   let html = '';
   data.forEach(b => {
       let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
       
-      // ดึงค่างวดจาก Backend
+      // คำนวณค่างวด + นำงวดปัจจุบัน/ทั้งหมดมาแสดง
       let installmentPay = Number(b.installment || b.installmentAmount || b.perInstallment || 0);
-      let installmentHtml = installmentPay > 0 ? `<p class="mb-0 text-success-corp fw-bold fs-6 mt-1"><i class="fa-solid fa-coins me-2"></i>งวดละ: ฿${installmentPay.toLocaleString()}</p>` : '';
+      let cInst = b.currentInst || 1;
+      let tInst = b.totalInst || 1;
+      let installmentHtml = installmentPay > 0 ? `<p class="mb-0 text-success-corp fw-bold fs-6 mt-1"><i class="fa-solid fa-coins me-2"></i>งวดละ: ฿${installmentPay.toLocaleString()} <span class="text-muted ms-1" style="font-size:0.9rem;">(${cInst}/${tInst})</span></p>` : '';
 
       html += `
       <div class="borrower-card loan-item p-4 mb-3" onclick="viewDetails('${b.loanId}')">

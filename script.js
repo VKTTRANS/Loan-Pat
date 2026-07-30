@@ -505,14 +505,10 @@ function updateDashMetrics() {
   let fMonth = document.getElementById('dashFilterMonth').value;
   
   let metrics = {
-    TotalLoan: 0, TotalRemain: 0,
-    '1Loan': 0, '1Remain': 0,
-    '3Loan': 0, '3Remain': 0,
-    '5Loan': 0, '5Remain': 0,
-    '7Loan': 0, '7Remain': 0,
-    '15Loan': 0, '15Remain': 0,
-    '30Loan': 0, '30Remain': 0
+    TotalLoan: 0, TotalRemain: 0, TotalUsers: new Set()
   };
+  
+  let cycleMetrics = {};
 
   rawAllTimeLoans.forEach(l => {
     let d = new Date(l.startDate);
@@ -520,21 +516,61 @@ function updateDashMetrics() {
       let y = d.getFullYear() + 543; let m = d.getMonth() + 1;
       if ((fYear === 'all' || fYear == y.toString()) && (fMonth === 'all' || fMonth == m.toString())) {
         let orig = Number(l.originalPrincipal) || 0; let remain = Number(l.remainingPrincipal) || 0;
-        metrics.TotalLoan += orig; if(l.status === 'Active') metrics.TotalRemain += remain;
+        metrics.TotalLoan += orig; 
         
-        if (l.cycle === '1') { metrics['1Loan'] += orig; if(l.status === 'Active') metrics['1Remain'] += remain; } 
-        else if (l.cycle === '3') { metrics['3Loan'] += orig; if(l.status === 'Active') metrics['3Remain'] += remain; }
-        else if (l.cycle === '5') { metrics['5Loan'] += orig; if(l.status === 'Active') metrics['5Remain'] += remain; }
-        else if (l.cycle === '7') { metrics['7Loan'] += orig; if(l.status === 'Active') metrics['7Remain'] += remain; }
-        else if (l.cycle === '15') { metrics['15Loan'] += orig; if(l.status === 'Active') metrics['15Remain'] += remain; } 
-        else if (l.cycle === '30') { metrics['30Loan'] += orig; if(l.status === 'Active') metrics['30Remain'] += remain; }
+        if(l.status === 'Active') {
+          metrics.TotalRemain += remain;
+          metrics.TotalUsers.add(l.userId);
+        }
+        
+        let c = String(l.cycle);
+        if (!cycleMetrics[c]) cycleMetrics[c] = { loan: 0, remain: 0 };
+        cycleMetrics[c].loan += orig;
+        if (l.status === 'Active') cycleMetrics[c].remain += remain;
       }
     }
   });
 
-  ['TotalLoan','TotalRemain','1Loan','1Remain','3Loan','3Remain','5Loan','5Remain','7Loan','7Remain','15Loan','15Remain','30Loan','30Remain'].forEach(k => { 
-    document.getElementById('m'+k).innerText = Math.round(metrics[k]).toLocaleString(); 
+  if(document.getElementById('mTotalLoan')) document.getElementById('mTotalLoan').innerText = Math.round(metrics.TotalLoan).toLocaleString(); 
+  if(document.getElementById('mTotalRemain')) document.getElementById('mTotalRemain').innerText = Math.round(metrics.TotalRemain).toLocaleString(); 
+  if(document.getElementById('mTotalUsers')) document.getElementById('mTotalUsers').innerText = metrics.TotalUsers.size.toLocaleString();
+  
+  let cycleHtml = '';
+  let sortedCycles = Object.keys(cycleMetrics).sort((a, b) => Number(a) - Number(b));
+  let hasData = false;
+
+  sortedCycles.forEach(c => {
+    let data = cycleMetrics[c];
+    if (data.loan === 0 && data.remain === 0) return;
+
+    hasData = true;
+    let cNum = Number(c);
+    let cLabel = `ส่งทุก ${cNum} วัน`;
+    if (cNum === 1) cLabel = "ส่งรายวัน";
+    else if (cNum === 7) cLabel = "รายสัปดาห์ (7 วัน)";
+    else if (cNum === 30) cLabel = "รายเดือน (30 วัน)";
+
+    cycleHtml += `
+     <div class="d-flex justify-content-between align-items-center p-3 border-bottom bg-white">
+        <div class="d-flex align-items-center">
+           <div class="bg-light text-primary-corp rounded-3 d-flex justify-content-center align-items-center fw-bold me-3 shadow-sm border" style="width: 45px; height: 45px; font-size: 1.1rem;">${cNum}</div>
+           <div>
+              <span class="d-block fw-bold text-dark mb-1">${cLabel}</span>
+              <span class="d-block text-muted small" style="font-size: 0.75rem;">ปล่อยกู้: ฿${Math.round(data.loan).toLocaleString()}</span>
+           </div>
+        </div>
+        <div class="text-end">
+           <span class="d-block fw-bold text-warning-corp fs-6">ค้าง: ฿${Math.round(data.remain).toLocaleString()}</span>
+        </div>
+     </div>
+    `;
   });
+
+  if(!hasData) cycleHtml = `<div class="p-4 text-center text-muted bg-white small">ยังไม่มีข้อมูลในเดือนนี้</div>`;
+
+  if(document.getElementById('cycleBreakdownContainer')) {
+    document.getElementById('cycleBreakdownContainer').innerHTML = cycleHtml;
+  }
 }
 
 function applyRecentPaysLimit() {
@@ -572,68 +608,101 @@ function renderRecentPays(data) {
   document.getElementById('recentPaysContainer').innerHTML = html;
 }
 
-// 🟢 อัปเดต: หน้า Dash Alerts ดึง (currentInst / totalInst) มาแสดงผล
+// 🟢 อัปเดต: หน้า Dash Alerts จัดระเบียบการ์ดใหม่ให้สั้นกะทัดรัด (Flexbox Layout)
 function renderDashAlerts() {
   let alertLoans = allLoans.filter(l => (Number(l.daysLeft) || 0) <= 3);
   let html = '';
   alertLoans.forEach(b => {
-    let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
+    let dLeft = Number(b.daysLeft) || 0; 
+    let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-success-corp'); 
+    let statusText = dLeft < 0 ? `เกินกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
     
-    // คำนวณค่างวด + นำงวดปัจจุบัน/ทั้งหมดมาแสดง
     let installmentPay = Number(b.installment || b.installmentAmount || b.perInstallment || 0);
     let cInst = b.currentInst || 1;
     let tInst = b.totalInst || 1;
-    let installmentHtml = installmentPay > 0 ? `<span class="text-success-corp fw-bold small ms-2 border-start border-2 ps-2"><i class="fa-solid fa-coins me-1"></i>งวดละ: ฿${installmentPay.toLocaleString()} <span style="font-size:0.8rem; color:#64748b;">(${cInst}/${tInst})</span></span>` : '';
 
     html += `
-      <div class="borrower-card p-3 mb-3" onclick="viewDetails('${b.loanId}')" style="border-left-color: #ef4444;">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h6 class="fw-bold mb-2 text-dark"><i class="fa-solid fa-circle-user text-secondary me-2"></i> ${b.userName || 'ไม่ระบุชื่อ'}</h6>
-            <span class="text-muted d-block mb-1 small">สัญญา: ${b.loanId}</span>
-            <div class="d-flex align-items-center mt-1">
-              <span class="text-danger-corp fw-bold small">ยอดค้าง: ฿${Number(b.amount || 0).toLocaleString()}</span>
-              ${installmentHtml}
-            </div>
+      <div class="borrower-card p-3 mb-3 shadow-sm" onclick="viewDetails('${b.loanId}')" style="border-left-color: var(--danger); border-radius: 16px;">
+          <!-- แถว 1: ชื่อ & สถานะ -->
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+              <h6 class="fw-bold m-0 text-dark text-truncate pe-2" style="max-width: 70%;">
+                  <i class="fa-solid fa-circle-user text-secondary me-2"></i>${b.userName || 'ไม่ระบุชื่อ'}
+              </h6>
+              <span class="status-badge ${statusClass} shadow-sm" style="font-size:0.75rem; padding: 4px 10px;">${statusText}</span>
           </div>
-          <div class="text-end">
-            <span class="status-badge ${statusClass} d-block mb-3 shadow-sm">${statusText}</span>
-            <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold w-100" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
+
+          <!-- แถว 2: ยอดหนี้ & ค่างวด -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+              <div>
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">รหัส: ${b.loanId}</span>
+                  <span class="text-danger-corp fw-bold" style="font-size:1.1rem;">ค้าง: ฿${Number(b.amount || 0).toLocaleString()}</span>
+              </div>
+              <div class="text-end">
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด ${installmentPay > 0 ? `(${cInst}/${tInst})` : ''}</span>
+                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">${installmentPay > 0 ? `฿${installmentPay.toLocaleString()}` : '-'}</span>
+              </div>
           </div>
-        </div>
+
+          <!-- แถว 3: ปุ่มจ่ายเงิน -->
+          <div class="text-end mt-2 pt-2 border-top">
+              <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold w-100" style="font-size:0.85rem;" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
+          </div>
       </div>`;
   });
   document.getElementById('dashAlertContainer').innerHTML = html || '<div class="text-center text-muted p-4 border rounded bg-white mx-2 mb-3">ไม่มีรายการค้างชำระ / ใกล้ครบดิว</div>';
 }
 
-// 🟢 อัปเดต: หน้า Loan List ดึง (currentInst / totalInst) มาแสดงผล
+// 🟢 อัปเดต: หน้า Loan List จัดระเบียบการ์ดใหม่ให้สั้นกะทัดรัด (Flexbox Layout)
 function renderList(data) {
   let html = '';
   data.forEach(b => {
-      let dLeft = Number(b.daysLeft) || 0; let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp'); let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
+      let dLeft = Number(b.daysLeft) || 0; 
+      let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp'); 
+      let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
       
-      // คำนวณค่างวด + นำงวดปัจจุบัน/ทั้งหมดมาแสดง
       let installmentPay = Number(b.installment || b.installmentAmount || b.perInstallment || 0);
       let cInst = b.currentInst || 1;
       let tInst = b.totalInst || 1;
-      let installmentHtml = installmentPay > 0 ? `<p class="mb-0 text-success-corp fw-bold fs-6 mt-1"><i class="fa-solid fa-coins me-2"></i>งวดละ: ฿${installmentPay.toLocaleString()} <span class="text-muted ms-1" style="font-size:0.9rem;">(${cInst}/${tInst})</span></p>` : '';
 
       html += `
-      <div class="borrower-card loan-item p-4 mb-3" onclick="viewDetails('${b.loanId}')">
-          <div class="d-flex justify-content-between align-items-start">
+      <div class="borrower-card loan-item p-3 mb-3 shadow-sm" onclick="viewDetails('${b.loanId}')" style="border-left-color: var(--primary); border-radius: 16px;">
+          <!-- แถว 1: ชื่อลูกค้า & รอบบิล -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
+              <h6 class="fw-bold m-0 text-dark text-truncate pe-2" style="max-width: 70%;">
+                  <i class="fa-solid fa-circle-user text-secondary me-2"></i>${b.userName} ${b.nickname ? `(${b.nickname})` : ''}
+              </h6>
+              <span class="badge bg-light text-secondary border px-2 py-1" style="font-size:0.75rem; white-space:nowrap;">รอบ ${b.cycle} วัน</span>
+          </div>
+          
+          <!-- แถว 2: รหัสสัญญา & สถานะ -->
+          <div class="d-flex justify-content-between align-items-center mb-2 pb-2 border-bottom">
+              <span class="text-muted small m-0" style="font-size:0.8rem;"><i class="fa-solid fa-hashtag me-1"></i>${b.loanId}</span>
+              <span class="status-badge ${statusClass} shadow-sm" style="font-size:0.75rem; padding: 4px 10px;">${statusText}</span>
+          </div>
+
+          <!-- แถว 3: ยอดหนี้ & ค่างวด (จัดเรียงแนวนอน) -->
+          <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
-                  <h6 class="fw-bold mb-2 text-dark">${b.userName} ${b.nickname ? `(${b.nickname})` : ''}</h6>
-                  <span class="badge bg-light text-secondary border mb-2 px-3 py-1 fs-6">รอบ ${b.cycle} วัน</span>
-                  <span class="text-muted d-block mb-2 small">รหัส: ${b.loanId}</span>
-                  <p class="mb-0 text-primary-corp fw-bold fs-6">ยอดหนี้: ฿${Number(b.amount || 0).toLocaleString()}</p>
-                  ${installmentHtml}
-                  <p class="mb-0 text-muted mt-2 small"><i class="fa-regular fa-calendar me-2"></i>ดิว: ${b.dueDate}</p>
-                  <p class="mb-0 text-muted mt-2 small"><i class="fa-solid fa-user-tie me-2"></i>แอดมิน: ${b.adminName || 'ไม่ระบุ'} | <i class="fa-solid fa-users mx-2"></i>กลุ่ม: ${b.groupName || '-'}</p>
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ยอดหนี้คงค้าง</span>
+                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${Number(b.amount || 0).toLocaleString()}</span>
               </div>
-              <div class="text-end d-flex flex-column justify-content-between" style="height: 100%;">
-                  <span class="status-badge ${statusClass} d-block shadow-sm mb-4 fs-6">${statusText}</span>
-                  <button class="btn bg-primary-corp rounded-pill px-4 py-2 fw-bold shadow-sm mt-auto" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
+              <div class="text-end">
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด ${installmentPay > 0 ? `(${cInst}/${tInst})` : ''}</span>
+                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">${installmentPay > 0 ? `฿${installmentPay.toLocaleString()}` : '-'}</span>
               </div>
+          </div>
+
+          <!-- แถว 4: ดิว/แอดมิน/กลุ่ม & ปุ่มจ่ายเงิน -->
+          <div class="d-flex justify-content-between align-items-end mt-2 pt-2 border-top">
+              <div class="text-muted" style="font-size:0.75rem;">
+                  <div class="mb-1"><i class="fa-regular fa-calendar me-1"></i>ดิว: <span class="text-dark fw-bold">${b.dueDate}</span></div>
+                  <div>
+                      <i class="fa-solid fa-user-tie me-1"></i>${b.adminName || '-'} 
+                      <span class="mx-1 text-light">|</span> 
+                      <i class="fa-solid fa-users me-1"></i>${b.groupName || '-'}
+                  </div>
+              </div>
+              <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold" style="font-size:0.85rem;" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
           </div>
       </div>`;
   });

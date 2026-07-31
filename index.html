@@ -144,7 +144,6 @@
 
       <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-chart-column me-2 text-primary-corp"></i> สัดส่วนหนี้คงค้างตามรอบบิล</h6>
       <div id="cycleBreakdownContainer" class="pro-card p-0 overflow-hidden mb-4 shadow-sm" style="border-radius: 16px;">
-         <!-- ข้อมูลจะถูกดึงมาใส่ตรงนี้โดย script.js -->
       </div>
 
       <span class="fw-bold d-block mb-2 text-danger-corp px-2"><i class="fa-solid fa-bell me-2"></i>รายการใกล้ครบกำหนด / ค้างชำระ</span>
@@ -255,7 +254,7 @@
     </div>
     <input type="hidden" id="eaId">
     <label class="small">ชื่อที่ใช้แสดงผล</label><input type="text" id="eaName" class="form-control form-control-sm mb-2">
-    <label class="text-primary-corp fw-bold small">แก้ไขรหัส PIN</label><input type="text" id="eaPin" class="form-control form-control-sm mb-2 fw-bold text-center" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <label class="text-primary-corp fw-bold small">แก้ไขรหัส PIN</label><input type="text" id="eaPin" class="form-control form-control-sm mb-2 fw-bold text-center fs-4" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     <label class="small">สถานะบัญชี</label>
     <select id="eaStatus" class="form-select form-select-sm mb-2 fw-bold">
       <option value="Active" class="text-success-corp">เปิดใช้งาน (Active)</option>
@@ -291,7 +290,7 @@
         <select id="euGroup" class="form-select form-select-sm"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
       </div>
     </div>
-    <button onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
+    <button id="btnConfirmEditUser" onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
 </div>
 
@@ -333,7 +332,6 @@
       <h6 class="fw-bold text-primary-corp mb-1 fs-5" id="dName">ชื่อผู้กู้</h6>
       <p class="text-muted mb-3 small" id="dDetails">รายละเอียดเพิ่มเติม</p>
 
-      <!-- 🟢 อัปเดต: Grid จัดเรียงข้อมูลลูกค้า ซ้าย-ขวา ประหยัดพื้นที่ -->
       <div id="dInfoGrid" class="mb-3 pb-3 border-bottom"></div>
       
       <div class="row text-center g-2 align-items-center">
@@ -415,7 +413,11 @@
         <label class="text-danger-corp fw-bold mt-2 mb-1 small">หักเป็นค่าปรับ (฿)</label>
         <input type="number" id="pFinePaidInput" class="form-control form-control-sm mb-2 fw-bold fs-5 text-danger-corp" min="0" oninput="syncTotalPay()" style="background:#fff1f2;">
         
-        <label class="text-primary-corp fw-bold mt-2 mb-1 small">ลูกค้าโอน/เงินสดจริง (฿)</label>
+        <!-- 🟢 ปุ่ม "ปิดยอดสัญญา" ที่ซ่อนยอดคำนวณให้อัตโนมัติ -->
+        <div class="d-flex justify-content-between align-items-end mt-2 mb-1">
+            <label class="text-primary-corp fw-bold small m-0">ลูกค้าโอน/เงินสดจริง (฿)</label>
+            <span class="badge bg-danger shadow-sm cursor-pointer px-2 py-1" style="cursor: pointer; font-size: 0.75rem;" onclick="setPayoffAmount()"><i class="fa-solid fa-flag-checkered me-1"></i> ปิดยอดสัญญา</span>
+        </div>
         <input type="number" id="pTotalPaidInput" class="form-control form-control-sm mb-1 fw-bold text-primary-corp text-center" min="0" style="font-size: 1.5rem; background:#eff6ff; border:2px solid #2563eb !important; height: 50px;">
       </div>
       
@@ -425,7 +427,7 @@
         <div class="col-6"><label class="fw-bold text-muted mb-1 small">แนบสลิป</label><input type="file" id="pSlip" class="form-control form-control-sm bg-white" style="padding: 5px;" accept="image/*"></div>
       </div>
       
-      <button onclick="submitPay()" class="btn bg-primary-corp w-100 fw-bold py-2 shadow-sm rounded-pill"><i class="fa-solid fa-check-circle me-2"></i> ยืนยันทำรายการ</button>
+      <button id="btnConfirmPay" onclick="submitPay()" class="btn bg-primary-corp w-100 fw-bold py-2 shadow-sm rounded-pill"><i class="fa-solid fa-check-circle me-2"></i> ยืนยันทำรายการ</button>
     </div>
   </div>
 </div>
@@ -517,7 +519,7 @@
     <label class="fw-bold text-muted small mb-1">ตารางประมาณการชำระ</label>
     <div id="cSchedulePreview" class="pro-card p-2 mb-3 bg-white" style="max-height: 200px; overflow-y:auto; font-size: 0.85rem;"></div>
     
-    <button onclick="saveLoan()" class="btn bg-success-corp w-100 py-2 fw-bold shadow-sm rounded-pill"><i class="fa-solid fa-check me-2"></i> อนุมัติสัญญา</button>
+    <button id="btnConfirmCreate" onclick="saveLoan()" class="btn bg-success-corp w-100 py-2 fw-bold shadow-sm rounded-pill"><i class="fa-solid fa-check me-2"></i> อนุมัติสัญญา</button>
   </div>
 </div>
 
@@ -572,7 +574,7 @@
       
       <label class="small">แก้ไขวันที่เริ่ม</label><input type="date" id="eStartDate" class="form-control form-control-sm fw-bold">
     </div>
-    <button onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
+    <button id="btnConfirmEdit" onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
   </div>
 </div>
 

@@ -7,6 +7,9 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="icon" href="logo1.svg" type="image/svg+xml">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="logo1.svg">
   
   <link rel="stylesheet" href="style.css">
 </head>
@@ -88,7 +91,7 @@
   <div class="top-header">
     <h5 class="fw-bold m-0"><i class="fa-solid fa-building-columns me-2"></i>Fintech Pro</h5>
     <div class="d-flex gap-2 align-items-center">
-      <button id="btnManageAdmin" class="btn btn-light btn-sm rounded-pill px-3 py-2 fw-bold text-primary-corp shadow-sm" style="display:none;" onclick="openModal('modalManageAdmins')">
+      <button id="btnManageAdmin" class="btn btn-light btn-sm rounded-pill px-3 py-2 fw-bold text-primary-corp shadow-sm" style="display:none;" onclick="openManageAdmins()">
         <i class="fa-solid fa-users-gear me-1"></i> แอดมิน
       </button>
       <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-bold text-white shadow-sm"><i class="fa-solid fa-power-off"></i></button>
@@ -158,7 +161,8 @@
               <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
           </span>
-          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="applyFilters()">
+          <!-- 🟢 แก้เป็น onkeyup="debouncedApplyFilters()" -->
+          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="debouncedApplyFilters()">
         </div>
         <details class="mb-1">
           <summary class="fw-bold text-primary-corp p-2 bg-light rounded-3 small" style="cursor:pointer;"><i class="fa-solid fa-filter me-2"></i> ตัวกรองขั้นสูง</summary>
@@ -194,7 +198,8 @@
               <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
             </svg>
           </span>
-          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="filterUsers()">
+          <!-- 🟢 แก้เป็น onkeyup="debouncedFilterUsers()" -->
+          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="debouncedFilterUsers()">
         </div>
         <div class="d-flex justify-content-end align-items-center p-1">
             <label class="mb-0 me-2 fw-bold text-muted small">แสดงผล:</label>
@@ -254,7 +259,7 @@
     </div>
     <input type="hidden" id="eaId">
     <label class="small">ชื่อที่ใช้แสดงผล</label><input type="text" id="eaName" class="form-control form-control-sm mb-2">
-    <label class="text-primary-corp fw-bold small">แก้ไขรหัส PIN</label><input type="text" id="eaPin" class="form-control form-control-sm mb-2 fw-bold text-center fs-4" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
+    <label class="text-primary-corp fw-bold small">เปลี่ยนรหัส PIN (เว้นว่างไว้หากไม่แก้)</label><input type="text" id="eaPin" class="form-control form-control-sm mb-2 fw-bold text-center fs-4" placeholder="••••" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
     <label class="small">สถานะบัญชี</label>
     <select id="eaStatus" class="form-select form-select-sm mb-2 fw-bold">
       <option value="Active" class="text-success-corp">เปิดใช้งาน (Active)</option>
@@ -413,7 +418,6 @@
         <label class="text-danger-corp fw-bold mt-2 mb-1 small">หักเป็นค่าปรับ (฿)</label>
         <input type="number" id="pFinePaidInput" class="form-control form-control-sm mb-2 fw-bold fs-5 text-danger-corp" min="0" oninput="syncTotalPay()" style="background:#fff1f2;">
         
-        <!-- 🟢 ปุ่ม "ปิดยอดสัญญา" ที่ซ่อนยอดคำนวณให้อัตโนมัติ -->
         <div class="d-flex justify-content-between align-items-end mt-2 mb-1">
             <label class="text-primary-corp fw-bold small m-0">ลูกค้าโอน/เงินสดจริง (฿)</label>
             <span class="badge bg-danger shadow-sm cursor-pointer px-2 py-1" style="cursor: pointer; font-size: 0.75rem;" onclick="setPayoffAmount()"><i class="fa-solid fa-flag-checkered me-1"></i> ปิดยอดสัญญา</span>

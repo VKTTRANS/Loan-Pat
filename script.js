@@ -22,8 +22,15 @@ let yearHtml = '<option value="all">ทุกปี</option>';
 for(let y = currentYear - 2; y <= currentYear + 2; y++) yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
 document.getElementById('dashFilterYear').innerHTML = yearHtml;
 
+// 🟢 ตัวช่วยแปลง String เป็น Date ให้รองรับกับ iOS/Safari
+function safeDateParse(dateStr) {
+  if (!dateStr) return new Date(NaN);
+  if (String(dateStr).includes('T')) return new Date(dateStr); 
+  return new Date(String(dateStr).replace(/-/g, '/')); 
+}
+
 function formatThaiDateWithDay(dateString) {
-  let d = new Date(dateString);
+  let d = safeDateParse(dateString);
   if(isNaN(d.getTime())) return '-';
   return DAY_NAMES[d.getDay()] + ' ' + d.toLocaleDateString('th-TH');
 }
@@ -42,9 +49,24 @@ function zoomImage(url) {
 
 function closeImageViewer() { document.getElementById('imageViewer').style.display = 'none'; }
 
+// 🟢 Debounce สำหรับการค้นหา (ลดการกระตุก)
+function debounce(func, delay) {
+  let timer;
+  return function(...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() => func.apply(this, args), delay);
+  };
+}
+
+// 🟢 Throttle สำหรับ Inactivity Timer (ลดการกินแบตเตอรี่)
+let lastActivityTime = 0;
 function resetInactivityTimer() {
-  clearTimeout(timeLogoutVar);
-  if (sessionStorage.getItem('fintechAuthData')) timeLogoutVar = setTimeout(logout, 300000); 
+  const now = Date.now();
+  if (now - lastActivityTime > 1000) { 
+    lastActivityTime = now;
+    clearTimeout(timeLogoutVar);
+    if (sessionStorage.getItem('fintechAuthData')) timeLogoutVar = setTimeout(logout, 300000); 
+  }
 }
 
 function processDashboardData(res) {
@@ -87,8 +109,7 @@ window.onload = () => {
       sessionStorage.removeItem('fintechAuthData');
       checkNfcEntry();
     } else if(Date.now() - parsed.timestamp < 43200000) { 
-      let rawStorageData = sessionStorage.getItem('fintechAuthData');
-      loggedInPassword = JSON.parse(rawStorageData).pass;
+      loggedInPassword = atob(parsed.token); // 🟢 แปลงคืนค่าจาก Base64 ในหน่วยความจำ
       window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
@@ -141,13 +162,12 @@ function cancelNfcLogin() {
 }
 
 async function submitNfcLogin() {
-  toggleL(true);
   const res = await api({ action: 'loginNfc', userId: detectedNfcUid, pin: currentPinInput });
-  toggleL(false);
   
   if (res.success) {
     loggedInPassword = currentPinInput; 
-    sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, pass: currentPinInput, timestamp: Date.now(), role: res.role, groupName: res.groupName }));
+    // 🟢 ซ่อนรหัสผ่านใน Storage แบบ Base64 ขั้นพื้นฐาน
+    sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, token: btoa(currentPinInput), timestamp: Date.now(), role: res.role, groupName: res.groupName }));
     window.history.replaceState({}, document.title, window.location.pathname);
     
     if(res.role === 'SuperAdmin') {
@@ -189,8 +209,10 @@ function toggleEditCycleMode() {
 }
 
 function clearForms() {
-  ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cImg3','cImg4','cImg5','cAmount','cCustomInterval','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin','authPassword'].forEach(id => {
-    if(document.getElementById(id)) document.getElementById(id).value = '';
+  const ids = ['cName','cNick','cPhone','cDetails','cPhoto','cIdCard','cImg3','cImg4','cImg5','cAmount','cCustomInterval','loanIdInput','pTotalPaidInput','pFinePaidInput','pSlip','caId','caPass','caName','caPin','authPassword'];
+  ids.forEach(id => {
+    let el = document.getElementById(id);
+    if(el) el.value = '';
   });
   document.getElementById('cSchedulePreview').innerHTML = '';
   document.getElementById('cUserSelect').value = 'NEW';
@@ -251,18 +273,23 @@ function switchDetailTab(tab) {
   document.getElementById('d'+tab).style.display = 'block';
 }
 
-async function api(data) {
+// 🟢 รวม Loader เอาไว้ในฟังก์ชันนี้เลย ไม่ต้องสั่ง toggleL ทุกรอบ
+async function api(data, showLoader = true) {
+  if (showLoader) toggleL(true);
   try {
       const r = await fetch(GAS_URL, { method: 'POST', body: JSON.stringify(data) });
       return await r.json();
   } catch (e) {
       return { success: false, error: 'เชื่อมต่อเซิร์ฟเวอร์ไม่ได้: ' + e.message };
+  } finally {
+      if (showLoader) toggleL(false);
   }
 }
 
 function logout() {
   clearTimeout(timeLogoutVar); 
   sessionStorage.removeItem('fintechAuthData'); 
+  loggedInPassword = '';
   
   document.getElementById('loginPage').style.display = 'none';
   document.getElementById('mainApp').style.display = 'none';
@@ -285,9 +312,7 @@ async function loadDash() {
      document.getElementById('filterAdminWrap').style.display = 'none';
   }
 
-  toggleL(true); 
   const res = await api({ action: 'getDashboard', adminId: authData.userId }); 
-  toggleL(false);
   
   if(res.success) {
       processDashboardData(res);
@@ -298,14 +323,14 @@ async function loadDash() {
 
 async function openManageAdmins() {
   let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-  toggleL(true); const res = await api({ action: 'getAdmins', operatorId: authData.userId }); toggleL(false);
+  const res = await api({ action: 'getAdmins', operatorId: authData.userId }); 
 
   if(res.success) {
     let html = '';
     res.admins.forEach(a => {
       let roleBadge = a.role === 'SuperAdmin' ? '<span class="badge bg-danger">SuperAdmin</span>' : '<span class="badge bg-primary-corp">Admin</span>';
       let statusBadge = a.status === 'Active' ? '<span class="badge bg-success-corp">Active</span>' : '<span class="badge bg-secondary">Suspended</span>';
-      let editBtn = a.role === 'SuperAdmin' ? '' : `<button class="btn btn-outline-secondary px-3 py-2" onclick="triggerEditAdmin('${a.id}', '${a.name}', '${a.groupName}', '${a.status}', '${a.pin}')"><i class="fa-solid fa-pen"></i></button>`;
+      let editBtn = a.role === 'SuperAdmin' ? '' : `<button class="btn btn-outline-secondary px-3 py-2" onclick="triggerEditAdmin('${a.id}', '${a.name}', '${a.groupName}', '${a.status}')"><i class="fa-solid fa-pen"></i></button>`;
       
       html += `
         <div class="pro-card p-3 mb-3 border-0 shadow-sm">
@@ -324,10 +349,10 @@ async function openManageAdmins() {
   } else showAlert(res.error, true);
 }
 
-function triggerEditAdmin(id, name, group, status, pin) {
+function triggerEditAdmin(id, name, group, status) {
   document.getElementById('eaId').value = id; document.getElementById('eaName').value = name;
   document.getElementById('eaGroup').value = group || 'A'; document.getElementById('eaStatus').value = status || 'Active';
-  document.getElementById('eaPin').value = pin || ''; document.getElementById('eaPass').value = ''; 
+  document.getElementById('eaPin').value = ''; document.getElementById('eaPass').value = ''; 
   closeModal('modalManageAdmins'); openModal('modalEditAdmin');
 }
 
@@ -336,7 +361,7 @@ async function submitEditAdmin() {
   let payload = { action: 'editAdmin', operatorId: authData.userId, targetAdminId: document.getElementById('eaId').value, name: document.getElementById('eaName').value, groupName: document.getElementById('eaGroup').value, status: document.getElementById('eaStatus').value, pinCode: document.getElementById('eaPin').value, password: document.getElementById('eaPass').value };
   if(payload.pinCode && payload.pinCode.length !== 4) { showAlert('รหัส PIN ต้องมี 4 หลัก', true); return; }
 
-  toggleL(true); const res = await api(payload); toggleL(false);
+  const res = await api(payload); 
   if(res.success) { showAlert('อัปเดตข้อมูลแอดมินสำเร็จ'); closeModal('modalEditAdmin'); } else showAlert(res.error, true);
 }
 
@@ -346,9 +371,12 @@ async function saveAdmin() {
   if(!adId || !adPass || !adGroup || !adPin) { showAlert('กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงรหัส PIN', true); return; }
   if(adPin.length !== 4) { showAlert('รหัส PIN ต้องมีครบ 4 หลักพอดี', true); return; }
 
-  toggleL(true); const res = await api({ action: 'createAdmin', operatorId: authData.userId, newAdminId: adId, password: adPass, name: adName, groupName: adGroup, pinCode: adPin }); toggleL(false);
+  const res = await api({ action: 'createAdmin', operatorId: authData.userId, newAdminId: adId, password: adPass, name: adName, groupName: adGroup, pinCode: adPin });
   if(res.success) { showAlert('สร้างแอดมินใหม่เรียบร้อยแล้ว'); clearForms(); closeModal('modalCreateAdmin'); loadDash(); } else showAlert(res.error || 'เกิดข้อผิดพลาด', true);
 }
+
+// 🟢 Debounce function
+const debouncedFilterUsers = debounce(filterUsers, 300);
 
 function filterUsers() {
   let val = document.getElementById('searchUser').value.toLowerCase();
@@ -411,7 +439,7 @@ function viewUserHistory(userId) {
     <span class="badge bg-white text-dark border shadow-sm px-3 py-2 fs-6">กลุ่ม: ${user.groupName || '-'}</span>
   `;
 
-  let uLoans = rawAllTimeLoans.filter(l => String(l.userId).trim() === String(userId).trim()).sort((a,b) => new Date(b.startDate) - new Date(a.startDate));
+  let uLoans = rawAllTimeLoans.filter(l => String(l.userId).trim() === String(userId).trim()).sort((a,b) => safeDateParse(b.startDate) - safeDateParse(a.startDate));
   let html = '';
   if(uLoans.length === 0) html = '<div class="text-center text-muted p-4 border rounded bg-white">ยังไม่มีประวัติการกู้</div>';
   else {
@@ -479,7 +507,6 @@ async function submitEditUser() {
   let btn = document.getElementById('btnConfirmEditUser');
   if(btn) btn.disabled = true;
   
-  toggleL(true);
   try {
     let photoBase64 = document.getElementById('euPhoto').files[0] ? await compressImage(document.getElementById('euPhoto').files[0]) : ''; 
     let idCardBase64 = document.getElementById('euIdCard').files[0] ? await compressImage(document.getElementById('euIdCard').files[0]) : '';
@@ -514,7 +541,6 @@ async function submitEditUser() {
   } catch(e) {
     showAlert('ระบบขัดข้อง: ' + e.message, true);
   } finally {
-    toggleL(false);
     if(btn) btn.disabled = false;
   }
 }
@@ -532,7 +558,7 @@ function updateDashMetrics() {
   rawAllTimeLoans.forEach(l => {
     if (l.status === 'Deleted') return; 
 
-    let d = new Date(l.startDate);
+    let d = safeDateParse(l.startDate);
     if(!isNaN(d.getTime())) {
       let y = d.getFullYear() + 543; let m = d.getMonth() + 1;
       if ((fYear === 'all' || fYear == y.toString()) && (fMonth === 'all' || fMonth == m.toString())) {
@@ -721,6 +747,9 @@ function renderList(data) {
   document.getElementById('loanContainer').innerHTML = html || '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลที่ค้นหา</div>';
 }
 
+// 🟢 Debounce function
+const debouncedApplyFilters = debounce(applyFilters, 300);
+
 function applyFilters() {
   let cycleVal = document.getElementById('filterCycle').value; 
   let statusVal = document.getElementById('filterStatus').value; 
@@ -755,8 +784,7 @@ function triggerDelete(id) {
   promptPassword(() => {
     showConfirm('🚨 คำเตือน:\nคุณต้องการ "ลบ" สัญญานี้อย่างถาวรใช่หรือไม่?', () => {
       let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-      toggleL(true);
-      api({ action: 'deleteLoan', loanId: id, operatorId: authData.userId }).then(res => { toggleL(false); if(res.success) { showAlert('ลบข้อมูลสัญญาเรียบร้อยแล้ว'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการลบ', true); });
+      api({ action: 'deleteLoan', loanId: id, operatorId: authData.userId }).then(res => { if(res.success) { showAlert('ลบข้อมูลสัญญาเรียบร้อยแล้ว'); loadDash(); } else showAlert('เกิดข้อผิดพลาดในการลบ', true); });
     });
   });
 }
@@ -765,9 +793,7 @@ function triggerArchive() {
   promptPassword(() => {
     showConfirm('📦 ยืนยันการย้ายข้อมูลเก่าลง Archive?\nระบบจะทำการย้ายสัญญาที่ (ปิดยอด/ถูกลบ) ที่เกิน 6 เดือน ไปเก็บในชีตสำรองเพื่อลดความหนืดของระบบ', () => {
       let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-      toggleL(true);
       api({ action: 'archiveData', operatorId: authData.userId }).then(res => { 
-        toggleL(false); 
         if(res.success) { showAlert('จัดเก็บข้อมูลเก่าลง Archive สำเร็จ!\nย้ายข้อมูลไปทั้งหมด ' + res.count + ' สัญญา'); loadDash(); } 
         else { showAlert(res.error, true); }
       });
@@ -777,9 +803,7 @@ function triggerArchive() {
 
 function triggerEdit(id) {
   let loan = allLoans.find(l => String(l.loanId).trim() === String(id).trim()); if(!loan) return;
-  toggleL(true);
   api({ action: 'getLoanDetails', loanId: id }).then(res => {
-    toggleL(false);
     if(res.success) {
       document.getElementById('eLoanId').value = id; document.getElementById('eUserId').value = loan.userId;
       if(res.startDateRaw) document.getElementById('eStartDate').value = res.startDateRaw;
@@ -804,7 +828,6 @@ async function submitEdit() {
   let btn = document.getElementById('btnConfirmEdit');
   if(btn) btn.disabled = true;
   
-  toggleL(true); 
   try {
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     let cycleMode = document.getElementById('eCycleMode').value;
@@ -830,13 +853,12 @@ async function submitEdit() {
   } catch(e) {
     showAlert('ระบบขัดข้อง: ' + e.message, true);
   } finally {
-    toggleL(false);
     if(btn) btn.disabled = false;
   }
 }
 
 async function viewDetails(id) {
-  toggleL(true); const res = await api({ action: 'getLoanDetails', loanId: id }); toggleL(false);
+  const res = await api({ action: 'getLoanDetails', loanId: id }); 
   if(res.success) {
     document.getElementById('dName').innerText = `${res.userName} ${res.nickname ? `(${res.nickname})` : ''}`; 
     document.getElementById('dDetails').innerHTML = `${res.details || 'ไม่มีข้อมูลเพิ่มเติม'}`;
@@ -928,9 +950,7 @@ function triggerDeletePayment(paymentId, loanId) {
   promptPassword(() => {
      showConfirm('คุณต้องการ "ลบประวัติรับชำระเงิน" รหัสงวดนี้ใช่หรือไม่?\n(เงินจะถูกดึงกลับเข้าสัญญา)', () => {
         let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-        toggleL(true);
         api({ action: 'deletePayment', paymentId: paymentId, loanId: loanId, operatorId: authData.userId }).then(res => {
-           toggleL(false);
            if (res.success) {
               showAlert('ลบประวัติรับชำระเงินสำเร็จ!');
               closeModal('modalDetails'); closeModal('modalRecentPays'); loadDash();
@@ -973,7 +993,7 @@ function generateSchedulePreview() {
   
   if(!dateStr || amount === 0) { document.getElementById('cSchedulePreview').innerHTML = '<div class="text-muted text-center p-4">กรุณาระบุยอดเงินและวันที่เริ่มสัญญา</div>'; return; }
   
-  let start = new Date(dateStr); 
+  let start = safeDateParse(dateStr); 
   if(isNaN(start.getTime())) { document.getElementById('cSchedulePreview').innerHTML = '<div class="text-danger text-center p-3">รูปแบบวันที่ไม่ถูกต้อง</div>'; return; }
   
   let firstDue = new Date(start);
@@ -1016,9 +1036,12 @@ function generateSchedulePreview() {
 // 🟢 ฟังก์ชันคำนวณยอดปิดสัญญาแบบคลิกเดียวจบ
 function setPayoffAmount() {
   if(!curPay) return;
-  let fine = Number(document.getElementById('pFinePaidInput').value) || 0;
+  let fineInput = document.getElementById('pFinePaidInput');
+  let totalInput = document.getElementById('pTotalPaidInput');
+  
+  let fine = Number(fineInput.value) || 0;
   let payoffTotal = Number(curPay.remainingPrincipal) + Number(curPay.expectedInt) + fine;
-  document.getElementById('pTotalPaidInput').value = payoffTotal;
+  totalInput.value = payoffTotal;
 }
 
 async function saveLoan() {
@@ -1030,7 +1053,6 @@ async function saveLoan() {
   let btn = document.getElementById('btnConfirmCreate');
   if(btn) btn.disabled = true;
 
-  toggleL(true); 
   try {
     let photoBase64 = document.getElementById('cPhoto').files[0] ? await compressImage(document.getElementById('cPhoto').files[0]) : ''; 
     let idCardBase64 = document.getElementById('cIdCard').files[0] ? await compressImage(document.getElementById('cIdCard').files[0]) : ''; 
@@ -1086,7 +1108,6 @@ async function saveLoan() {
   } catch(e) {
     showAlert('ระบบขัดข้อง: ' + e.message, true);
   } finally {
-    toggleL(false);
     if(btn) btn.disabled = false;
   }
 }
@@ -1102,35 +1123,64 @@ async function fetchPreview() {
   if(loanObj) targetLoanId = String(loanObj.loanId).trim();
   if(!targetLoanId) return showAlert('กรุณาเลือกรหัสสัญญาให้ถูกต้อง', true);
 
-  toggleL(true); 
   try {
     const res = await api({ action: 'previewPay', loanId: targetLoanId }); 
-    toggleL(false);
     
     if(res.success) {
-      curPay = res; document.getElementById('payDetails').style.display = 'block'; document.getElementById('pName').innerText = `👤 ข้อมูลลูกค้า: ${res.userName}`;
-      if(res.missedInst > 1) { document.getElementById('pWarning').innerText = `⚠️ ระบบคิดค่างวดทบยอด ${res.missedInst} รอบบิล`; document.getElementById('pWarning').style.display = 'block'; } 
-      else document.getElementById('pWarning').style.display = 'none';
+      curPay = res; 
+      document.getElementById('payDetails').style.display = 'block'; 
+      document.getElementById('pName').innerText = `👤 ข้อมูลลูกค้า: ${res.userName}`;
+      
+      let pWarning = document.getElementById('pWarning');
+      if(res.missedInst > 1) { 
+          pWarning.innerText = `⚠️ ระบบคิดค่างวดทบยอด ${res.missedInst} รอบบิล`; 
+          pWarning.style.display = 'block'; 
+      } else pWarning.style.display = 'none';
 
-      document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`; document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString(); document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString(); document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString(); document.getElementById('pExpectedTotal').innerText = `฿${Number(res.suggestedPay || 0).toLocaleString()}`;
-      document.getElementById('pChargeFine').value = 'Yes'; document.getElementById('pFinePaidInput').value = res.fineAmount || 0; document.getElementById('pFinePaidInput').disabled = false; document.getElementById('pTotalPaidInput').value = res.suggestedPay;
-      curPay.expectedPrin = res.expectedPrin; curPay.expectedInt = res.expectedInt; curPay.fineAmount = res.fineAmount; curPay.suggestedPay = res.suggestedPay;
-    } else { showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); document.getElementById('payDetails').style.display = 'none'; }
+      document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`; 
+      document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString(); 
+      document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString(); 
+      document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString(); 
+      document.getElementById('pExpectedTotal').innerText = `฿${Number(res.suggestedPay || 0).toLocaleString()}`;
+      
+      document.getElementById('pChargeFine').value = 'Yes'; 
+      let fineInput = document.getElementById('pFinePaidInput');
+      fineInput.value = res.fineAmount || 0; 
+      fineInput.disabled = false; 
+      
+      document.getElementById('pTotalPaidInput').value = res.suggestedPay;
+      
+      curPay.expectedPrin = res.expectedPrin; 
+      curPay.expectedInt = res.expectedInt; 
+      curPay.fineAmount = res.fineAmount; 
+      curPay.suggestedPay = res.suggestedPay;
+    } else { 
+        showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); 
+        document.getElementById('payDetails').style.display = 'none'; 
+    }
   } catch(e) {
-    toggleL(false); showAlert('เซิร์ฟเวอร์ขัดข้อง: ' + e.message, true);
+    showAlert('เซิร์ฟเวอร์ขัดข้อง: ' + e.message, true);
   }
 }
 
 function toggleFineInput() {
   if(!curPay) return;
-  if (document.getElementById('pChargeFine').value === 'Yes') { document.getElementById('pFinePaidInput').value = curPay.fineAmount || 0; document.getElementById('pFinePaidInput').disabled = false; } 
-  else { document.getElementById('pFinePaidInput').value = 0; document.getElementById('pFinePaidInput').disabled = true; }
+  let fineInput = document.getElementById('pFinePaidInput');
+  if (document.getElementById('pChargeFine').value === 'Yes') { 
+      fineInput.value = curPay.fineAmount || 0; 
+      fineInput.disabled = false; 
+  } else { 
+      fineInput.value = 0; 
+      fineInput.disabled = true; 
+  }
   syncTotalPay();
 }
 
 function syncTotalPay() {
   if(!curPay) return;
-  document.getElementById('pTotalPaidInput').value = ((Number(curPay.suggestedPay) || 0) - (Number(curPay.fineAmount) || 0)) + (Number(document.getElementById('pFinePaidInput').value) || 0);
+  let totalInput = document.getElementById('pTotalPaidInput');
+  let fineInput = document.getElementById('pFinePaidInput');
+  totalInput.value = ((Number(curPay.suggestedPay) || 0) - (Number(curPay.fineAmount) || 0)) + (Number(fineInput.value) || 0);
 }
 
 async function submitPay() {
@@ -1142,7 +1192,6 @@ async function submitPay() {
   let btn = document.getElementById('btnConfirmPay');
   if(btn) btn.disabled = true;
 
-  toggleL(true); 
   try {
     let slipBase64 = document.getElementById('pSlip').files[0] ? await compressImage(document.getElementById('pSlip').files[0]) : ''; 
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
@@ -1157,7 +1206,6 @@ async function submitPay() {
   } catch(e) {
     showAlert('ระบบขัดข้อง: ' + e.message, true);
   } finally {
-    toggleL(false);
     if(btn) btn.disabled = false;
   }
 }

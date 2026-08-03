@@ -15,12 +15,19 @@ let globalConfirmCallback = null;
 
 const DAY_NAMES = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
 
-document.getElementById('cStartDate').valueAsDate = new Date();
+// 🟢 เซ็ตวันที่ปัจจุบันให้ถูกต้องตาม Timezone ป้องกันการถอยวัน
+const tzOffsetDate = new Date();
+tzOffsetDate.setMinutes(tzOffsetDate.getMinutes() - tzOffsetDate.getTimezoneOffset());
+if (document.getElementById('cStartDate')) {
+  document.getElementById('cStartDate').value = tzOffsetDate.toISOString().split('T')[0];
+}
 
 let currentYear = new Date().getFullYear() + 543;
 let yearHtml = '<option value="all">ทุกปี</option>';
 for(let y = currentYear - 2; y <= currentYear + 2; y++) yearHtml += `<option value="${y}" ${y === currentYear ? 'selected' : ''}>${y}</option>`;
-document.getElementById('dashFilterYear').innerHTML = yearHtml;
+if (document.getElementById('dashFilterYear')) {
+  document.getElementById('dashFilterYear').innerHTML = yearHtml;
+}
 
 // 🟢 ตัวช่วยแปลง String เป็น Date ให้รองรับกับ iOS/Safari
 function safeDateParse(dateStr) {
@@ -109,7 +116,7 @@ window.onload = () => {
       sessionStorage.removeItem('fintechAuthData');
       checkNfcEntry();
     } else if(Date.now() - parsed.timestamp < 43200000) { 
-      loggedInPassword = atob(parsed.token); // 🟢 แปลงคืนค่าจาก Base64 ในหน่วยความจำ
+      loggedInPassword = atob(parsed.token); 
       window.history.replaceState({}, document.title, window.location.pathname);
       document.getElementById('loginPage').style.display = 'none';
       document.getElementById('mainApp').style.display = 'block';
@@ -166,7 +173,6 @@ async function submitNfcLogin() {
   
   if (res.success) {
     loggedInPassword = currentPinInput; 
-    // 🟢 ซ่อนรหัสผ่านใน Storage แบบ Base64 ขั้นพื้นฐาน
     sessionStorage.setItem('fintechAuthData', JSON.stringify({ userId: res.userId, token: btoa(currentPinInput), timestamp: Date.now(), role: res.role, groupName: res.groupName }));
     window.history.replaceState({}, document.title, window.location.pathname);
     
@@ -273,7 +279,6 @@ function switchDetailTab(tab) {
   document.getElementById('d'+tab).style.display = 'block';
 }
 
-// 🟢 รวม Loader เอาไว้ในฟังก์ชันนี้เลย ไม่ต้องสั่ง toggleL ทุกรอบ
 async function api(data, showLoader = true) {
   if (showLoader) toggleL(true);
   try {
@@ -357,6 +362,7 @@ function triggerEditAdmin(id, name, group, status) {
 }
 
 async function submitEditAdmin() {
+  if (document.getElementById('loader').style.display === 'flex') return; // ป้องกันปุ่มเบิ้ล
   let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
   let payload = { action: 'editAdmin', operatorId: authData.userId, targetAdminId: document.getElementById('eaId').value, name: document.getElementById('eaName').value, groupName: document.getElementById('eaGroup').value, status: document.getElementById('eaStatus').value, pinCode: document.getElementById('eaPin').value, password: document.getElementById('eaPass').value };
   if(payload.pinCode && payload.pinCode.length !== 4) { showAlert('รหัส PIN ต้องมี 4 หลัก', true); return; }
@@ -366,6 +372,7 @@ async function submitEditAdmin() {
 }
 
 async function saveAdmin() {
+  if (document.getElementById('loader').style.display === 'flex') return; // ป้องกันปุ่มเบิ้ล
   let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
   let adId = document.getElementById('caId').value; let adPass = document.getElementById('caPass').value; let adName = document.getElementById('caName').value; let adGroup = document.getElementById('caGroup').value; let adPin = document.getElementById('caPin').value; 
   if(!adId || !adPass || !adGroup || !adPin) { showAlert('กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงรหัส PIN', true); return; }
@@ -504,6 +511,7 @@ function compressImage(file, maxWidth = 800) {
 }
 
 async function submitEditUser() {
+  if (document.getElementById('loader').style.display === 'flex') return; // ป้องกันปุ่มเบิ้ล
   let btn = document.getElementById('btnConfirmEditUser');
   if(btn) btn.disabled = true;
   
@@ -825,6 +833,7 @@ function triggerEdit(id) {
 }
  
 async function submitEdit() {
+  if (document.getElementById('loader').style.display === 'flex') return; // ป้องกันปุ่มเบิ้ล
   let btn = document.getElementById('btnConfirmEdit');
   if(btn) btn.disabled = true;
   
@@ -1119,6 +1128,7 @@ function setPayoffAmount() {
 }
 
 async function saveLoan() {
+  if (document.getElementById('loader').style.display === 'flex') return; // ป้องกันปุ่มเบิ้ล
   const uId = document.getElementById('cUserSelect').value; 
   const amount = document.getElementById('cAmount').value;
   if(!amount || amount <= 0) { showAlert('กรุณาระบุยอดเงินต้นให้ถูกต้อง', true); return; }
@@ -1188,7 +1198,12 @@ async function saveLoan() {
 
 function quickPay(id) { 
   document.getElementById('loanIdInput').value = id; 
-  document.getElementById('pPayDate').valueAsDate = new Date(); 
+  
+  // 🟢 เซ็ตวันที่รับชำระด้วย Timezone ของเครื่อง ป้องกันวันที่ถอยกลับ
+  const tzDate = new Date();
+  tzDate.setMinutes(tzDate.getMinutes() - tzDate.getTimezoneOffset());
+  document.getElementById('pPayDate').value = tzDate.toISOString().split('T')[0];
+  
   openModal('modalPay'); 
   fetchPreview(); 
 }
@@ -1234,7 +1249,7 @@ async function fetchPreview() {
       curPay.fineAmount = res.fineAmount; 
       curPay.suggestedPay = res.suggestedPay;
       
-      // 🟢 เรียกการคำนวณซ้ำ 1 ครั้งทันที เผื่อกรณีคีย์ย้อนหลัง/ล่วงหน้าตั้งแต่ตอนเปิด Modal (ถ้าวันที่ใน Input ไม่ใช่วันนี้)
+      // 🟢 เรียกการคำนวณซ้ำ 1 ครั้งทันที เผื่อกรณีคีย์ย้อนหลัง/ล่วงหน้าตั้งแต่ตอนเปิด Modal
       recalculatePayPreview();
       
     } else { 
@@ -1267,6 +1282,7 @@ function syncTotalPay() {
 }
 
 async function submitPay() {
+  if (document.getElementById('loader').style.display === 'flex') return; // ป้องกันปุ่มเบิ้ล
   const totalPaidVal = document.getElementById('pTotalPaidInput').value; 
   const finePaidVal = document.getElementById('pFinePaidInput').value;
   

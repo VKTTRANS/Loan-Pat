@@ -426,7 +426,7 @@
       </div>
       
       <div class="row g-2 mb-3">
-        <div class="col-12"><label class="fw-bold text-muted mb-1 small">วันที่รับชำระ</label><input type="date" id="pPayDate" class="form-control form-control-sm bg-white fw-bold"></div>
+        <div class="col-12"><label class="fw-bold text-muted mb-1 small">วันที่รับชำระ</label><input type="date" id="pPayDate" class="form-control form-control-sm bg-white fw-bold" onchange="recalculatePayPreview()"></div>
         <div class="col-6"><label class="fw-bold text-muted mb-1 small">ช่องทางชำระ</label><select id="pMethod" class="form-select form-select-sm bg-white fw-bold"><option value="เงินโอน">โอนเข้าบัญชี</option><option value="เงินสด">รับเงินสด</option></select></div>
         <div class="col-6"><label class="fw-bold text-muted mb-1 small">แนบสลิป</label><input type="file" id="pSlip" class="form-control form-control-sm bg-white" style="padding: 5px;" accept="image/*"></div>
       </div>

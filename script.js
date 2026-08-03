@@ -1033,6 +1033,80 @@ function generateSchedulePreview() {
   document.getElementById('cSchedulePreview').innerHTML = html;
 }
 
+// 🟢 ฟังก์ชันคำนวณค่าปรับและค่างวดใหม่ เมื่อมีการเปลี่ยนวันที่รับชำระย้อนหลัง/ล่วงหน้า
+function recalculatePayPreview() {
+  if (!curPay) return;
+
+  let selectedDateStr = document.getElementById('pPayDate').value;
+  if (!selectedDateStr) return;
+
+  let selectedDate = safeDateParse(selectedDateStr);
+  selectedDate.setHours(0, 0, 0, 0);
+
+  let nextDue = safeDateParse(curPay.nextDue);
+  if (isNaN(nextDue.getTime())) nextDue = new Date(); 
+  nextDue.setHours(0, 0, 0, 0);
+
+  // คำนวณความห่างของวัน
+  let daysDiff = Math.ceil((selectedDate.getTime() - nextDue.getTime()) / (1000 * 60 * 60 * 24));
+  let cycle = Number(curPay.cycle) || 1;
+  let missedInst = 1;
+
+  if (daysDiff > 0) {
+      missedInst = 1 + Math.floor(daysDiff / cycle);
+  }
+
+  // คำนวณเงินต้นและดอกเบี้ยตามจำนวนงวดที่ค้าง
+  let installments = Number(curPay.installments) || 1;
+  let count = Number(curPay.count) || 0;
+  let remainingInst = installments - count;
+  if (remainingInst < 1) remainingInst = 1;
+  if (missedInst > remainingInst) missedInst = remainingInst;
+
+  let remainingPrincipal = Number(curPay.remainingPrincipal) || 0;
+  let rate = Number(curPay.rate) || 0;
+
+  let prinPerPeriod = remainingPrincipal / remainingInst;
+  let intPerPeriod = remainingPrincipal * (rate / 100);
+
+  let expectedPrin = prinPerPeriod * missedInst;
+  let expectedInt = intPerPeriod * missedInst;
+
+  if (expectedPrin > remainingPrincipal) expectedPrin = remainingPrincipal;
+
+  // คำนวณค่าปรับ (วันละ 100 บาท ตามสูตร Backend)
+  let suggestedFine = 0;
+  if (daysDiff > 0) {
+      suggestedFine = daysDiff * 100;
+  }
+
+  let suggestedTotal = expectedPrin + expectedInt + suggestedFine;
+
+  // อัปเดตข้อมูลใน object หลัก
+  curPay.expectedPrin = expectedPrin;
+  curPay.expectedInt = expectedInt;
+  curPay.fineAmount = suggestedFine;
+  curPay.suggestedPay = suggestedTotal;
+  curPay.nextNo = count + 1;
+
+  // อัปเดต UI บนหน้าจอให้เปลี่ยนตาม
+  document.getElementById('pExpectedPrin').innerText = Number(expectedPrin).toLocaleString();
+  document.getElementById('pExpectedInt').innerText = Number(expectedInt).toLocaleString();
+  document.getElementById('pFine').innerText = Number(suggestedFine).toLocaleString();
+  document.getElementById('pExpectedTotal').innerText = `฿${Number(suggestedTotal).toLocaleString()}`;
+
+  let pWarning = document.getElementById('pWarning');
+  if (missedInst > 1) {
+      pWarning.innerText = `⚠️ ระบบคิดค่างวดทบยอด ${missedInst} รอบบิล`;
+      pWarning.style.display = 'block';
+  } else {
+      pWarning.style.display = 'none';
+  }
+
+  // เรียกใช้ฟังก์ชัน toggle ค่าปรับเพื่อให้ช่อง Input สีแดง และช่องยอดโอนรวมด้านล่างอัปเดตตาม
+  toggleFineInput();
+}
+
 // 🟢 ฟังก์ชันคำนวณยอดปิดสัญญาแบบคลิกเดียวจบ
 function setPayoffAmount() {
   if(!curPay) return;
@@ -1112,7 +1186,12 @@ async function saveLoan() {
   }
 }
 
-function quickPay(id) { document.getElementById('loanIdInput').value = id; document.getElementById('pPayDate').valueAsDate = new Date(); openModal('modalPay'); fetchPreview(); }
+function quickPay(id) { 
+  document.getElementById('loanIdInput').value = id; 
+  document.getElementById('pPayDate').valueAsDate = new Date(); 
+  openModal('modalPay'); 
+  fetchPreview(); 
+}
 
 async function fetchPreview() {
   let query = String(document.getElementById('loanIdInput').value).trim(); 
@@ -1154,6 +1233,10 @@ async function fetchPreview() {
       curPay.expectedInt = res.expectedInt; 
       curPay.fineAmount = res.fineAmount; 
       curPay.suggestedPay = res.suggestedPay;
+      
+      // 🟢 เรียกการคำนวณซ้ำ 1 ครั้งทันที เผื่อกรณีคีย์ย้อนหลัง/ล่วงหน้าตั้งแต่ตอนเปิด Modal (ถ้าวันที่ใน Input ไม่ใช่วันนี้)
+      recalculatePayPreview();
+      
     } else { 
         showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); 
         document.getElementById('payDetails').style.display = 'none'; 

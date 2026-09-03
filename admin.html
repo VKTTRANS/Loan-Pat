@@ -57,7 +57,7 @@
     .clickable-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
     .clickable-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important; }
 
-    /* 🟢 อัปเกรด Modals (Popup) ให้อยู่เหนือทุกสิ่ง และสัดส่วนพอดีจอ */
+    /* 🟢 อัปเกรด Modals ให้อยู่เหนือทุกสิ่ง และสัดส่วนพอดีจอ */
     .modal-overlay { 
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
         background: rgba(15, 23, 42, 0.8); z-index: 99999 !important; display: none; 
@@ -68,6 +68,11 @@
         background: #ffffff; border-radius: 20px; box-shadow: 0 20px 40px rgba(0,0,0,0.2);
         width: 100%; max-width: 600px; padding: 20px; max-height: 90vh; overflow-y: auto;
     }
+    
+    /* 🟢 แก้บั๊ก: บังคับให้หน้าต่างดูรูปภาพอยู่ "หน้าสุด" เหนือ Popup รายละเอียด */
+    .image-viewer-overlay {
+        z-index: 999999 !important;
+    }
 
     /* 📱 ========================================= */
     /* 📱 ส่วนของหน้าจอ Admin สำหรับมือถือโดยเฉพาะ */
@@ -75,33 +80,32 @@
     @media (max-width: 991px) {
       body { padding-bottom: 70px !important; }
       
-      /* 🟢 ย่อขนาดเมนูด้านล่างให้บางลง */
+      /* ย่อขนาดเมนูด้านล่างให้บางลง */
       .bottom-nav {
           position: fixed; bottom: 0; left: 0; width: 100%;
           background: #ffffff; border-top: 1px solid #e2e8f0;
           display: flex; justify-content: space-between;
-          padding: 6px 5px 8px; z-index: 1050; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); /* บีบ Padding */
+          padding: 6px 5px 8px; z-index: 1050; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); 
       }
       .bottom-nav-item {
           background: transparent; border: none; flex: 1;
-          color: #64748b; font-size: 0.65rem; font-weight: 600; /* ลดฟอนต์เมนู */
+          color: #64748b; font-size: 0.65rem; font-weight: 600; 
           display: flex; flex-direction: column; align-items: center; justify-content: center;
       }
       .bottom-nav-item.active { color: #2563eb; }
-      .bottom-nav-item span.emoji-icon { font-size: 1.1rem; margin-bottom: 1px; } /* ลดไอคอนเมนู */
+      .bottom-nav-item span.emoji-icon { font-size: 1.1rem; margin-bottom: 1px; } 
     }
     
     @media (max-width: 768px) {
-      /* 🟢 2. ไฮไลท์: บีบการ์ดแนวดิ่งให้กระชับ เล็กลง และไม่เทอะทะ */
       .table-container { border: none !important; box-shadow: none !important; background: transparent !important; padding: 0 !important; }
       .table thead { display: none; } 
       .table tbody, .table tr, .table td { display: block; width: 100%; }
       .table tr {
-          background: #fff; margin-bottom: 8px; border-radius: 10px; /* ลดขอบมนและระยะห่างการ์ด */
+          background: #fff; margin-bottom: 8px; border-radius: 10px; 
           box-shadow: 0 1px 4px rgba(0,0,0,0.05); padding: 8px 12px; border: 1px solid #e2e8f0;
       }
       .table td {
-          padding: 5px 2px !important; border: none !important; /* ลดระยะห่างบรรทัด */
+          padding: 5px 2px !important; border: none !important; 
           border-bottom: 1px solid #f1f5f9 !important;
           display: flex; justify-content: space-between; align-items: center;
           text-align: right;
@@ -111,11 +115,10 @@
       .table td::before {
           content: attr(data-label);
           font-weight: 600; color: #64748b;
-          text-align: left; margin-right: 10px; font-size: 0.75rem !important; /* ลดชื่อหัวข้อฝั่งซ้าย */
+          text-align: left; margin-right: 10px; font-size: 0.75rem !important; 
           flex-shrink: 0;
       }
       
-      /* บังคับขนาดข้อความและป้ายต่างๆ ในบรรทัดให้เล็กลง */
       .table td span, .table td b, .table td div, .table td a { font-size: 0.8rem !important; }
       .table td .small, .table td .small span { font-size: 0.7rem !important; }
       .table td .badge { font-size: 0.7rem !important; padding: 3px 6px !important; font-weight: normal; }
@@ -123,7 +126,7 @@
       .table td .emoji-icon { font-size: 1em !important; margin-right: 4px; }
 
       .pro-card { padding: 12px !important; }
-      .pro-card h3 { font-size: 1.25rem !important; } /* ลดขนาดหัวข้อ */
+      .pro-card h3 { font-size: 1.25rem !important; } 
       .modal-content-custom { width: 100% !important; padding: 15px !important; margin: 0 auto; max-height: 85vh; }
     }
     
@@ -167,7 +170,7 @@
   <h6 class="text-primary-corp fw-bold mt-2">กำลังประมวลผล...</h6>
 </div>
 
-<!-- 🟢 แถบเมนูบนสำหรับ PC (ซ่อนในมือถือ) -->
+<!-- แถบเมนูบนสำหรับ PC (ซ่อนในมือถือ) -->
 <nav class="navbar navbar-expand-lg navbar-dark shadow-sm sticky-top d-none d-lg-flex" style="background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%); margin-bottom: 24px;">
   <div class="container-fluid px-4">
     <a class="navbar-brand fw-bold" href="#"><span class="emoji-icon">🛡️</span>Admin Panel</a>
@@ -187,7 +190,7 @@
   </div>
 </nav>
 
-<!-- 🟢 แถบเมนูบนสำหรับ มือถือ (ย่อขนาด Padding ให้บางลง) -->
+<!-- แถบเมนูบนสำหรับ มือถือ -->
 <div class="d-flex d-lg-none justify-content-between align-items-center bg-white py-2 px-3 shadow-sm sticky-top mb-3">
     <h5 class="fw-bold m-0 text-primary-corp" style="font-size: 1.1rem;"><span class="emoji-icon">🛡️</span> Admin</h5>
     <div class="d-flex gap-2">
@@ -201,7 +204,6 @@
   <div id="viewDash">
     <div class="pro-card p-3 mb-4 shadow-sm bg-white" style="border-radius: 16px;">
       
-      <!-- ปุ่มพับตัวกรองหน้า Dash สำหรับมือถือ -->
       <div class="d-flex justify-content-between align-items-center d-md-none" data-bs-toggle="collapse" data-bs-target="#dashFilterCollapse" style="cursor: pointer;">
          <h6 class="fw-bold text-dark m-0"><span class="emoji-icon">🎛️</span>ตัวกรองภาพรวม</h6>
          <span class="text-primary-corp fw-bold small bg-light px-3 py-1 rounded-pill border">▼ ขยาย</span>
@@ -332,7 +334,6 @@
   <div id="viewLoans" style="display:none;">
     <div class="d-flex flex-column flex-xl-row justify-content-between align-items-xl-center mb-3 gap-3">
       
-      <!-- ปุ่มค้นหา/กรองหน้า สัญญา สำหรับมือถือ -->
       <div class="d-flex justify-content-between align-items-center w-100 w-xl-auto">
         <div>
           <h5 class="fw-bold m-0"><span class="emoji-icon">📝</span>สัญญาเงินกู้ทั้งหมด</h5>
@@ -563,7 +564,7 @@
       
       <div class="row text-center g-2 align-items-center">
         <div class="col-4 border-end">
-          <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">เงินต้น</label>
+          <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">เงินต้นเริ่มแรก</label>
           <b class="text-dark fs-6" id="dPrin">0</b>
         </div>
         <div class="col-4 border-end">

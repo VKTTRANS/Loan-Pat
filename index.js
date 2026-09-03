@@ -1,13 +1,80 @@
+// 🟢 เปลี่ยน URL นี้เป็น Google Apps Script Web App URL ของคุณ
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
 
-// ป้องกันการย้อนกลับมาหน้า Login ถ้าล็อกอินอยู่แล้ว
+// 🟢 ตั้งค่า PIN ลับ สำหรับปลดล็อคหน้า Login ปกติ (ตั้งรหัสผ่านตรงนี้)
+const SECRET_GATEWAY_PIN = "9999"; 
+
+let currentUid = null;
+
 window.onload = () => {
-  let authData = sessionStorage.getItem('fintechAuthData');
-  if (authData) {
-    let parsed = JSON.parse(authData);
-    routeUser(parsed.role);
+  // อ่านค่าจาก URL (ตรวจสอบว่ามาจาก NFC Tag หรือไม่)
+  const urlParams = new URLSearchParams(window.location.search);
+  currentUid = urlParams.get('uid');
+
+  // 🟢 แก้ไข: ถ้ามีการแตะ Tag เข้ามาใหม่ ให้บังคับล้าง Session เก่าทิ้งทันที
+  if (currentUid) {
+      sessionStorage.removeItem('fintechAuthData');
+  } else {
+      // 🔴 ถ้าไม่ได้มาจาก Tag (เข้าเว็บตรงๆ) ให้เช็คว่าเคย Login ค้างไว้ไหม
+      let authData = sessionStorage.getItem('fintechAuthData');
+      if (authData) {
+        let parsed = JSON.parse(authData);
+        routeUser(parsed.role);
+        return; // เด้งไปหน้า Admin/User แล้วหยุดการทำงานส่วนล่าง
+      }
+  }
+
+  const mainCard = document.getElementById('mainCard');
+  
+  if (currentUid) {
+    // 🟢 โชว์หน้ากรอก PIN ประจำตัวพนักงาน
+    document.getElementById('stepGatewayLock').style.display = 'none';
+    document.getElementById('stepManualLogin').style.display = 'none';
+    document.getElementById('stepEnterPin').style.display = 'block';
+    
+    document.getElementById('displayUid').innerText = currentUid.toUpperCase();
+    
+    // ซ่อน parameter ออกจาก URL
+    window.history.replaceState({}, document.title, window.location.pathname);
+    setTimeout(() => document.getElementById('nfcPin').focus(), 800);
+  } else {
+    // 🔴 โชว์หน้าระบบถูกล็อค (Gateway Lock)
+    document.getElementById('stepEnterPin').style.display = 'none';
+    document.getElementById('stepManualLogin').style.display = 'none';
+    document.getElementById('stepGatewayLock').style.display = 'block';
+    setTimeout(() => document.getElementById('gatewayPin').focus(), 800);
   }
 };
+
+// 🟢 ฟังก์ชันปลดล็อคระบบ (Gateway Lock)
+function unlockGateway() {
+    const pinInput = document.getElementById('gatewayPin');
+    const pin = pinInput.value.trim();
+    const mainCard = document.getElementById('mainCard');
+
+    if (pin === SECRET_GATEWAY_PIN) {
+        // ปลดล็อคสำเร็จ: เล่น Animation 3D Flip เพื่อพลิกการ์ด
+        mainCard.classList.remove('animate-flip');
+        void mainCard.offsetWidth; // Trigger Reflow
+        mainCard.classList.add('animate-flip');
+
+        setTimeout(() => {
+            document.getElementById('stepGatewayLock').style.display = 'none';
+            document.getElementById('stepManualLogin').style.display = 'block';
+            document.getElementById('userId').focus();
+        }, 300); // เปลี่ยนเนื้อหาตอนการ์ดกำลังพลิก (ครึ่งทาง)
+        
+    } else {
+        // ปลดล็อคไม่สำเร็จ: สั่นการ์ดเตือน
+        mainCard.classList.remove('shake-animation');
+        void mainCard.offsetWidth; 
+        mainCard.classList.add('shake-animation');
+        
+        showAlert('รหัสปลดล็อคระบบไม่ถูกต้อง!');
+        pinInput.value = '';
+        setTimeout(() => pinInput.focus(), 500);
+    }
+}
 
 function toggleL(s) {
   document.getElementById('loader').style.display = s ? 'flex' : 'none';
@@ -15,7 +82,14 @@ function toggleL(s) {
 
 function showAlert(msg) {
   document.getElementById('alertMsg').innerText = msg;
-  document.getElementById('customAlert').style.display = 'flex';
+  const alertBox = document.getElementById('customAlert');
+  alertBox.style.display = 'flex';
+  
+  // เพิ่มเอฟเฟกต์เด้งเตือน
+  const alertCard = alertBox.querySelector('.pro-card');
+  alertCard.style.animation = 'none';
+  void alertCard.offsetWidth;
+  alertCard.style.animation = 'dropInBounce 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards';
 }
 
 async function api(data) {
@@ -45,7 +119,41 @@ function routeUser(role) {
   }
 }
 
-// ฟังก์ชัน Login ปกติ
+// 🟢 ฟังก์ชัน Login ด้วย NFC Tag (ใช้ UID จาก URL + กรอก PIN)
+async function submitNfcLogin() {
+  const p = document.getElementById('nfcPin').value.trim();
+
+  if (!currentUid || !p || p.length !== 4) {
+    showAlert('กรุณากรอกรหัส PIN 4 หลักให้ครบถ้วน');
+    return;
+  }
+
+  const res = await api({ action: 'loginNfc', userId: currentUid, pin: p });
+
+  if (res.success) {
+    const tokenData = {
+      userId: res.userId,
+      name: res.name,
+      role: res.role,
+      groupName: res.groupName,
+      token: btoa(p)
+    };
+    sessionStorage.setItem('fintechAuthData', JSON.stringify(tokenData));
+    routeUser(res.role);
+  } else {
+    // ใส่แอนิเมชันสั่นเตือนเวลาพิมพ์ PIN ผิด
+    const mainCard = document.getElementById('mainCard');
+    mainCard.classList.remove('shake-animation');
+    void mainCard.offsetWidth; 
+    mainCard.classList.add('shake-animation');
+
+    showAlert(res.error || 'รหัส PIN ไม่ถูกต้อง หรือบัญชีถูกระงับ');
+    document.getElementById('nfcPin').value = ''; 
+    setTimeout(() => document.getElementById('nfcPin').focus(), 500);
+  }
+}
+
+// 🟢 ฟังก์ชัน Login แบบปกติ (พิมพ์ ID / Pass)
 async function submitLogin() {
   const u = document.getElementById('userId').value.trim();
   const p = document.getElementById('password').value.trim();
@@ -68,76 +176,11 @@ async function submitLogin() {
     sessionStorage.setItem('fintechAuthData', JSON.stringify(tokenData));
     routeUser(res.role);
   } else {
+    const mainCard = document.getElementById('mainCard');
+    mainCard.classList.remove('shake-animation');
+    void mainCard.offsetWidth; 
+    mainCard.classList.add('shake-animation');
+
     showAlert(res.error || 'ไอดีหรือรหัสผ่านไม่ถูกต้อง');
-  }
-}
-
-// ================== ระบบ NFC ==================
-function openNfcLogin() {
-  document.getElementById('nfcId').value = '';
-  document.getElementById('nfcPin').value = '';
-  document.getElementById('nfcPinSection').style.display = 'none';
-  document.getElementById('btnReadNfc').style.display = 'block';
-  document.getElementById('modalNfc').style.display = 'flex';
-}
-
-function closeNfcModal() {
-  document.getElementById('modalNfc').style.display = 'none';
-}
-
-async function startNfcRead() {
-  try {
-    if ('NDEFReader' in window) {
-      const ndef = new NDEFReader();
-      await ndef.scan();
-      document.getElementById('nfcId').value = "กำลังรออ่านบัตร...";
-      
-      ndef.onreading = event => {
-        const serialNumber = event.serialNumber; 
-        document.getElementById('nfcId').value = serialNumber.replace(/:/g, '');
-        document.getElementById('btnReadNfc').style.display = 'none';
-        document.getElementById('nfcPinSection').style.display = 'block';
-        document.getElementById('nfcPin').focus();
-      };
-    } else {
-      showAlert('อุปกรณ์หรือบราวเซอร์ของคุณไม่รองรับการอ่าน NFC');
-    }
-  } catch (error) {
-    showAlert('เกิดข้อผิดพลาดในการเปิดระบบ NFC: ' + error);
-  }
-}
-
-// ฟังก์ชันดักจับการกด Enter ในช่อง PIN ของ NFC
-function handleNfcEnter(event) {
-  if (event.key === 'Enter') {
-    event.preventDefault(); // กันจอกระพริบ
-    submitNfcLogin();
-  }
-}
-
-async function submitNfcLogin() {
-  const u = document.getElementById('nfcId').value.trim();
-  const p = document.getElementById('nfcPin').value.trim();
-
-  if (!u || !p || p.length !== 4) {
-    showAlert('กรุณาแตะบัตรและกรอก PIN 4 หลักให้ครบถ้วน');
-    return;
-  }
-
-  const res = await api({ action: 'loginNfc', userId: u, pin: p });
-
-  if (res.success) {
-    const tokenData = {
-      userId: res.userId,
-      name: res.name,
-      role: res.role,
-      groupName: res.groupName,
-      token: btoa(p)
-    };
-    sessionStorage.setItem('fintechAuthData', JSON.stringify(tokenData));
-    routeUser(res.role);
-  } else {
-    showAlert(res.error || 'รหัส PIN ไม่ถูกต้อง');
-    document.getElementById('nfcPin').value = ''; 
   }
 }

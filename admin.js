@@ -10,7 +10,6 @@ let timeLogoutVar;
 let pendingAction = null; 
 let globalConfirmCallback = null;
 
-// 🟢 แก้ไขเพื่อความแม่นยำในการเปรียบเทียบข้อความ (ไม่เอาคำว่า "วัน")
 const DAY_NAMES = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
 
 let currentYear = new Date().getFullYear() + 543;
@@ -381,23 +380,62 @@ function showCycleDetails(cycleName) {
     openModal('modalCycleDetails');
 }
 
+// 🟢 เพิ่มปุ่ม "คัดลอกลิงก์ NFC" ในหน้าจัดการพนักงาน 🟢
 function renderSystemTable() {
   let html = '';
   windowSystemAccounts.forEach(a => {
     let roleBadge = a.role === 'SuperAdmin' ? '<span class="badge bg-danger">SuperAdmin</span>' : (a.role === 'Admin' ? '<span class="badge bg-primary">Admin</span>' : '<span class="badge bg-info text-dark">User</span>');
     let statusBadge = a.status === 'Active' ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Suspended</span>';
-    let editBtn = a.role === 'SuperAdmin' ? '-' : `<button class="btn btn-sm btn-outline-secondary" onclick="triggerEditAccount('${a.id}', '${a.name}', '${a.role}', '${a.groupName}', '${a.status}')"><span class="emoji-icon">✏️</span> แก้ไข</button>`;
     
+    let editBtn = `<button class="btn btn-sm btn-outline-secondary" onclick="triggerEditAccount('${a.id}', '${a.name}', '${a.role}', '${a.groupName}', '${a.status}')"><span class="emoji-icon">✏️</span> แก้ไข</button>`;
+    let copyBtn = `<button class="btn btn-sm btn-outline-primary ms-1" onclick="copyNfcLink('${a.id}')"><span class="emoji-icon">🔗</span> คัดลอก NFC Link</button>`;
+    
+    let actionBtns = a.role === 'SuperAdmin' ? '-' : `<div class="d-flex justify-content-center gap-1">${editBtn}${copyBtn}</div>`;
+
     html += `<tr>
       <td class="fw-bold text-muted">${a.id}</td>
       <td class="fw-bold">${a.name}</td>
       <td>${roleBadge}</td>
       <td>${a.groupName || '-'}</td>
       <td>${statusBadge}</td>
-      <td class="text-center">${editBtn}</td>
+      <td class="text-center">${actionBtns}</td>
     </tr>`;
   });
   document.getElementById('systemTableBody').innerHTML = html || '<tr><td colspan="6" class="text-center text-muted py-3">ไม่มีข้อมูลพนักงาน</td></tr>';
+}
+
+// 🟢 ฟังก์ชันสำหรับคัดลอก NFC Link อัตโนมัติ 🟢
+function copyNfcLink(userId) {
+    let currentUrl = window.location.href.split('?')[0]; 
+    let baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
+    if(baseUrl === "" || baseUrl === "https://" || baseUrl === "http://") {
+        baseUrl = currentUrl.replace(/\/$/, "");
+    }
+    let nfcLink = `${baseUrl}/index.html?uid=${userId}`;
+
+    if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(nfcLink).then(() => {
+            showAlert(`🔗 คัดลอกลิงก์ NFC สำเร็จ!\n\n${nfcLink}\n\nนำไปวางในแอปเขียน Tag ได้เลยครับ`);
+        }).catch(err => {
+            prompt('กรุณาคัดลอกลิงก์ด้านล่างนี้ด้วยตัวเอง:', nfcLink);
+        });
+    } else {
+        let textArea = document.createElement("textarea");
+        textArea.value = nfcLink;
+        textArea.style.position = "fixed";
+        textArea.style.left = "-999999px";
+        textArea.style.top = "-999999px";
+        document.body.appendChild(textArea);
+        textArea.focus();
+        textArea.select();
+        try {
+            document.execCommand('copy');
+            showAlert(`🔗 คัดลอกลิงก์ NFC สำเร็จ!\n\n${nfcLink}\n\nนำไปวางในแอปเขียน Tag ได้เลยครับ`);
+        } catch (err) {
+            prompt('กรุณาคัดลอกลิงก์ด้านล่างนี้ด้วยตัวเอง:', nfcLink);
+        }
+        textArea.remove();
+    }
 }
 
 async function saveSystemAccount() {
@@ -634,7 +672,6 @@ function triggerDeleteClient(userId) {
 
 const debouncedApplyFilters = debounce(filterLoans, 300);
 
-// 🟢 อัปเดตให้รองรับระบบค้นหาวันที่ครบกำหนดแบบยืดหยุ่นในหน้า Admin ด้วย
 function filterLoans() {
   let statusVal = document.getElementById('filterLoanStatus').value; 
   let groupVal = document.getElementById('filterLoanGroup').value; 

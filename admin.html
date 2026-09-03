@@ -70,7 +70,7 @@
   <div class="pro-card p-4 text-center" style="width: 85%; max-width: 320px; border-top: 5px solid #2563eb; border-radius: 20px;">
     <span id="alertIcon" style="font-size: 3.5rem; display: block; margin-bottom: 15px;">✅</span>
     <h5 id="alertTitle" class="fw-bold mb-2">สำเร็จ</h5>
-    <p id="alertMsg" class="text-muted mb-4 small">ทำรายการเรียบร้อยแล้ว</p>
+    <p id="alertMsg" class="text-muted mb-4 small" style="white-space: pre-wrap;">ทำรายการเรียบร้อยแล้ว</p>
     <button id="alertBtn" class="btn bg-primary-corp fw-bold px-4 py-3 w-100 rounded-pill shadow-sm" onclick="document.getElementById('customAlert').style.display='none'">ตกลง</button>
   </div>
 </div>
@@ -318,9 +318,7 @@
       <h5 class="fw-bold m-0 text-primary-corp"><span class="emoji-icon">⏱️</span><span id="cycleDetailTitle">รายละเอียด</span></h5>
       <span class="fs-4 text-secondary p-2 bg-white rounded-circle shadow-sm" style="cursor:pointer; width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;" onclick="closeModal('modalCycleDetails')">❌</span>
     </div>
-    <div id="cycleDetailBody" class="bg-white rounded-3 shadow-sm border p-0 overflow-hidden">
-        <!-- ข้อมูลตารางจะถูกแทรกที่นี่ -->
-    </div>
+    <div id="cycleDetailBody" class="bg-white rounded-3 shadow-sm border p-0 overflow-hidden"></div>
   </div>
 </div>
 

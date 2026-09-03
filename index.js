@@ -1,33 +1,30 @@
 // 🟢 เปลี่ยน URL นี้เป็น Google Apps Script Web App URL ของคุณ
 const GAS_URL = "https://script.google.com/macros/s/AKfycbxkq39mAaFRG584lXiQfqogwzTiPCjRWleq1L8JKiDVqa4YYphMRTYvlgefOqVI4ac4yQ/exec";
 
-// 🟢 ตั้งค่า PIN ลับ สำหรับปลดล็อคหน้า Login ปกติ (ตั้งรหัสผ่านตรงนี้)
+// 🟢 ตั้งค่า PIN ลับ สำหรับปลดล็อคหน้า Login ปกติ
 const SECRET_GATEWAY_PIN = "9999"; 
 
 let currentUid = null;
 
 window.onload = () => {
+  // ดักจับ Error เผื่อมีปัญหาจาก Cache
+  try {
+    let authData = sessionStorage.getItem('fintechAuthData');
+    if (authData) {
+      let parsed = JSON.parse(authData);
+      routeUser(parsed.role);
+      return; 
+    }
+  } catch (e) {
+    sessionStorage.removeItem('fintechAuthData');
+  }
+
   // อ่านค่าจาก URL (ตรวจสอบว่ามาจาก NFC Tag หรือไม่)
   const urlParams = new URLSearchParams(window.location.search);
   currentUid = urlParams.get('uid');
 
-  // 🟢 แก้ไข: ถ้ามีการแตะ Tag เข้ามาใหม่ ให้บังคับล้าง Session เก่าทิ้งทันที
   if (currentUid) {
-      sessionStorage.removeItem('fintechAuthData');
-  } else {
-      // 🔴 ถ้าไม่ได้มาจาก Tag (เข้าเว็บตรงๆ) ให้เช็คว่าเคย Login ค้างไว้ไหม
-      let authData = sessionStorage.getItem('fintechAuthData');
-      if (authData) {
-        let parsed = JSON.parse(authData);
-        routeUser(parsed.role);
-        return; // เด้งไปหน้า Admin/User แล้วหยุดการทำงานส่วนล่าง
-      }
-  }
-
-  const mainCard = document.getElementById('mainCard');
-  
-  if (currentUid) {
-    // 🟢 โชว์หน้ากรอก PIN ประจำตัวพนักงาน
+    // 🟢 ถ้ามาจาก NFC Tag (?uid=) -> โชว์หน้ากรอก PIN ของพนักงาน
     document.getElementById('stepGatewayLock').style.display = 'none';
     document.getElementById('stepManualLogin').style.display = 'none';
     document.getElementById('stepEnterPin').style.display = 'block';
@@ -36,13 +33,11 @@ window.onload = () => {
     
     // ซ่อน parameter ออกจาก URL
     window.history.replaceState({}, document.title, window.location.pathname);
-    setTimeout(() => document.getElementById('nfcPin').focus(), 800);
+    setTimeout(() => document.getElementById('nfcPin').focus(), 300);
   } else {
-    // 🔴 โชว์หน้าระบบถูกล็อค (Gateway Lock)
-    document.getElementById('stepEnterPin').style.display = 'none';
-    document.getElementById('stepManualLogin').style.display = 'none';
-    document.getElementById('stepGatewayLock').style.display = 'block';
-    setTimeout(() => document.getElementById('gatewayPin').focus(), 800);
+    // 🔴 เข้าเว็บปกติ -> ไม่ต้องทำอะไร เพราะหน้า Lock ถูกตั้งค่าให้โชว์อยู่แล้วใน HTML
+    // แค่โฟกัสช่องให้พิมพ์ PIN
+    setTimeout(() => document.getElementById('gatewayPin').focus(), 300);
   }
 };
 
@@ -62,7 +57,7 @@ function unlockGateway() {
             document.getElementById('stepGatewayLock').style.display = 'none';
             document.getElementById('stepManualLogin').style.display = 'block';
             document.getElementById('userId').focus();
-        }, 300); // เปลี่ยนเนื้อหาตอนการ์ดกำลังพลิก (ครึ่งทาง)
+        }, 300); 
         
     } else {
         // ปลดล็อคไม่สำเร็จ: สั่นการ์ดเตือน
@@ -141,7 +136,7 @@ async function submitNfcLogin() {
     sessionStorage.setItem('fintechAuthData', JSON.stringify(tokenData));
     routeUser(res.role);
   } else {
-    // ใส่แอนิเมชันสั่นเตือนเวลาพิมพ์ PIN ผิด
+    // สั่นเตือนเวลาพิมพ์ PIN ผิด
     const mainCard = document.getElementById('mainCard');
     mainCard.classList.remove('shake-animation');
     void mainCard.offsetWidth; 
@@ -185,13 +180,10 @@ async function submitLogin() {
   }
 }
 
-// ==========================================
-// ลงทะเบียน Service Worker (PWA)
-// ==========================================
+// 🟢 ลงทะเบียน Service Worker สำหรับ PWA (ให้เว็บเร็วกระฉูด)
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker ลงทะเบียนสำเร็จ: ', reg.scope))
-      .catch(err => console.log('Service Worker ลงทะเบียนไม่สำเร็จ: ', err));
+    navigator.serviceWorker.register('./sw.js')
+      .catch(err => console.log('Service Worker Reg Fail:', err));
   });
 }

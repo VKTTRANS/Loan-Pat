@@ -66,7 +66,6 @@ function resetInactivityTimer() {
   }
 }
 
-// 🟢 ทำงานเมื่อเปิดหน้าเว็บ
 window.onload = () => {
   let authData = sessionStorage.getItem('fintechAuthData');
   if(!authData) {
@@ -80,7 +79,6 @@ window.onload = () => {
     return;
   }
 
-  // 🟢 แสดงชื่อพนักงานที่มุมซ้ายบน
   let staffNameEl = document.getElementById('navStaffName');
   if(staffNameEl) {
       staffNameEl.innerText = "คุณ " + parsed.name;
@@ -130,6 +128,12 @@ function clearForms() {
   document.getElementById('payDetails').style.display = 'none';
   document.getElementById('pWarning').style.display = 'none';
   curPay = null;
+
+  // คืนค่าหน้าต่างรับชำระให้โชว์กล่องค้นหาตามปกติ
+  let searchGroup = document.getElementById('paySearchGroup');
+  if(searchGroup) searchGroup.style.display = 'flex';
+  let loading = document.getElementById('payLoading');
+  if(loading) loading.style.display = 'none';
 }
 
 function showAlert(msg, isError = false) {
@@ -160,8 +164,10 @@ function executeConfirm() {
 
 function switchMainTab(tab) {
   ['Dash', 'Users', 'List'].forEach(t => {
-    document.getElementById('btnTab'+t).classList.remove('active');
-    document.getElementById('view'+t).style.display = 'none';
+    let btn = document.getElementById('btnTab'+t);
+    let view = document.getElementById('view'+t);
+    if(btn) btn.classList.remove('active');
+    if(view) view.style.display = 'none';
   });
   document.getElementById('btnTab'+tab).classList.add('active');
   document.getElementById('view'+tab).style.display = 'block';
@@ -194,34 +200,26 @@ function logout() {
   window.location.href = 'index.html'; 
 }
 
-// 🟢 อัปเกรด loadDash ให้ทำงานร่วมกับ Cache เพื่อโหลดเร็วระดับเสี้ยววินาที
 async function loadDash() {
   let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-  
-  // ตรวจสอบข้อมูลจาก Cache ก่อน
   let cachedData = localStorage.getItem('userDashCache_' + authData.userId);
   let showLoader = true;
 
   if (cachedData) {
-      console.log("⚡ โหลดข้อมูลจาก Cache ท้องถิ่น");
       renderDashboardData(JSON.parse(cachedData), authData.groupName);
-      showLoader = false; // ปิด Loader ไปเลย ไม่ต้องโชว์
+      showLoader = false;
   }
 
-  // ดึงข้อมูลใหม่จาก Server เบื้องหลัง
   const res = await api({ action: 'getUserDashboard', userId: authData.userId }, showLoader); 
   
   if(res.success) {
-      // เซฟทับ Cache ตัวเก่า
       localStorage.setItem('userDashCache_' + authData.userId, JSON.stringify(res));
-      console.log("☁️ อัปเดตข้อมูลจาก Server สำเร็จ");
-      renderDashboardData(res, res.groupName); // โชว์ข้อมูลใหม่แบบเนียนๆ
+      renderDashboardData(res, res.groupName); 
   } else if (!cachedData) {
       showAlert('ข้อผิดพลาด: ' + (res.error || 'โหลดข้อมูลล้มเหลว'), true);
   }
 }
 
-// 🟢 แยกส่วนวาดหน้าจอออกมาเพื่อทำงานร่วมกับ Cache
 function renderDashboardData(res, groupName) {
     allLoans = res.activeLoans || []; 
     rawAllTimeLoans = res.allTimeLoans || []; 
@@ -313,6 +311,33 @@ function updateDashMetrics() {
   document.getElementById('typeBreakdownContainer').innerHTML = typeHtml || `<div class="col-12 text-center text-muted small">ไม่มีข้อมูลสัญญากู้</div>`;
 }
 
+// 🟢 ตัวช่วยคำนวณค่างวดที่แท้จริงให้ตรงกันทุกหน้า (แก้ปัญหายอดหนี้และงวดคลาดเคลื่อน)
+function getDynamicInstallmentInfo(loan) {
+    let remainAmt = loan.remainingPrincipal !== undefined ? Number(loan.remainingPrincipal) : Number(loan.amount || 0);
+    let rate = Number(loan.rate || 0);
+    let cInst = Number(loan.currentInst) || 1;
+    let tInst = Number(loan.totalInst) || 1;
+    
+    // ถ้างวดปัจจุบันเลยงวดทั้งหมด (แปลว่ามีการจ่ายแต่ดอก และยืดงวดออกไป) ให้ขยับยอดรวมตาม
+    if (cInst > tInst) {
+        tInst = cInst; 
+    }
+    
+    let remainingInst = tInst - (cInst - 1);
+    if (remainingInst < 1) remainingInst = 1;
+    
+    let prinPerInst = remainAmt / remainingInst;
+    let intPerInst = remainAmt * (rate / 100);
+    let expectedPay = prinPerInst + intPerInst;
+    
+    return {
+        remainAmt: remainAmt,
+        cInst: cInst,
+        tInst: tInst,
+        expectedPay: expectedPay
+    };
+}
+
 function showDueByDate() {
     let dateVal = document.getElementById('dashFilterDue').value;
     if (!dateVal) return showAlert('กรุณาเลือกวันที่', true);
@@ -345,36 +370,22 @@ function showDueByDate() {
     if(targetLoans.length === 0) {
         html = '<div class="text-center text-muted py-4"><span style="font-size: 2rem; display: block; margin-bottom: 10px;">📭</span>ไม่มีลูกค้าที่ครบกำหนดในวันนี้</div>';
     } else {
-        html = `
-        <div class="table-responsive" style="max-height: 400px;">
-            <table class="table table-hover align-middle mb-0 border-0">
-                <thead style="position: sticky; top: 0; z-index: 1;">
-                    <tr>
-                        <th class="bg-light border-bottom" style="font-size: 0.8rem;">ชื่อลูกค้า</th>
-                        <th class="bg-light border-bottom text-end" style="font-size: 0.8rem;">ยอดที่ต้องเก็บ (฿)</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
+        html = '<div class="list-group list-group-flush border-top border-bottom mb-2">';
         targetLoans.forEach(l => {
-            let instAmt = Number(l.installment || l.installmentAmount || l.perInstallment || 0);
-            if (instAmt <= 0) instAmt = Number(l.remainingPrincipal || l.amount || 0);
-            
-            totalExpected += instAmt;
+             // 🟢 ดึงข้อมูลจากการคำนวณสด
+             let info = getDynamicInstallmentInfo(l);
+             totalExpected += info.expectedPay;
             
              html += `
-             <tr style="cursor:pointer;" onclick="closeModal('modalDueByDate'); clearForms(); quickPay('${l.loanId}')">
-                <td>
-                  <b class="text-dark d-block" style="font-size: 0.85rem;">${l.userName}</b>
-                  <span class="text-muted small" style="font-size:0.7rem;">${l.loanId}</span>
-                </td>
-                <td class="text-success fw-bold text-end" style="font-size: 0.85rem;">
-                  ฿${instAmt.toLocaleString()}
-                </td>
-             </tr>`;
+             <div class="list-group-item list-group-item-action px-2 py-3" style="cursor:pointer;" onclick="closeModal('modalDueByDate'); quickPay('${l.loanId}')">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
+                    <span class="text-success fw-bold" style="font-size: 1rem;">฿${info.expectedPay.toLocaleString()}</span>
+                </div>
+                <div class="text-muted small text-truncate" style="font-size:0.75rem;"><span class="emoji-icon">🏷️</span>${l.loanId}</div>
+             </div>`;
         });
-        html += '</tbody></table></div>';
+        html += '</div>';
     }
     
     document.getElementById('dueDetailDate').innerText = `${longDays[dayIndex]} ${d}/${m}/${y}`; 
@@ -391,35 +402,23 @@ function showCycleDetails(cycleName) {
     if(loans.length === 0) {
         html = '<div class="text-center text-muted py-4"><span style="font-size: 2rem; display: block; margin-bottom: 10px;">📭</span>ไม่มีสัญญากำลังกู้ (Active) ในรอบนี้</div>';
     } else {
-        html = `
-        <div class="table-responsive" style="max-height: 400px;">
-            <table class="table table-hover align-middle mb-0 border-0">
-                <thead style="position: sticky; top: 0; z-index: 1;">
-                    <tr>
-                        <th class="bg-light border-bottom" style="font-size: 0.8rem;">ชื่อลูกค้า</th>
-                        <th class="bg-light border-bottom text-center" style="font-size: 0.8rem;">ดิวชำระ</th>
-                        <th class="bg-light border-bottom text-end" style="font-size: 0.8rem;">ยอดกู้ (฿)</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
+        html = '<div class="list-group list-group-flush border-top border-bottom mb-2">';
         loans.forEach(l => {
+             // 🟢 ดึงข้อมูลจากการคำนวณสด
+             let info = getDynamicInstallmentInfo(l);
              html += `
-             <tr style="cursor:pointer;" onclick="closeModal('modalCycleDetails'); clearForms(); viewDetails('${l.loanId}')">
-                <td>
-                  <b class="text-dark d-block" style="font-size: 0.85rem;">${l.userName}</b>
-                  <span class="text-muted small" style="font-size:0.7rem;">${l.loanId}</span>
-                </td>
-                <td class="text-center">
-                  <span class="badge bg-white text-dark border shadow-sm"><span class="emoji-icon">📅</span>${l.dueDate || '-'}</span>
-                </td>
-                <td class="text-success fw-bold text-end" style="font-size: 0.85rem;">
-                  ฿${Number(l.originalPrincipal || 0).toLocaleString()}
-                </td>
-             </tr>`;
+             <div class="list-group-item list-group-item-action px-2 py-3" style="cursor:pointer;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
+                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${info.remainAmt.toLocaleString()}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center mt-1">
+                    <span class="text-muted small text-truncate" style="font-size:0.75rem; max-width: 50%;"><span class="emoji-icon">🏷️</span>${l.loanId}</span>
+                    <span class="badge bg-light text-dark border shadow-sm"><span class="emoji-icon">📅</span>${l.dueDate || '-'}</span>
+                </div>
+             </div>`;
         });
-        html += '</tbody></table></div>';
+        html += '</div>';
     }
     
     document.getElementById('cycleDetailTitle').innerText = 'สัญญา ' + cycleName;
@@ -435,9 +434,8 @@ function renderDashAlerts() {
     let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft === 0 ? 'bg-warning text-dark' : 'bg-success-corp'); 
     let statusText = dLeft < 0 ? `เกินกำหนด ${Math.abs(dLeft)} วัน` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
     
-    let installmentPay = Number(b.installment || b.installmentAmount || b.perInstallment || 0);
-    let cInst = b.currentInst || 1;
-    let tInst = b.totalInst || 1;
+    // 🟢 ดึงข้อมูลจากการคำนวณสด
+    let info = getDynamicInstallmentInfo(b);
 
     html += `
       <div class="borrower-card p-3 mb-3 shadow-sm" onclick="viewDetails('${b.loanId}')" style="border-left-color: var(--danger); border-radius: 16px;">
@@ -450,17 +448,17 @@ function renderDashAlerts() {
 
           <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
-                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">รหัส: ${b.loanId}</span>
-                  <span class="text-danger-corp fw-bold" style="font-size:1.1rem;">ค้าง: ฿${Number(b.amount || 0).toLocaleString()}</span>
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ยอดหนี้คงค้าง</span>
+                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${info.remainAmt.toLocaleString()}</span>
               </div>
               <div class="text-end">
-                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด ${installmentPay > 0 ? `(${cInst}/${tInst})` : ''}</span>
-                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">${installmentPay > 0 ? `฿${installmentPay.toLocaleString()}` : '-'}</span>
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด (${info.cInst}/${info.tInst})</span>
+                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">฿${info.expectedPay.toLocaleString()}</span>
               </div>
           </div>
 
           <div class="text-end mt-2 pt-2 border-top">
-              <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold w-100" style="font-size:0.85rem;" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
+              <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold w-100" style="font-size:0.85rem;" onclick="event.stopPropagation(); quickPay('${b.loanId}')">รับชำระ</button>
           </div>
       </div>`;
   });
@@ -472,7 +470,6 @@ const debouncedApplyFilters = debounce(applyFilters, 300);
 function applyFilters() {
   let cycleVal = document.getElementById('filterCycle').value; 
   let statusVal = document.getElementById('filterStatus').value; 
-  let sortVal = document.getElementById('filterSort').value; 
   let searchVal = document.getElementById('searchLoan').value.toLowerCase();
 
   let filtered = allLoans.filter(l => {
@@ -487,9 +484,6 @@ function applyFilters() {
     return matchCycle && matchStatus && matchSearch;
   });
 
-  if (sortVal === 'due') filtered.sort((a, b) => a.daysLeft - b.daysLeft); 
-  else if (sortVal === 'amtDesc') filtered.sort((a, b) => Number(b.amount || 0) - Number(a.amount || 0)); 
-
   renderList(filtered);
 }
 
@@ -500,9 +494,8 @@ function renderList(data) {
       let statusClass = dLeft < 0 ? 'bg-danger' : (dLeft <= 3 ? 'bg-warning text-dark' : 'bg-success-corp'); 
       let statusText = dLeft < 0 ? `เกินกำหนด` : (dLeft === 0 ? 'ครบดิววันนี้' : `อีก ${dLeft} วัน`);
       
-      let installmentPay = Number(b.installment || b.installmentAmount || b.perInstallment || 0);
-      let cInst = b.currentInst || 1;
-      let tInst = b.totalInst || 1;
+      // 🟢 ดึงข้อมูลจากการคำนวณสด
+      let info = getDynamicInstallmentInfo(b);
 
       html += `
       <div class="borrower-card loan-item p-3 mb-3 shadow-sm" onclick="viewDetails('${b.loanId}')" style="border-left-color: var(--primary); border-radius: 16px;">
@@ -521,11 +514,11 @@ function renderList(data) {
           <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ยอดหนี้คงค้าง</span>
-                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${Number(b.amount || 0).toLocaleString()}</span>
+                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${info.remainAmt.toLocaleString()}</span>
               </div>
               <div class="text-end">
-                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด ${installmentPay > 0 ? `(${cInst}/${tInst})` : ''}</span>
-                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">${installmentPay > 0 ? `฿${installmentPay.toLocaleString()}` : '-'}</span>
+                  <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด (${info.cInst}/${info.tInst})</span>
+                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">฿${info.expectedPay.toLocaleString()}</span>
               </div>
           </div>
 
@@ -533,7 +526,7 @@ function renderList(data) {
               <div class="text-muted" style="font-size:0.75rem;">
                   <div class="mb-1"><span class="emoji-icon">📅</span>ดิว: <span class="text-dark fw-bold">${b.dueDate}</span></div>
               </div>
-              <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold" style="font-size:0.85rem;" onclick="event.stopPropagation(); clearForms(); quickPay('${b.loanId}')">รับชำระ</button>
+              <button class="btn bg-primary-corp rounded-pill px-4 py-2 shadow-sm fw-bold" style="font-size:0.85rem;" onclick="event.stopPropagation(); quickPay('${b.loanId}')">รับชำระ</button>
           </div>
       </div>`;
   });
@@ -708,16 +701,16 @@ function renderRecentPays(data) {
     data.forEach(p => {
       let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fs-3 mt-2 me-3 text-decoration-none"><span class="emoji-icon">🧾</span></a>` : ``;
       html += `
-        <div class="pro-card p-4 mb-3 border-0 shadow-sm" style="border-left: 5px solid #10b981 !important;">
+        <div class="pro-card p-3 mb-2 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
           <div class="d-flex justify-content-between align-items-center">
             <div>
               <b class="text-dark fs-6"><span class="emoji-icon">👤</span> ${p.userName}</b>
-              <span class="d-block text-muted mt-2 small"><span class="emoji-icon">🕒</span>${p.date} | งวดที่ ${p.no}</span>
-              <span class="d-block text-danger-corp fw-bold mt-2 small">ค่าปรับ: ฿${Number(p.finePaid || 0).toLocaleString()}</span>
+              <span class="d-block text-muted mt-1 small"><span class="emoji-icon">🕒</span>${p.date} | งวดที่ ${p.no}</span>
+              <span class="d-block text-danger-corp fw-bold mt-1 small">ค่าปรับ: ฿${Number(p.finePaid || 0).toLocaleString()}</span>
             </div>
             <div class="text-end">
-              <b class="text-success-corp d-block" style="font-size:1.3rem;">+ ฿${Number(p.totalPaid || 0).toLocaleString()}</b>
-              <div class="d-flex justify-content-end align-items-center mt-2">${slipBtn}</div>
+              <b class="text-success-corp d-block" style="font-size:1.1rem;">+ ฿${Number(p.totalPaid || 0).toLocaleString()}</b>
+              <div class="d-flex justify-content-end align-items-center mt-1">${slipBtn}</div>
             </div>
           </div>
         </div>`;
@@ -816,7 +809,7 @@ async function viewDetails(id) {
     document.getElementById('btnDetailPay').disabled = !isActive;
     document.getElementById('btnDetailEdit').disabled = isDeleted;
 
-    document.getElementById('btnDetailPay').onclick = () => { if(isActive) { closeModal('modalDetails'); clearForms(); quickPay(id); } };
+    document.getElementById('btnDetailPay').onclick = () => { if(isActive) { closeModal('modalDetails'); quickPay(id); } };
     document.getElementById('btnDetailHistory').onclick = () => { if(currentUserId) { closeModal('modalDetails'); viewUserHistory(currentUserId); } };
     document.getElementById('btnDetailEdit').onclick = () => { if(!isDeleted) { closeModal('modalDetails'); triggerEdit(id); } };
     
@@ -834,14 +827,14 @@ async function viewDetails(id) {
         }
         
         hHtml += `
-          <div class="pro-card p-3 mb-3 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
+          <div class="pro-card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 ${titleRow}
                 <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString()} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString()} ${fineText}</span>
               </div>
               <div class="text-end">
-                <b class="text-success-corp d-block mb-1" style="font-size:1.1rem;">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
+                <b class="text-success-corp d-block mb-1" style="font-size:1rem;">฿${Number(p.totalPaid || 0).toLocaleString()}</b>
                 <div class="d-flex gap-2 justify-content-end align-items-center mt-1">
                    ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none fs-5"><span class="emoji-icon">🧾</span></a>` : ''}
                 </div>
@@ -926,6 +919,112 @@ function generateSchedulePreview() {
   document.getElementById('cSchedulePreview').innerHTML = html;
 }
 
+// 🟢 ฟังก์ชันสำหรับเปิดหน้ารับชำระแบบปกติ (โชว์ช่องค้นหา)
+function openBlankPayModal() {
+  clearForms();
+  document.getElementById('paySearchGroup').style.display = 'flex';
+  document.getElementById('payLoading').style.display = 'none';
+  document.getElementById('payDetails').style.display = 'none';
+  openModal('modalPay');
+}
+
+// 🟢 ฟังก์ชันค้นหาบิลชำระเงิน (ถูกแก้บั๊กเรื่องแสดงผลให้ไม่งง)
+async function fetchPreview(isQuickPay = false) {
+  let query = String(document.getElementById('loanIdInput').value).trim(); 
+  let targetLoanId = query;
+  if(query.includes('👤')) targetLoanId = query.split(' ')[0].trim(); 
+  
+  let loanObj = allLoans.find(l => String(l.loanId).trim() === String(targetLoanId).trim());
+  if(loanObj) targetLoanId = String(loanObj.loanId).trim();
+  if(!targetLoanId) {
+      if(isQuickPay) {
+          document.getElementById('payLoading').style.display = 'none';
+          document.getElementById('paySearchGroup').style.display = 'flex';
+      }
+      return showAlert('กรุณาเลือกรหัสสัญญาให้ถูกต้อง', true);
+  }
+
+  try {
+    const res = await api({ action: 'previewPay', loanId: targetLoanId }); 
+    
+    // ถ้ามาจากกดด่วน ให้ซ่อนโหลดออก
+    if(isQuickPay) {
+        let loading = document.getElementById('payLoading');
+        if(loading) loading.style.display = 'none';
+    }
+
+    if(res.success) {
+      curPay = res; 
+      document.getElementById('payDetails').style.display = 'block'; 
+      document.getElementById('pName').innerText = `👤 ข้อมูลลูกค้า: ${res.userName}`;
+      
+      let pWarning = document.getElementById('pWarning');
+      if(res.missedInst > 1) { 
+          pWarning.innerText = `⚠️ ระบบคิดค่างวดทบยอด ${res.missedInst} รอบบิล`; 
+          pWarning.style.display = 'block'; 
+      } else pWarning.style.display = 'none';
+
+      document.getElementById('pRemainingPrin').innerText = `฿${Number(res.remainingPrincipal || 0).toLocaleString()}`; 
+      document.getElementById('pExpectedPrin').innerText = Number(res.expectedPrin || 0).toLocaleString(); 
+      document.getElementById('pExpectedInt').innerText = Number(res.expectedInt || 0).toLocaleString(); 
+      document.getElementById('pFine').innerText = Number(res.fineAmount || 0).toLocaleString(); 
+      document.getElementById('pExpectedTotal').innerText = `฿${Number(res.suggestedPay || 0).toLocaleString()}`;
+      
+      document.getElementById('pChargeFine').value = 'Yes'; 
+      let fineInput = document.getElementById('pFinePaidInput');
+      fineInput.value = res.fineAmount || 0; 
+      fineInput.disabled = false; 
+      
+      document.getElementById('pTotalPaidInput').value = res.suggestedPay;
+      
+      curPay.expectedPrin = res.expectedPrin; 
+      curPay.expectedInt = res.expectedInt; 
+      curPay.fineAmount = res.fineAmount; 
+      curPay.suggestedPay = res.suggestedPay;
+      
+      recalculatePayPreview();
+      
+    } else { 
+        showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); 
+        document.getElementById('payDetails').style.display = 'none'; 
+        if(isQuickPay) {
+            let searchGroup = document.getElementById('paySearchGroup');
+            if(searchGroup) searchGroup.style.display = 'flex';
+        }
+    }
+  } catch(e) {
+    showAlert('เซิร์ฟเวอร์ขัดข้อง: ' + e.message, true);
+    if(isQuickPay) {
+        let loading = document.getElementById('payLoading');
+        if(loading) loading.style.display = 'none';
+        let searchGroup = document.getElementById('paySearchGroup');
+        if(searchGroup) searchGroup.style.display = 'flex';
+    }
+  }
+}
+
+// 🟢 3. ฟังก์ชันกดปุ่มชำระด่วนจากรายชื่อ (ซ่อนช่องค้นหาและขึ้นหมุนๆแทน)
+function quickPay(id) { 
+  clearForms();
+  document.getElementById('loanIdInput').value = id; 
+  
+  // ซ่อนช่องค้นหา แสดงโหลด
+  let searchGroup = document.getElementById('paySearchGroup');
+  if(searchGroup) searchGroup.style.display = 'none';
+  
+  let loading = document.getElementById('payLoading');
+  if(loading) loading.style.display = 'block';
+  
+  document.getElementById('payDetails').style.display = 'none';
+  
+  const tzDate = new Date();
+  tzDate.setMinutes(tzDate.getMinutes() - tzDate.getTimezoneOffset());
+  document.getElementById('pPayDate').value = tzDate.toISOString().split('T')[0];
+  
+  openModal('modalPay'); 
+  fetchPreview(true); 
+}
+
 function recalculatePayPreview() {
   if (!curPay) return;
 
@@ -1001,6 +1100,95 @@ function setPayoffAmount() {
   let fine = Number(fineInput.value) || 0;
   let payoffTotal = Number(curPay.remainingPrincipal || 0) + Number(curPay.expectedInt || 0) + fine;
   totalInput.value = payoffTotal;
+}
+
+function toggleFineInput() {
+  if(!curPay) return;
+  let fineInput = document.getElementById('pFinePaidInput');
+  if (document.getElementById('pChargeFine').value === 'Yes') { 
+      fineInput.value = curPay.fineAmount || 0; 
+      fineInput.disabled = false; 
+  } else { 
+      fineInput.value = 0; 
+      fineInput.disabled = true; 
+  }
+  syncTotalPay();
+}
+
+function syncTotalPay() {
+  if(!curPay) return;
+  let totalInput = document.getElementById('pTotalPaidInput');
+  let fineInput = document.getElementById('pFinePaidInput');
+  totalInput.value = ((Number(curPay.suggestedPay) || 0) - (Number(curPay.fineAmount) || 0)) + (Number(fineInput.value) || 0);
+}
+
+async function saveLoan() {
+  if (document.getElementById('loader').style.display === 'flex') return; 
+  const uId = document.getElementById('cUserSelect').value; 
+  const amount = document.getElementById('cAmount').value;
+  if(!amount || amount <= 0) { showAlert('กรุณาระบุยอดเงินต้นให้ถูกต้อง', true); return; }
+  if(uId === 'NEW' && !document.getElementById('cName').value) { showAlert('กรุณากรอกชื่อ-นามสกุลลูกค้า', true); return; }
+
+  let btn = document.getElementById('btnConfirmCreate');
+  if(btn) btn.disabled = true;
+
+  try {
+    let photoBase64 = document.getElementById('cPhoto').files[0] ? await compressImage(document.getElementById('cPhoto').files[0]) : ''; 
+    let idCardBase64 = document.getElementById('cIdCard').files[0] ? await compressImage(document.getElementById('cIdCard').files[0]) : ''; 
+    let img3Base64 = document.getElementById('cImg3').files[0] ? await compressImage(document.getElementById('cImg3').files[0]) : '';
+    let img4Base64 = document.getElementById('cImg4').files[0] ? await compressImage(document.getElementById('cImg4').files[0]) : '';
+    let img5Base64 = document.getElementById('cImg5').files[0] ? await compressImage(document.getElementById('cImg5').files[0]) : '';
+
+    let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+    
+    let cycleMode = document.getElementById('cCycleMode').value;
+    let cycleVal = '1';
+    let targetDay = null;
+    
+    if (cycleMode === 'fixed_day') {
+        cycleVal = 'fixed_day';
+        targetDay = document.getElementById('cDayOfWeek').value;
+    } else if (cycleMode === 'preset') {
+        cycleVal = document.getElementById('cPresetInterval').value;
+    } else if (cycleMode === 'custom') {
+        cycleVal = document.getElementById('cCustomInterval').value;
+    }
+    
+    let isUpfront = document.getElementById('cUpfrontInt').checked;
+    
+    const res = await api({ 
+      action: 'saveLoan', 
+      operatorId: authData.userId, 
+      userId: uId, 
+      name: document.getElementById('cName').value, 
+      nickname: document.getElementById('cNick').value, 
+      phone: document.getElementById('cPhone').value, 
+      details: document.getElementById('cDetails').value, 
+      photoBase64: photoBase64, 
+      idCardBase64: idCardBase64, 
+      img3Base64: img3Base64,
+      img4Base64: img4Base64,
+      img5Base64: img5Base64,
+      amount: amount, 
+      rate: document.getElementById('cRate').value, 
+      cycle: cycleVal, 
+      targetDay: targetDay, 
+      isUpfront: isUpfront, 
+      installments: document.getElementById('cInstallments').value, 
+      startDate: document.getElementById('cStartDate').value, 
+      groupName: authData.groupName 
+    });
+
+    if (res.success) {
+       clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();
+    } else {
+       showAlert('เกิดข้อผิดพลาด: ' + res.error, true);
+    }
+  } catch(e) {
+    showAlert('ระบบขัดข้อง: ' + e.message, true);
+  } finally {
+    if(btn) btn.disabled = false;
+  }
 }
 
 async function submitPay() {

@@ -1159,3 +1159,14 @@ async function submitPay() {
     if(btn) btn.disabled = false;
   }
 }
+
+// ==========================================
+// ลงทะเบียน Service Worker (PWA)
+// ==========================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('Service Worker ลงทะเบียนสำเร็จ: ', reg.scope))
+      .catch(err => console.log('Service Worker ลงทะเบียนไม่สำเร็จ: ', err));
+  });
+}

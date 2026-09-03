@@ -21,7 +21,6 @@ if (document.getElementById('dashFilterDue')) {
   document.getElementById('dashFilterDue').value = todayIsoStr;
 }
 
-// 🟢 ตัวช่วยจัดการปุ่มไม่ให้กดซ้ำ และโชว์สถานะโหลด
 function toggleBtnLoading(btnId, isLoading) {
   let btn = document.getElementById(btnId);
   if (!btn) return;
@@ -147,6 +146,12 @@ function clearForms() {
   if(searchGroup) searchGroup.style.display = 'flex';
   let loading = document.getElementById('payLoading');
   if(loading) loading.style.display = 'none';
+
+  const tzDate = new Date();
+  tzDate.setMinutes(tzDate.getMinutes() - tzDate.getTimezoneOffset());
+  if (document.getElementById('pPayDate')) {
+      document.getElementById('pPayDate').value = tzDate.toISOString().split('T')[0];
+  }
 }
 
 function showAlert(msg, isError = false) {
@@ -165,7 +170,6 @@ function showConfirm(msg, callback) {
   document.getElementById('customConfirm').style.display = 'flex';
 }
 
-// 🟢 อัปเกรดให้รอโหลดเวลาคอนเฟิร์ม (ไม่ให้กดซ้ำ)
 async function executeConfirm() {
   toggleBtnLoading('btnConfirmYes', true);
   try {
@@ -183,8 +187,10 @@ function closeConfirm() {
 
 function switchMainTab(tab) {
   ['Dash', 'Users', 'List'].forEach(t => {
-    document.getElementById('btnTab'+t).classList.remove('active');
-    document.getElementById('view'+t).style.display = 'none';
+    let btn = document.getElementById('btnTab'+t);
+    let view = document.getElementById('view'+t);
+    if(btn) btn.classList.remove('active');
+    if(view) view.style.display = 'none';
   });
   document.getElementById('btnTab'+tab).classList.add('active');
   document.getElementById('view'+tab).style.display = 'block';
@@ -252,7 +258,7 @@ function renderDashboardData(res, groupName) {
     if(res.users) res.users.forEach(u => { optHtml += `<option value="${u.id}">👤 ${u.name} (${u.nickname})</option>`; });
     allLoans.forEach(l => { 
       let name = l.userName + (l.nickname ? ` (${l.nickname})` : '');
-      datalistHtml += `<option value="${l.loanId}">👤 ${name} (ค้าง: ฿${Number(l.amount || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})})</option>`;
+      datalistHtml += `<option value="${l.loanId}">👤 ${name} (ค้าง: ฿${Math.round(Number(l.amount || 0)).toLocaleString()})</option>`;
     }); 
     
     document.getElementById('cUserSelect').innerHTML = optHtml;
@@ -299,8 +305,8 @@ function updateDashMetrics() {
     }
   });
 
-  document.getElementById('mTotalLoan').innerText = metrics.TotalLoan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
-  document.getElementById('mTotalRemain').innerText = metrics.TotalRemain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+  document.getElementById('mTotalLoan').innerText = Math.round(metrics.TotalLoan).toLocaleString(); 
+  document.getElementById('mTotalRemain').innerText = Math.round(metrics.TotalRemain).toLocaleString(); 
   document.getElementById('mTotalUsers').innerText = metrics.TotalUsers.size.toLocaleString();
 
   let typeHtml = '';
@@ -319,8 +325,8 @@ function updateDashMetrics() {
            <span class="d-block text-muted" style="font-size: 0.7rem;">${data.count} สัญญา</span>
         </div>
         <div>
-           <span class="d-block fw-bold text-primary-corp" style="font-size: 0.75rem;">ปล่อย: ฿${data.loan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-           <span class="d-block fw-bold text-warning-corp" style="font-size: 0.75rem;">ค้าง: ฿${data.remain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+           <span class="d-block fw-bold text-primary-corp" style="font-size: 0.75rem;">ปล่อย: ฿${Math.round(data.loan).toLocaleString()}</span>
+           <span class="d-block fw-bold text-warning-corp" style="font-size: 0.75rem;">ค้าง: ฿${Math.round(data.remain).toLocaleString()}</span>
         </div>
      </div>
     </div>`;
@@ -394,7 +400,7 @@ function showDueByDate() {
              <div class="list-group-item list-group-item-action px-2 py-3" style="cursor:pointer;" onclick="closeModal('modalDueByDate'); quickPay('${l.loanId}')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
-                    <span class="text-success fw-bold" style="font-size: 1rem;">฿${info.expectedPay.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span class="text-success fw-bold" style="font-size: 1rem;">฿${Math.round(info.expectedPay).toLocaleString()}</span>
                 </div>
                 <div class="text-muted small text-truncate" style="font-size:0.75rem;"><span class="emoji-icon">🏷️</span>${l.loanId}</div>
              </div>`;
@@ -403,7 +409,7 @@ function showDueByDate() {
     }
     
     document.getElementById('dueDetailDate').innerText = `${longDays[dayIndex]} ${d}/${m}/${y}`; 
-    document.getElementById('dueDetailTotal').innerText = `฿${totalExpected.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('dueDetailTotal').innerText = `฿${Math.round(totalExpected).toLocaleString()}`;
     document.getElementById('dueDetailBody').innerHTML = html;
     
     openModal('modalDueByDate');
@@ -423,7 +429,7 @@ function showCycleDetails(cycleName) {
              <div class="list-group-item list-group-item-action px-2 py-3" style="cursor:pointer;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
-                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${Math.round(info.remainAmt).toLocaleString()}</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center mt-1">
                     <span class="text-muted small text-truncate" style="font-size:0.75rem; max-width: 50%;"><span class="emoji-icon">🏷️</span>${l.loanId}</span>
@@ -461,11 +467,11 @@ function renderDashAlerts() {
           <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ยอดหนี้คงค้าง</span>
-                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${Math.round(info.remainAmt).toLocaleString()}</span>
               </div>
               <div class="text-end">
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด (${info.cInst}/${info.tInst})</span>
-                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">฿${info.expectedPay.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">฿${Math.round(info.expectedPay).toLocaleString()}</span>
               </div>
           </div>
 
@@ -525,11 +531,11 @@ function renderList(data) {
           <div class="d-flex justify-content-between align-items-center mb-2">
               <div>
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ยอดหนี้คงค้าง</span>
-                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  <span class="text-primary-corp fw-bold" style="font-size:1.1rem;">฿${Math.round(info.remainAmt).toLocaleString()}</span>
               </div>
               <div class="text-end">
                   <span class="d-block text-muted mb-1" style="font-size:0.7rem;">ค่างวด (${info.cInst}/${info.tInst})</span>
-                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">฿${info.expectedPay.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                  <span class="text-success-corp fw-bold" style="font-size:1.1rem;">฿${Math.round(info.expectedPay).toLocaleString()}</span>
               </div>
           </div>
 
@@ -565,7 +571,7 @@ function renderUsers(usersArray) {
           <div class="me-3">${photoHtml}</div>
           <div>
             <h6 class="fw-bold mb-2 text-dark">${u.name} ${u.nickname ? `(${u.nickname})` : ''}</h6>
-            <span class="text-muted small"><span class="emoji-icon">📝</span>กู้ ${userLoans.length} ครั้ง | ฿${totalBorrowed.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span><br>
+            <span class="text-muted small"><span class="emoji-icon">📝</span>กู้ ${userLoans.length} ครั้ง | ฿${Math.round(totalBorrowed).toLocaleString()}</span><br>
             <span class="text-muted small"><span class="emoji-icon">📞</span>โทร: ${u.phone || '-'}</span>
           </div>
         </div>
@@ -618,7 +624,7 @@ function viewUserHistory(userId) {
         <div class="pro-card p-3 mb-3 border-0 shadow-sm" style="cursor:pointer;" onclick="viewDetails('${l.loanId}')">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <b class="text-dark d-block mb-2">ยอดกู้: ฿${Number(l.originalPrincipal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+              <b class="text-dark d-block mb-2">ยอดกู้: ฿${Math.round(Number(l.originalPrincipal || 0)).toLocaleString()}</b>
               <span class="text-muted d-block mb-1 small"><span class="emoji-icon">📅</span>${formatThaiDateWithDay(l.startDate)}</span>
             </div>
             <div class="text-end">
@@ -690,7 +696,7 @@ async function submitEditUser() {
         img3Base64: img3Base64,
         img4Base64: img4Base64,
         img5Base64: img5Base64 
-    }, false); // ปิด Loader ใหญ่ ให้หมุนที่ปุ่มแทน
+    }, false); 
     
     if(res.success) { 
         showAlert('อัปเดตข้อมูลลูกค้าสำเร็จ'); closeModal('modalEditUser'); closeModal('modalUserHistory'); loadDash(); 
@@ -719,10 +725,10 @@ function renderRecentPays(data) {
               <b class="text-dark fs-6"><span class="emoji-icon">👤</span> ${p.userName}</b>
               <span class="d-block text-muted mt-1 small"><span class="emoji-icon">🕒</span>${p.date} | งวดที่ ${p.no}</span>
               <span class="d-block text-primary-corp mt-1 small fw-bold"><span class="emoji-icon">👔</span>รับโดย: ${receiver}</span>
-              <span class="d-block text-danger-corp fw-bold mt-1 small">ค่าปรับ: ฿${Number(p.finePaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+              <span class="d-block text-danger-corp fw-bold mt-1 small">ค่าปรับ: ฿${Math.round(Number(p.finePaid || 0)).toLocaleString()}</span>
             </div>
             <div class="text-end">
-              <b class="text-success-corp d-block" style="font-size:1.1rem;">+ ฿${Number(p.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+              <b class="text-success-corp d-block" style="font-size:1.1rem;">+ ฿${Math.round(Number(p.totalPaid || 0)).toLocaleString()}</b>
               <div class="d-flex justify-content-end align-items-center mt-1">${slipBtn}</div>
             </div>
           </div>
@@ -808,9 +814,9 @@ async function viewDetails(id) {
     `;
     document.getElementById('dInfoGrid').innerHTML = infoHtml;
     
-    document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
-    document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
-    document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('dPrin').innerText = `฿${Math.round(Number(res.principal || 0)).toLocaleString()}`; 
+    document.getElementById('dPaid').innerText = `฿${Math.round(Number(res.totalPaid || 0)).toLocaleString()}`; 
+    document.getElementById('dRemain').innerText = `฿${Math.round(Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0))).toLocaleString()}`;
     
     let loanObj = allLoans.find(l => String(l.loanId).trim() === String(id).trim()) || rawAllTimeLoans.find(l => String(l.loanId).trim() === String(id).trim());
     let currentUserId = loanObj ? loanObj.userId : null;
@@ -829,7 +835,7 @@ async function viewDetails(id) {
     if(!res.payments || res.payments.length === 0) hHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ยังไม่มีประวัติการรับชำระ</div>';
     else {
       res.payments.forEach(p => {
-        let fineText = Number(p.finePaid || 0) > 0 ? `<br><span class="text-danger-corp fw-bold">ค่าปรับ: ฿${Number(p.finePaid).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>` : '';
+        let fineText = Number(p.finePaid || 0) > 0 ? `<br><span class="text-danger-corp fw-bold">ค่าปรับ: ฿${Math.round(Number(p.finePaid)).toLocaleString()}</span>` : '';
         let receiver = p.receiverName || p.operatorName || p.adminName || 'ไม่ระบุ';
         
         let titleRow = '';
@@ -844,11 +850,11 @@ async function viewDetails(id) {
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 ${titleRow}
-                <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${fineText}</span>
+                <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Math.round(Number(p.prinPaid || 0)).toLocaleString()} | ตัดดอก ฿${Math.round(Number(p.intPaid || 0)).toLocaleString()} ${fineText}</span>
                 <span class="text-primary-corp d-block mt-1 small fw-bold" style="font-size:0.75rem;"><span class="emoji-icon">👔</span>รับโดย: ${receiver}</span>
               </div>
               <div class="text-end">
-                <b class="text-success-corp d-block mb-1" style="font-size:1rem;">฿${Number(p.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+                <b class="text-success-corp d-block mb-1" style="font-size:1rem;">฿${Math.round(Number(p.totalPaid || 0)).toLocaleString()}</b>
                 <div class="d-flex gap-2 justify-content-end align-items-center mt-1">
                    ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none fs-5"><span class="emoji-icon">🧾</span></a>` : ''}
                 </div>
@@ -862,7 +868,7 @@ async function viewDetails(id) {
     let sHtml = '';
     if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
     else {
-      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Number(s.amount || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></div>`; });
+      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Math.round(Number(s.amount || 0)).toLocaleString()}</b></div>`; });
     }
     document.getElementById('dSchedule').innerHTML = sHtml;
     
@@ -915,11 +921,11 @@ function generateSchedulePreview() {
      html += `
      <div class="d-flex justify-content-between text-danger-corp border-bottom py-2 px-3 rounded mb-2" style="background-color: #fef2f2;">
        <span><b class="small">หัก ณ วันทำสัญญา:</b></span>
-       <b class="small">ดอกเบี้ย ฿${intPerPeriod.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+       <b class="small">ดอกเบี้ย ฿${Math.round(intPerPeriod).toLocaleString()}</b>
      </div>
      <div class="d-flex justify-content-between text-success-corp border-bottom py-2 px-3 rounded mb-3" style="background-color: #f0fdf4;">
        <span><b class="small">ลูกค้ารับเงินสุทธิ:</b></span>
-       <b style="font-size: 1.1rem;">฿${(amount - intPerPeriod).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+       <b style="font-size: 1.1rem;">฿${Math.round(amount - intPerPeriod).toLocaleString()}</b>
      </div>`;
   }
   
@@ -927,16 +933,15 @@ function generateSchedulePreview() {
     let d = new Date(firstDue);
     d.setDate(d.getDate() + ((i-1) * cycle));
     let dayStr = DAY_NAMES[d.getDay()] + ' ' + d.toLocaleDateString('th-TH');
-    html += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span>งวดที่ ${i}: <span class="fw-bold text-dark ms-2">${dayStr}</span></span><b class="text-primary-corp">฿${(prinPerPeriod + intPerPeriod).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></div>`;
+    html += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span>งวดที่ ${i}: <span class="fw-bold text-dark ms-2">${dayStr}</span></span><b class="text-primary-corp">฿${Math.round(prinPerPeriod + intPerPeriod).toLocaleString()}</b></div>`;
   }
   
   document.getElementById('cSchedulePreview').innerHTML = html;
 }
 
-// 🟢 อัปเกรดระบบการค้นหาและซ่อนหน้าค้นหา
 function openBlankPayModal() {
   clearForms();
-  document.getElementById('paySearchGroup').style.display = 'flex'; // โชว์ช่องค้นหา
+  document.getElementById('paySearchGroup').style.display = 'flex';
   document.getElementById('payLoading').style.display = 'none';
   document.getElementById('payDetails').style.display = 'none';
   openModal('modalPay');
@@ -962,7 +967,6 @@ async function fetchPreview(isQuickPay = false) {
       return showAlert('กรุณาเลือกรหัสสัญญาให้ถูกต้อง', true);
   }
 
-  // ซ่อนกล่องค้นหาทันที และแสดงไอคอนหมุนๆ
   if(searchGroup) searchGroup.style.display = 'none';
   if(loading) loading.style.display = 'block';
   if(details) details.style.display = 'none';
@@ -974,6 +978,11 @@ async function fetchPreview(isQuickPay = false) {
 
     if(res.success) {
       curPay = res; 
+      
+      if(!isQuickPay && searchGroup) {
+          searchGroup.style.display = 'flex';
+      }
+
       if(details) details.style.display = 'block'; 
       document.getElementById('pName').innerText = `👤 ข้อมูลลูกค้า: ${res.userName}`;
       
@@ -988,7 +997,6 @@ async function fetchPreview(isQuickPay = false) {
       
     } else { 
         showAlert(res.error || 'ค้นหารหัสสัญญาไม่พบ', true); 
-        // ถ้าหาไม่เจอ คืนค่าช่องค้นหากลับมา
         if(searchGroup) searchGroup.style.display = 'flex';
     }
   } catch(e) {
@@ -1018,7 +1026,7 @@ function quickPay(id) {
   fetchPreview(true); 
 }
 
-// 🟢 อัปเกรดระบบปัดเศษยอดรวมให้ลงตัวที่หลักสิบ และล็อกทศนิยม 2 ตำแหน่ง
+// 🟢 อัปเกรดระบบปัดเศษใหม่: ปัดเศษหลักหน่วย (ทศนิยม) ให้เป็นจำนวนเต็ม
 function recalculatePayPreview() {
   if (!curPay) return;
 
@@ -1062,9 +1070,10 @@ function recalculatePayPreview() {
       suggestedFine = daysDiff * 100;
   }
 
-  // 🟢 คำนวณยอดรวม และปัดเศษลงตัวที่หลักสิบ
   let rawTotal = expectedPrin + expectedInt + suggestedFine;
-  let suggestedTotal = Math.round(rawTotal / 10) * 10;
+  
+  // ปัดทศนิยมให้เป็นจำนวนเต็ม (หลักหน่วย)
+  let suggestedTotal = Math.round(rawTotal);
 
   curPay.expectedPrin = expectedPrin;
   curPay.expectedInt = expectedInt;
@@ -1072,12 +1081,12 @@ function recalculatePayPreview() {
   curPay.suggestedPay = suggestedTotal;
   curPay.nextNo = count + 1;
 
-  document.getElementById('pRemainingPrin').innerText = remainingPrincipal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('pExpectedPrin').innerText = expectedPrin.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('pExpectedInt').innerText = expectedInt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
-  document.getElementById('pFine').innerText = suggestedFine.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2});
+  document.getElementById('pRemainingPrin').innerText = Math.round(remainingPrincipal).toLocaleString();
+  document.getElementById('pExpectedPrin').innerText = Math.round(expectedPrin).toLocaleString();
+  document.getElementById('pExpectedInt').innerText = Math.round(expectedInt).toLocaleString();
+  document.getElementById('pFine').innerText = Math.round(suggestedFine).toLocaleString();
   
-  document.getElementById('pExpectedTotal').innerText = `฿${suggestedTotal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+  document.getElementById('pExpectedTotal').innerText = `฿${suggestedTotal.toLocaleString()}`;
 
   let pWarning = document.getElementById('pWarning');
   if (missedInst > 1) {
@@ -1098,19 +1107,19 @@ function setPayoffAmount() {
   let fine = Number(fineInput.value) || 0;
   let rawPayoff = Number(curPay.remainingPrincipal || 0) + Number(curPay.expectedInt || 0) + fine;
   
-  // ปัดเศษตอนปิดยอดให้ลงตัวหลักสิบด้วย
-  let roundedPayoff = Math.round(rawPayoff / 10) * 10;
-  totalInput.value = roundedPayoff.toFixed(2);
+  // ปัดเศษตอนปิดยอดเป็นจำนวนเต็ม
+  let roundedPayoff = Math.round(rawPayoff);
+  totalInput.value = roundedPayoff;
 }
 
 function toggleFineInput() {
   if(!curPay) return;
   let fineInput = document.getElementById('pFinePaidInput');
   if (document.getElementById('pChargeFine').value === 'Yes') { 
-      fineInput.value = (curPay.fineAmount || 0).toFixed(2); 
+      fineInput.value = Math.round(curPay.fineAmount || 0); 
       fineInput.disabled = false; 
   } else { 
-      fineInput.value = (0).toFixed(2); 
+      fineInput.value = 0; 
       fineInput.disabled = true; 
   }
   syncTotalPay();
@@ -1120,8 +1129,9 @@ function syncTotalPay() {
   if(!curPay) return;
   let totalInput = document.getElementById('pTotalPaidInput');
   let fineInput = document.getElementById('pFinePaidInput');
+  
   let calcVal = ((Number(curPay.suggestedPay) || 0) - (Number(curPay.fineAmount) || 0)) + (Number(fineInput.value) || 0);
-  totalInput.value = calcVal.toFixed(2);
+  totalInput.value = Math.round(calcVal);
 }
 
 async function saveLoan() {
@@ -1180,7 +1190,7 @@ async function saveLoan() {
       installments: document.getElementById('cInstallments').value, 
       startDate: document.getElementById('cStartDate').value, 
       groupName: authData.groupName 
-    }, false); // ปิดการแสดง Loader ใหญ่
+    }, false); 
 
     if (res.success) {
        clearForms(); showAlert('สร้างสัญญาสินเชื่อใหม่สำเร็จ!'); closeModal('modalCreate'); loadDash();

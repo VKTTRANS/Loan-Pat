@@ -1,5 +1,5 @@
-// ตั้งชื่อ Cache และเวอร์ชัน (หากมีการแก้ไขไฟล์ HTML/CSS ให้เปลี่ยนเลข v1 เป็น v2, v3...)
-const CACHE_NAME = 'fintech-pro-cache-v1';
+// เปลี่ยนเลขเวอร์ชันเป็น v2 เพื่อบังคับให้ระบบมือถือล้าง Cache เก่าทิ้ง
+const CACHE_NAME = 'fintech-pro-cache-v2';
 
 // รายชื่อไฟล์ทั้งหมดที่ต้องการให้เก็บลงเครื่อง (App Shell)
 const urlsToCache = [
@@ -18,7 +18,6 @@ const urlsToCache = [
   '/logo.png',
   '/logo.svg',
   '/logo512.png',
-  // เก็บ Cache ของ Bootstrap และ Font จากภายนอกด้วย
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css',
   'https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js',
   'https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap'
@@ -26,18 +25,18 @@ const urlsToCache = [
 
 // 🟢 1. เหตุการณ์ Install: โหลดไฟล์ทั้งหมดลง Cache ทันทีที่เข้าเว็บครั้งแรก
 self.addEventListener('install', event => {
+  // สั่งให้ Service Worker ตัวใหม่เข้าไปทำงานทันที ไม่ต้องรอ
+  self.skipWaiting();
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('เปิดใช้งาน Cache สำเร็จ');
+        console.log('เปิดใช้งาน Cache v2 สำเร็จ');
         return cache.addAll(urlsToCache);
       })
   );
-  // สั่งให้ Service Worker ตัวใหม่ทำงานทันทีโดยไม่ต้องรอโหลดหน้าเว็บใหม่
-  self.skipWaiting();
 });
 
-// 🟢 2. เหตุการณ์ Activate: ล้าง Cache เวอร์ชันเก่าทิ้ง (ถ้ามีการเปลี่ยนเลข v)
+// 🟢 2. เหตุการณ์ Activate: ล้าง Cache เวอร์ชันเก่าทิ้ง
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -45,17 +44,18 @@ self.addEventListener('activate', event => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('ล้าง Cache เก่า: ', cacheName);
+            console.log('ล้าง Cache เก่าทิ้ง: ', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
   );
+  // เข้าควบคุมหน้าเว็บทั้งหมดทันที
   self.clients.claim();
 });
 
-// 🟢 3. เหตุการณ์ Fetch: ดักจับการดึงข้อมูลเพื่อส่งจาก Cache หรือเน็ต
+// 🟢 3. เหตุการณ์ Fetch: กลยุทธ์ "Network First, fallback to Cache"
 self.addEventListener('fetch', event => {
   const requestUrl = event.request.url;
 
@@ -64,36 +64,21 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // 🟢 กลยุทธ์ "Cache First, fallback to Network"
+  // 🟢 วิ่งไปดึงข้อมูลจาก Server (GitHub) ก่อนเสมอ จะได้โค้ดอัปเดตล่าสุด
   event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // ถ้าเจอไฟล์ใน Cache ให้ส่งกลับทันที (โหลดไว 0.1 วิ)
-        if (response) {
-          return response;
-        }
-
-        // ถ้าไม่เจอใน Cache ให้ไปโหลดจากเน็ต
-        return fetch(event.request).then(
-          function(networkResponse) {
-            // เช็คว่าข้อมูลที่โหลดมาถูกต้องไหม ถ้าไม่ให้ส่งกลับไปเลย
-            if(!networkResponse || networkResponse.status !== 200 || networkResponse.type !== 'basic') {
-              return networkResponse;
-            }
-
-            // ถ้าโหลดสำเร็จ ให้ก๊อปปี้ไฟล์นั้นเก็บลง Cache ไว้ใช้รอบหน้า
-            var responseToCache = networkResponse.clone();
-            caches.open(CACHE_NAME)
-              .then(function(cache) {
-                cache.put(event.request, responseToCache);
-              });
-
-            return networkResponse;
-          }
-        );
-      }).catch(() => {
-        // กรณี Offline แล้วหาไฟล์ไม่เจอใน Cache (เผื่อทำหน้า Offline Page ในอนาคต)
-        console.log('Offline: ไม่สามารถโหลด ', event.request.url);
-      })
+    fetch(event.request).then(networkResponse => {
+      // ถ้ามีเน็ตและโหลดสำเร็จ ให้ก๊อปปี้ไฟล์ใหม่ไปอัปเดตทับใน Cache ด้วย
+      if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+        let responseClone = networkResponse.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseClone);
+        });
+      }
+      return networkResponse;
+    }).catch(() => {
+      // 🔴 ถ้าเน็ตหลุด หรือหาเว็บไม่เจอ (Offline) ให้ดึงไฟล์จาก Cache มาแสดงแทน
+      console.log('ทำงานโหมด Offline: โหลดข้อมูลจาก Cache', event.request.url);
+      return caches.match(event.request);
+    })
   );
 });

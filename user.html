@@ -50,11 +50,16 @@
 </div>
 
 <div id="mainApp" style="display:none">
-  <div class="top-header">
-    <h5 class="fw-bold m-0 text-primary-corp"><span class="emoji-icon">💼</span>Staff Pro</h5>
-    <div class="d-flex gap-2 align-items-center">
-      <span id="staffGroupBadge" class="badge bg-light text-dark border shadow-sm px-2 py-1" style="font-size: 0.75rem;">กลุ่ม: -</span>
-      <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-bold text-white shadow-sm"><span class="emoji-icon m-0">🚪</span></button>
+  <!-- 🟢 ส่วนที่แก้ไข: แสดงชื่อพนักงาน และปุ่ม Logout แบบชัดเจน -->
+  <div class="top-header d-flex justify-content-between align-items-center bg-white p-3 shadow-sm mb-3">
+    <h5 class="fw-bold m-0 text-primary-corp text-truncate" style="max-width: 45%; font-size: 1.1rem;">
+      <span class="emoji-icon">👋</span> <span id="navStaffName">กำลังโหลด...</span>
+    </h5>
+    <div class="d-flex gap-2 align-items-center flex-shrink-0">
+      <span id="staffGroupBadge" class="badge bg-light text-dark border shadow-sm px-2 py-2" style="font-size: 0.75rem;">กลุ่ม: -</span>
+      <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-bold text-white shadow-sm d-flex align-items-center">
+        <span class="emoji-icon m-0 me-1">🚪</span> ออกจากระบบ
+      </button>
     </div>
   </div>
 

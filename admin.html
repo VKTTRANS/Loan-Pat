@@ -60,6 +60,60 @@
     
     .clickable-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
     .clickable-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important; }
+
+    /* 📱 ========================================= */
+    /* 📱 ส่วนของหน้าจอ Admin สำหรับมือถือและแท็บเล็ต */
+    /* 📱 ========================================= */
+    @media (max-width: 991px) {
+      .navbar-collapse {
+        background-color: rgba(15, 23, 42, 0.95);
+        border-radius: 12px;
+        padding: 15px;
+        margin-top: 10px;
+        backdrop-filter: blur(10px);
+      }
+    }
+    @media (max-width: 768px) {
+      body { padding-bottom: 80px !important; } /* กันไม่ให้ Content โดนขอบล่างบัง */
+      
+      /* ปรับตารางไม่ให้ฟอนต์ใหญ่เกินไปในมือถือ */
+      .table tbody td, .table thead th {
+        padding: 10px !important;
+        font-size: 0.8rem !important;
+        white-space: nowrap; /* ห้ามตัดคำ ให้ผู้ใช้ปัดซ้ายขวาเอา */
+      }
+      .table-container { border-radius: 8px; }
+      
+      /* ปรับลด Padding ของ Card ต่างๆ */
+      .pro-card { padding: 15px !important; }
+      .pro-card h3 { font-size: 1.5rem !important; }
+      .pro-card .fs-6 { font-size: 0.9rem !important; }
+      
+      /* ให้ Modal พอดีกับหน้าจอ */
+      .modal-content-custom { 
+        width: 95% !important; 
+        padding: 20px !important; 
+        margin: 10px auto; 
+      }
+    }
+    
+    @media (max-width: 576px) {
+      .container-fluid { padding-left: 10px !important; padding-right: 10px !important; }
+      .btn { font-size: 0.85rem !important; padding: 8px 12px !important; }
+      .form-select, .form-control { font-size: 0.85rem !important; }
+      
+      /* บังคับตัวกรอง (Filters) ให้เรียงซ้อนกันแนวตั้ง 100% แทนการบีบในแนวนอน */
+      #viewLoans .d-flex.flex-wrap {
+        flex-direction: column;
+        align-items: stretch !important;
+      }
+      #viewLoans .d-flex.flex-wrap > * {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin-bottom: 8px;
+        margin-left: 0 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -108,7 +162,7 @@
       </ul>
       <div class="d-flex gap-2 mt-2 mt-lg-0">
         <button class="btn btn-outline-light btn-sm fw-bold" onclick="triggerArchive()"><span class="emoji-icon">📦</span>ย้ายข้อมูลเก่า</button>
-        <button class="btn btn-danger btn-sm fw-bold" onclick="logout()"><span class="emoji-icon">🚪</span>ออกจากระบบ</button>
+        <button class="btn btn-danger btn-sm fw-bold d-flex align-items-center" onclick="logout()"><span class="emoji-icon">🚪</span>ออกจากระบบ</button>
       </div>
     </div>
   </div>
@@ -188,7 +242,7 @@
   </div>
 
   <div id="viewSystem" style="display:none;">
-    <div class="d-flex justify-content-between align-items-center mb-3">
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
       <h5 class="fw-bold m-0"><span class="emoji-icon">👔</span>รายชื่อพนักงานระบบ</h5>
       <button class="btn btn-primary fw-bold shadow-sm" onclick="clearForms(); openModal('modalCreateAccount')"><span class="emoji-icon">➕</span>เพิ่มพนักงาน</button>
     </div>
@@ -215,9 +269,9 @@
         <h5 class="fw-bold m-0"><span class="emoji-icon">👥</span>ฐานข้อมูลลูกค้าทั้งหมด</h5>
         <span class="text-muted small">💡 แตะที่ชื่อลูกค้าเพื่อดูประวัติแฟ้มข้อมูลเต็มๆ</span>
       </div>
-      <div class="d-flex gap-2">
-        <input type="text" id="searchClient" class="form-control form-control-sm shadow-sm" placeholder="ค้นหาชื่อ, รหัส, เบอร์..." onkeyup="filterClients()" style="max-width: 250px;">
-        <button class="btn btn-sm btn-success fw-bold shadow-sm text-nowrap" onclick="clearForms(); openModal('modalCreateClient')"><span class="emoji-icon">➕</span>เพิ่มลูกค้า</button>
+      <div class="d-flex gap-2 w-100" style="max-width: 350px;">
+        <input type="text" id="searchClient" class="form-control form-control-sm shadow-sm flex-grow-1" placeholder="ค้นหาชื่อ, รหัส, เบอร์..." onkeyup="filterClients()">
+        <button class="btn btn-sm btn-success fw-bold shadow-sm text-nowrap flex-shrink-0" onclick="clearForms(); openModal('modalCreateClient')"><span class="emoji-icon">➕</span>เพิ่มลูกค้า</button>
       </div>
     </div>
     <div class="table-container">

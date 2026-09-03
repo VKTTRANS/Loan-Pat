@@ -21,6 +21,20 @@ if (document.getElementById('dashFilterYear')) {
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
 }
 
+// 🟢 ตัวช่วยจัดการปุ่มล็อคและแสดงการโหลด
+function toggleBtnLoading(btnId, isLoading) {
+  let btn = document.getElementById(btnId);
+  if (!btn) return;
+  if (isLoading) {
+    btn.disabled = true;
+    if (!btn.dataset.originalText) btn.dataset.originalText = btn.innerHTML;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm" style="width: 1rem; height: 1rem; margin-right: 5px;"></span>กำลังประมวลผล...';
+  } else {
+    btn.disabled = false;
+    if (btn.dataset.originalText) btn.innerHTML = btn.dataset.originalText;
+  }
+}
+
 function safeDateParse(dateStr) {
   if (!dateStr) return new Date(NaN);
   if (String(dateStr).includes('T')) return new Date(dateStr); 
@@ -110,8 +124,22 @@ function showConfirm(msg, callback) {
   globalConfirmCallback = callback;
   document.getElementById('customConfirm').style.display = 'flex';
 }
-function closeConfirm() { document.getElementById('customConfirm').style.display = 'none'; globalConfirmCallback = null; }
-function executeConfirm() { document.getElementById('customConfirm').style.display = 'none'; if(globalConfirmCallback) globalConfirmCallback(); }
+
+// 🟢 อัปเกรดให้ปุ่ม Yes มี Loading ด้วยเวลาลบ
+async function executeConfirm() {
+  toggleBtnLoading('btnConfirmYes', true);
+  try {
+      if(globalConfirmCallback) await globalConfirmCallback();
+  } finally {
+      closeConfirm();
+  }
+}
+
+function closeConfirm() { 
+  document.getElementById('customConfirm').style.display = 'none'; 
+  globalConfirmCallback = null; 
+  toggleBtnLoading('btnConfirmYes', false);
+}
 
 function switchMainTab(tab) {
   ['Dash', 'System', 'Clients', 'Loans', 'Pays'].forEach(t => {
@@ -215,7 +243,6 @@ async function loadAdminDash() {
   }
 }
 
-// 🟢 เพิ่มฟังก์ชันคำนวณยอดหนี้แบบ Dynamic เหมือนฝั่ง User
 function getDynamicInstallmentInfo(loan) {
     let remainAmt = loan.remainingPrincipal !== undefined ? Number(loan.remainingPrincipal) : Number(loan.amount || 0);
     let rate = Number(loan.rate || 0);
@@ -275,8 +302,6 @@ function updateDashMetrics() {
 
       if (matchDay && matchMonth && matchYear && matchGroup && matchAdmin) {
         let orig = Number(l.originalPrincipal) || 0; 
-        
-        // 🟢 ใช้การคำนวณยอดเหลือให้แม่นยำ
         let remain = Number(l.remainingPrincipal !== undefined ? l.remainingPrincipal : (l.amount || 0));
         
         metrics.TotalLoan += orig; 
@@ -315,8 +340,8 @@ function updateDashMetrics() {
     }
   });
 
-  document.getElementById('mTotalLoan').innerText = Math.round(metrics.TotalLoan).toLocaleString(); 
-  document.getElementById('mTotalRemain').innerText = Math.round(metrics.TotalRemain).toLocaleString(); 
+  document.getElementById('mTotalLoan').innerText = metrics.TotalLoan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+  document.getElementById('mTotalRemain').innerText = metrics.TotalRemain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
   document.getElementById('mTotalClients').innerText = metrics.TotalUsers.size.toLocaleString();
   document.getElementById('mTotalStaff').innerText = metrics.TotalStaff;
   
@@ -336,8 +361,8 @@ function updateDashMetrics() {
            <span class="d-block text-muted small" style="font-size: 0.75rem;">จำนวน: ${data.count} สัญญา</span>
         </div>
         <div class="text-end">
-           <span class="d-block fw-bold text-primary-corp" style="font-size: 0.85rem;">ปล่อย: ฿${Math.round(data.loan).toLocaleString()}</span>
-           <span class="d-block fw-bold text-warning-corp" style="font-size: 0.85rem;">ค้าง: ฿${Math.round(data.remain).toLocaleString()}</span>
+           <span class="d-block fw-bold text-primary-corp" style="font-size: 0.85rem;">ปล่อย: ฿${data.loan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+           <span class="d-block fw-bold text-warning-corp" style="font-size: 0.85rem;">ค้าง: ฿${data.remain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
         </div>
      </div>
     </div>`;
@@ -355,10 +380,10 @@ function updateDashMetrics() {
              <span class="emoji-icon text-muted">🗂️</span>
              <span class="fw-bold text-dark">${g}</span>
            </div>
-           <span class="d-block text-muted small" style="font-size: 0.75rem;">กู้สะสม: ฿${Math.round(data.loan).toLocaleString()}</span>
+           <span class="d-block text-muted small" style="font-size: 0.75rem;">กู้สะสม: ฿${data.loan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
         </div>
         <div class="text-end">
-           <span class="d-block fw-bold text-warning-corp fs-6">ค้าง: ฿${Math.round(data.remain).toLocaleString()}</span>
+           <span class="d-block fw-bold text-warning-corp fs-6">ค้าง: ฿${data.remain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
         </div>
      </div>
     </div>`;
@@ -375,13 +400,12 @@ function showCycleDetails(cycleName) {
     } else {
         html = '<div class="list-group list-group-flush">';
         loans.forEach(l => {
-             // 🟢 ดึงข้อมูลจากการคำนวณสด
              let info = getDynamicInstallmentInfo(l);
              html += `
              <div class="list-group-item list-group-item-action p-3" style="cursor:pointer; border-bottom: 1px solid #e2e8f0;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
-                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${info.remainAmt.toLocaleString()}</span>
+                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-muted small text-truncate" style="font-size:0.75rem; max-width: 50%;"><span class="emoji-icon">👔</span>${l.adminName || '-'} | สาย: ${l.groupName || '-'}</span>
@@ -465,8 +489,13 @@ async function saveSystemAccount() {
   if(!adId || !adPass || !adName || !adPin) { showAlert('กรุณากรอกข้อมูลให้ครบถ้วน รวมถึงรหัส PIN', true); return; }
   if(adPin.length !== 4) { showAlert('รหัส PIN ต้องมีครบ 4 หลัก', true); return; }
 
-  const res = await api({ action: 'createSystemAccount', operatorId: authData.userId, newUserId: adId, password: adPass, name: adName, role: adRole, groupName: adGroup, pinCode: adPin });
-  if(res.success) { showAlert('สร้างบัญชีพนักงานใหม่สำเร็จ'); clearForms(); closeModal('modalCreateAccount'); loadAdminDash(); } else showAlert(res.error || 'เกิดข้อผิดพลาด', true);
+  toggleBtnLoading('btnConfirmCreateAccount', true);
+  try {
+    const res = await api({ action: 'createSystemAccount', operatorId: authData.userId, newUserId: adId, password: adPass, name: adName, role: adRole, groupName: adGroup, pinCode: adPin }, false);
+    if(res.success) { showAlert('สร้างบัญชีพนักงานใหม่สำเร็จ'); clearForms(); closeModal('modalCreateAccount'); loadAdminDash(); } else showAlert(res.error || 'เกิดข้อผิดพลาด', true);
+  } finally {
+    toggleBtnLoading('btnConfirmCreateAccount', false);
+  }
 }
 
 function triggerEditAccount(id, name, role, group, status) {
@@ -486,8 +515,13 @@ async function submitEditAccount() {
   
   if(payload.pinCode && payload.pinCode.length !== 4) { showAlert('รหัส PIN ต้องมี 4 หลัก', true); return; }
 
-  const res = await api(payload); 
-  if(res.success) { showAlert('อัปเดตพนักงานสำเร็จ'); closeModal('modalEditAccount'); loadAdminDash(); } else showAlert(res.error, true);
+  toggleBtnLoading('btnConfirmEditAccount', true);
+  try {
+    const res = await api(payload, false); 
+    if(res.success) { showAlert('อัปเดตพนักงานสำเร็จ'); closeModal('modalEditAccount'); loadAdminDash(); } else showAlert(res.error, true);
+  } finally {
+    toggleBtnLoading('btnConfirmEditAccount', false);
+  }
 }
 
 const debouncedFilterUsers = debounce(filterClients, 300);
@@ -510,13 +544,13 @@ function renderClientsTable(data) {
     let admins = new Set();
     
     clientActiveLoans.forEach(l => {
-        let info = getDynamicInstallmentInfo(l); // 🟢 ใช้สมการใหม่
+        let info = getDynamicInstallmentInfo(l); 
         totalActivePrincipal += info.remainAmt; 
         if (l.adminName) admins.add(l.adminName);
     });
     
     let adminNames = admins.size > 0 ? Array.from(admins).join(', ') : '-';
-    let loanBadge = totalActivePrincipal > 0 ? `<span class="text-primary fw-bold">฿${totalActivePrincipal.toLocaleString()}</span>` : `<span class="text-muted">-</span>`;
+    let loanBadge = totalActivePrincipal > 0 ? `<span class="text-primary fw-bold">฿${totalActivePrincipal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>` : `<span class="text-muted">-</span>`;
 
     html += `<tr style="cursor:pointer;" onclick="viewClientProfile('${u.id}')">
       <td data-label="รูปภาพ">${photoHtml}</td>
@@ -575,13 +609,13 @@ function viewClientProfile(userId) {
       else if(l.status === 'Deleted') statusBadge = '<span class="badge bg-danger">ยกเลิก/ลบสัญญา</span>';
       else statusBadge = `<span class="badge bg-danger">${l.status}</span>`;
 
-      let info = getDynamicInstallmentInfo(l); // 🟢 ใช้สมการใหม่
+      let info = getDynamicInstallmentInfo(l); 
 
       lHtml += `
         <div class="pro-card p-3 mb-2 border-0 shadow-sm bg-white" style="cursor:pointer; border-left: 4px solid #3b82f6 !important;" onclick="closeModal('modalViewClient'); viewDetails('${l.loanId}')">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <b class="text-dark d-block mb-1">ยอดกู้: ฿${Number(l.originalPrincipal || 0).toLocaleString()} <span class="ms-2 text-danger" style="font-size:0.85rem;">ค้าง: ฿${info.remainAmt.toLocaleString()}</span></b>
+              <b class="text-dark d-block mb-1">ยอดกู้: ฿${Number(l.originalPrincipal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} <span class="ms-2 text-danger" style="font-size:0.85rem;">ค้าง: ฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></b>
               <span class="text-muted d-block small"><span class="emoji-icon">📅</span>${formatDateWithDayName(l.startDate)}</span>
             </div>
             <div class="text-end">
@@ -594,9 +628,8 @@ function viewClientProfile(userId) {
   }
   document.getElementById('vcLoansList').innerHTML = lHtml;
 
-  let modalContent = document.getElementById('modalViewClient').querySelector('.modal-content-custom');
-  let btnEdit = modalContent.querySelector('.btn-outline-primary');
-  let btnDel = modalContent.querySelector('.btn-outline-danger');
+  let btnEdit = document.getElementById('btnConfirmEditClientModal');
+  let btnDel = document.getElementById('btnConfirmDelClientModal');
   if(btnEdit) btnEdit.onclick = () => { closeModal('modalViewClient'); triggerEditClient(userId); };
   if(btnDel) btnDel.onclick = () => { closeModal('modalViewClient'); triggerDeleteClient(userId); };
 
@@ -627,19 +660,24 @@ async function submitCreateClient() {
   let name = document.getElementById('ccName').value;
   if(!name) { showAlert('กรุณากรอกชื่อลูกค้า', true); return; }
 
-  let photoBase64 = document.getElementById('ccPhoto').files[0] ? await compressImage(document.getElementById('ccPhoto').files[0]) : ''; 
-  let idCardBase64 = document.getElementById('ccIdCard').files[0] ? await compressImage(document.getElementById('ccIdCard').files[0]) : '';
-  let img3Base64 = document.getElementById('ccImg3').files[0] ? await compressImage(document.getElementById('ccImg3').files[0]) : '';
-  let img4Base64 = document.getElementById('ccImg4').files[0] ? await compressImage(document.getElementById('ccImg4').files[0]) : '';
-  let img5Base64 = document.getElementById('ccImg5').files[0] ? await compressImage(document.getElementById('ccImg5').files[0]) : '';
+  toggleBtnLoading('btnConfirmCreateClient', true);
+  try {
+    let photoBase64 = document.getElementById('ccPhoto').files[0] ? await compressImage(document.getElementById('ccPhoto').files[0]) : ''; 
+    let idCardBase64 = document.getElementById('ccIdCard').files[0] ? await compressImage(document.getElementById('ccIdCard').files[0]) : '';
+    let img3Base64 = document.getElementById('ccImg3').files[0] ? await compressImage(document.getElementById('ccImg3').files[0]) : '';
+    let img4Base64 = document.getElementById('ccImg4').files[0] ? await compressImage(document.getElementById('ccImg4').files[0]) : '';
+    let img5Base64 = document.getElementById('ccImg5').files[0] ? await compressImage(document.getElementById('ccImg5').files[0]) : '';
 
-  const res = await api({
-    action: 'createClient', operatorId: authData.userId, name: name, nickname: document.getElementById('ccNick').value,
-    phone: document.getElementById('ccPhone').value, details: document.getElementById('ccDetails').value, groupName: document.getElementById('ccGroup').value,
-    photoBase64: photoBase64, idCardBase64: idCardBase64, img3Base64: img3Base64, img4Base64: img4Base64, img5Base64: img5Base64
-  });
+    const res = await api({
+      action: 'createClient', operatorId: authData.userId, name: name, nickname: document.getElementById('ccNick').value,
+      phone: document.getElementById('ccPhone').value, details: document.getElementById('ccDetails').value, groupName: document.getElementById('ccGroup').value,
+      photoBase64: photoBase64, idCardBase64: idCardBase64, img3Base64: img3Base64, img4Base64: img4Base64, img5Base64: img5Base64
+    }, false);
 
-  if(res.success) { showAlert('เพิ่มประวัติลูกค้าสำเร็จ'); closeModal('modalCreateClient'); loadAdminDash(); } else showAlert(res.error, true);
+    if(res.success) { showAlert('เพิ่มประวัติลูกค้าสำเร็จ'); closeModal('modalCreateClient'); loadAdminDash(); } else showAlert(res.error, true);
+  } finally {
+    toggleBtnLoading('btnConfirmCreateClient', false);
+  }
 }
 
 function triggerEditClient(userId) {
@@ -661,29 +699,33 @@ function triggerEditClient(userId) {
 
 async function submitEditClient() {
   let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-  let photoBase64 = document.getElementById('ecPhoto').files[0] ? await compressImage(document.getElementById('ecPhoto').files[0]) : ''; 
-  let idCardBase64 = document.getElementById('ecIdCard').files[0] ? await compressImage(document.getElementById('ecIdCard').files[0]) : '';
-  let img3Base64 = document.getElementById('ecImg3').files[0] ? await compressImage(document.getElementById('ecImg3').files[0]) : '';
-  let img4Base64 = document.getElementById('ecImg4').files[0] ? await compressImage(document.getElementById('ecImg4').files[0]) : '';
-  let img5Base64 = document.getElementById('ecImg5').files[0] ? await compressImage(document.getElementById('ecImg5').files[0]) : '';
+  toggleBtnLoading('btnConfirmEditClient', true);
+  try {
+    let photoBase64 = document.getElementById('ecPhoto').files[0] ? await compressImage(document.getElementById('ecPhoto').files[0]) : ''; 
+    let idCardBase64 = document.getElementById('ecIdCard').files[0] ? await compressImage(document.getElementById('ecIdCard').files[0]) : '';
+    let img3Base64 = document.getElementById('ecImg3').files[0] ? await compressImage(document.getElementById('ecImg3').files[0]) : '';
+    let img4Base64 = document.getElementById('ecImg4').files[0] ? await compressImage(document.getElementById('ecImg4').files[0]) : '';
+    let img5Base64 = document.getElementById('ecImg5').files[0] ? await compressImage(document.getElementById('ecImg5').files[0]) : '';
 
-  const res = await api({
-    action: 'editUser', operatorId: authData.userId, userId: document.getElementById('ecId').value, 
-    name: document.getElementById('ecName').value, nickname: document.getElementById('ecNick').value, phone: document.getElementById('ecPhone').value, 
-    details: document.getElementById('ecDetails').value, groupName: document.getElementById('ecGroup').value, 
-    photoBase64: photoBase64, idCardBase64: idCardBase64, img3Base64: img3Base64, img4Base64: img4Base64, img5Base64: img5Base64
-  });
+    const res = await api({
+      action: 'editUser', operatorId: authData.userId, userId: document.getElementById('ecId').value, 
+      name: document.getElementById('ecName').value, nickname: document.getElementById('ecNick').value, phone: document.getElementById('ecPhone').value, 
+      details: document.getElementById('ecDetails').value, groupName: document.getElementById('ecGroup').value, 
+      photoBase64: photoBase64, idCardBase64: idCardBase64, img3Base64: img3Base64, img4Base64: img4Base64, img5Base64: img5Base64
+    }, false);
 
-  if(res.success) { showAlert('แก้ไขลูกค้าสำเร็จ'); closeModal('modalEditClient'); loadAdminDash(); } else showAlert(res.error, true);
+    if(res.success) { showAlert('แก้ไขลูกค้าสำเร็จ'); closeModal('modalEditClient'); loadAdminDash(); } else showAlert(res.error, true);
+  } finally {
+    toggleBtnLoading('btnConfirmEditClient', false);
+  }
 }
 
 function triggerDeleteClient(userId) {
-  promptPassword(() => {
-    showConfirm('ต้องการลบประวัติลูกค้ารายนี้ถาวรใช่หรือไม่?\n(สถานะจะถูกเปลี่ยนเป็น Deleted)', () => {
+  promptPassword(async () => {
+    showConfirm('ต้องการลบประวัติลูกค้ารายนี้ถาวรใช่หรือไม่?\n(สถานะจะถูกเปลี่ยนเป็น Deleted)', async () => {
       let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-      api({ action: 'deleteClient', clientId: userId, operatorId: authData.userId }).then(res => {
-        if(res.success) { showAlert('ลบลูกค้าสำเร็จ'); loadAdminDash(); } else showAlert(res.error, true);
-      });
+      const res = await api({ action: 'deleteClient', clientId: userId, operatorId: authData.userId });
+      if(res.success) { showAlert('ลบลูกค้าสำเร็จ'); loadAdminDash(); } else showAlert(res.error, true);
     });
   });
 }
@@ -744,7 +786,7 @@ function renderLoansTable(data) {
   data.forEach(b => {
       let statusBadge = b.status === 'Active' ? '<span class="badge bg-success">กำลังกู้</span>' : '<span class="badge bg-secondary">ปิดยอดแล้ว</span>';
       
-      let info = getDynamicInstallmentInfo(b); // 🟢 ใช้สมการใหม่
+      let info = getDynamicInstallmentInfo(b); 
 
       html += `<tr style="cursor:pointer;" onclick="viewDetails('${b.loanId}')">
           <td data-label="รหัสสัญญา" class="text-muted small">${b.loanId}</td>
@@ -756,8 +798,8 @@ function renderLoansTable(data) {
             <span class="d-block text-muted small mb-1">รอบ ${b.cycle === 'fixed_day' ? '7' : b.cycle} วัน</span>
             <span class="d-block fw-bold text-dark small"><span class="emoji-icon">📅</span>${b.dueDate}</span>
           </td>
-          <td data-label="ยอดเงินต้น" class="text-primary fw-bold text-end">฿${Number(b.originalPrincipal || 0).toLocaleString()}</td>
-          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${info.remainAmt.toLocaleString()}</td>
+          <td data-label="ยอดเงินต้น" class="text-primary fw-bold text-end">฿${Number(b.originalPrincipal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
           <td data-label="สถานะ" class="text-end">${statusBadge}</td>
       </tr>`;
   });
@@ -780,21 +822,63 @@ async function viewDetails(id) {
     `;
     document.getElementById('dInfoGrid').innerHTML = infoHtml;
     
-    document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString()}`; 
-    document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString()}`; 
-    document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString()}`;
+    document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
+    document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
+    document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
     
     document.getElementById('btnDetailDelete').onclick = () => { closeModal('modalDetails'); triggerDeleteLoan(id); };
     
+    let hHtml = '';
+    if(!res.payments || res.payments.length === 0) hHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ยังไม่มีประวัติการรับชำระ</div>';
+    else {
+      res.payments.forEach(p => {
+        let fineText = Number(p.finePaid || 0) > 0 ? `<br><span class="text-danger-corp fw-bold">ค่าปรับ: ฿${Number(p.finePaid).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>` : '';
+        let receiver = p.receiverName || p.operatorName || p.adminName || 'ไม่ระบุ';
+        
+        let titleRow = '';
+        if(String(p.no) === '0') {
+           titleRow = `<b class="text-danger-corp fs-6">หักดอกเบี้ยล่วงหน้า <span class="text-muted fw-normal d-block mt-1" style="font-size:0.75rem;">(${p.date})</span></b>`;
+        } else {
+           titleRow = `<b class="text-dark fs-6">งวดที่ ${p.no} <span class="text-muted fw-normal d-block mt-1" style="font-size:0.75rem;">(${p.date})</span></b>`;
+        }
+        
+        hHtml += `
+          <div class="pro-card p-2 mb-2 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
+            <div class="d-flex justify-content-between align-items-center">
+              <div>
+                ${titleRow}
+                <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${fineText}</span>
+                <span class="text-primary-corp d-block mt-1 small fw-bold" style="font-size:0.75rem;"><span class="emoji-icon">👔</span>รับโดย: ${receiver}</span>
+              </div>
+              <div class="text-end">
+                <b class="text-success-corp d-block mb-1" style="font-size:1rem;">฿${Number(p.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+                <div class="d-flex gap-2 justify-content-end align-items-center mt-1">
+                   ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none fs-5"><span class="emoji-icon">🧾</span></a>` : ''}
+                </div>
+              </div>
+            </div>
+          </div>`;
+      });
+    }
+    document.getElementById('dHistory').innerHTML = hHtml;
+
+    let sHtml = '';
+    if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
+    else {
+      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Number(s.amount || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></div>`; });
+    }
+    document.getElementById('dSchedule').innerHTML = sHtml;
+
     openModal('modalDetails');
   }
 }
 
 function triggerDeleteLoan(id) {
-  promptPassword(() => {
-    showConfirm('🚨 คำเตือน:\nคุณต้องการ "ลบ" สัญญานี้อย่างถาวรใช่หรือไม่?', () => {
+  promptPassword(async () => {
+    showConfirm('🚨 คำเตือน:\nคุณต้องการ "ลบ" สัญญานี้อย่างถาวรใช่หรือไม่?', async () => {
       let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-      api({ action: 'deleteLoan', loanId: id, operatorId: authData.userId }).then(res => { if(res.success) { showAlert('ลบข้อมูลสัญญาสำเร็จ'); loadAdminDash(); } else showAlert('เกิดข้อผิดพลาดในการลบ', true); });
+      const res = await api({ action: 'deleteLoan', loanId: id, operatorId: authData.userId });
+      if(res.success) { showAlert('ลบข้อมูลสัญญาสำเร็จ'); loadAdminDash(); } else showAlert('เกิดข้อผิดพลาดในการลบ', true);
     });
   });
 }
@@ -804,39 +888,39 @@ function renderPaysTable(data) {
   data.forEach(p => {
     let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="btn btn-sm btn-outline-primary"><span class="emoji-icon">🧾</span></a>` : `-`;
     let noText = String(p.no) === '0' ? 'ล่วงหน้า' : p.no;
+    let receiver = p.receiverName || p.operatorName || p.adminName || 'ไม่ระบุ';
 
     html += `<tr>
       <td data-label="วันที่/เวลา" class="text-muted small">${p.date}</td>
       <td data-label="ชื่อลูกค้า" class="fw-bold">${p.userName}</td>
       <td data-label="รหัสสัญญา" class="text-muted small">${p.loanId}</td>
       <td data-label="งวดที่">${noText}</td>
-      <td data-label="ยอดรับ (฿)" class="text-success fw-bold text-end">฿${Number(p.totalPaid || 0).toLocaleString()}</td>
-      <td data-label="ค่าปรับ (฿)" class="text-danger fw-bold text-end">${Number(p.finePaid || 0) > 0 ? '฿'+Number(p.finePaid).toLocaleString() : '-'}</td>
+      <td data-label="ผู้รับเงิน"><span class="badge bg-light text-dark border"><span class="emoji-icon">👔</span>${receiver}</span></td>
+      <td data-label="ยอดรับ (฿)" class="text-success fw-bold text-end">฿${Number(p.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+      <td data-label="ค่าปรับ (฿)" class="text-danger fw-bold text-end">${Number(p.finePaid || 0) > 0 ? '฿'+Number(p.finePaid).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-'}</td>
       <td data-label="สลิป" class="text-end">${slipBtn}</td>
       <td data-label="ยกเลิกรายการ" class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="triggerDeletePayment('${p.id}', '${p.loanId}')"><span class="emoji-icon">🗑️</span></button></td>
     </tr>`;
   });
-  document.getElementById('paysTableBody').innerHTML = html || '<tr><td colspan="8" class="text-center text-muted py-3">ไม่มีประวัติรับชำระ</td></tr>';
+  document.getElementById('paysTableBody').innerHTML = html || '<tr><td colspan="9" class="text-center text-muted py-3">ไม่มีประวัติรับชำระ</td></tr>';
 }
 
 function triggerDeletePayment(paymentId, loanId) {
-  promptPassword(() => {
-     showConfirm('คุณต้องการ "ลบประวัติรับชำระเงิน" รหัสงวดนี้ใช่หรือไม่?\n(เงินจะถูกดึงกลับเข้าสัญญา)', () => {
+  promptPassword(async () => {
+     showConfirm('คุณต้องการ "ลบประวัติรับชำระเงิน" รหัสงวดนี้ใช่หรือไม่?\n(เงินจะถูกดึงกลับเข้าสัญญา)', async () => {
         let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-        api({ action: 'deletePayment', paymentId: paymentId, loanId: loanId, operatorId: authData.userId }).then(res => {
-           if (res.success) { showAlert('ลบประวัติรับชำระเงินสำเร็จ!'); loadAdminDash(); } else showAlert(res.error, true);
-        });
+        const res = await api({ action: 'deletePayment', paymentId: paymentId, loanId: loanId, operatorId: authData.userId });
+        if (res.success) { showAlert('ลบประวัติรับชำระเงินสำเร็จ!'); loadAdminDash(); } else showAlert(res.error, true);
      });
   });
 }
 
 function triggerArchive() {
-  promptPassword(() => {
-    showConfirm('📦 ยืนยันการย้ายข้อมูลเก่าลง Archive?\nสัญญา (ปิดยอด/ลบ) ที่เกิน 6 เดือน จะถูกย้ายไปชีตสำรอง', () => {
+  promptPassword(async () => {
+    showConfirm('📦 ยืนยันการย้ายข้อมูลเก่าลง Archive?\nสัญญา (ปิดยอด/ลบ) ที่เกิน 6 เดือน จะถูกย้ายไปชีตสำรอง', async () => {
       let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
-      api({ action: 'archiveData', operatorId: authData.userId }).then(res => { 
-        if(res.success) { showAlert('จัดเก็บข้อมูลเก่าลง Archive สำเร็จ!\nย้ายไป ' + res.count + ' สัญญา'); loadAdminDash(); } else { showAlert(res.error, true); }
-      });
+      const res = await api({ action: 'archiveData', operatorId: authData.userId });
+      if(res.success) { showAlert('จัดเก็บข้อมูลเก่าลง Archive สำเร็จ!\nย้ายไป ' + res.count + ' สัญญา'); loadAdminDash(); } else { showAlert(res.error, true); }
     });
   });
 }
@@ -845,8 +929,16 @@ function promptPassword(callback) {
   pendingAction = callback; document.getElementById('authPassword').value = ''; openModal('modalAuth');
 }
 
-function confirmPassword() {
-  if(String(document.getElementById('authPassword').value).trim() === String(loggedInPassword).trim()) {
-    closeModal('modalAuth'); if(pendingAction) pendingAction();
-  } else showAlert('รหัสยืนยันตัวตนไม่ถูกต้อง!', true);
+async function confirmPassword() {
+  toggleBtnLoading('btnConfirmAuth', true);
+  try {
+      if(String(document.getElementById('authPassword').value).trim() === String(loggedInPassword).trim()) {
+        closeModal('modalAuth'); 
+        if(pendingAction) await pendingAction();
+      } else {
+          showAlert('รหัสยืนยันตัวตนไม่ถูกต้อง!', true);
+      }
+  } finally {
+      toggleBtnLoading('btnConfirmAuth', false);
+  }
 }

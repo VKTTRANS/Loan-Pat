@@ -15,7 +15,6 @@
     .clickable-card { cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease; }
     .clickable-card:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.06) !important; }
     
-    /* 🟢 อัปเกรด Modals ให้อยู่เหนือทุกสิ่ง และสัดส่วนพอดีจอ */
     .modal-overlay { 
         position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
         background: rgba(15, 23, 42, 0.8); z-index: 99999 !important; display: none; 
@@ -27,18 +26,11 @@
         width: 100%; max-width: 550px; padding: 15px; max-height: 90vh; overflow-y: auto;
     }
     
-    /* 🟢 แก้บั๊ก: บังคับให้หน้าต่างดูรูปภาพอยู่ "หน้าสุด" เหนือ Popup รายละเอียด */
-    .image-viewer-overlay {
-        z-index: 999999 !important;
-    }
+    .image-viewer-overlay { z-index: 999999 !important; }
 
-    /* 📱 ========================================= */
-    /* 📱 ส่วนของมือถือ (Mobile Responsive) */
-    /* 📱 ========================================= */
     @media (max-width: 991px) {
       body { padding-bottom: 70px !important; }
       
-      /* ย่อขนาดเมนูด้านล่างให้บางลงมาก */
       .bottom-nav {
           position: fixed; bottom: 0; left: 0; width: 100%;
           background: #ffffff; border-top: 1px solid #e2e8f0;
@@ -55,12 +47,10 @@
     }
     
     @media (max-width: 768px) {
-      /* ลดขนาด Padding ของ Card */
       .pro-card { padding: 12px !important; }
       .pro-card h3, .pro-card h1 { font-size: 1.5rem !important; }
       .pro-card h5 { font-size: 1.1rem !important; }
       
-      /* บีบขนาดของการ์ดลูกค้า/สัญญา ให้ไม่เทอะทะ */
       .borrower-card { padding: 12px !important; margin-bottom: 12px !important; border-radius: 12px !important; }
       .borrower-card h6 { font-size: 0.95rem !important; }
       .borrower-card .text-muted, .borrower-card .small { font-size: 0.75rem !important; }
@@ -96,7 +86,7 @@
     <p id="confirmMsg" class="text-muted mb-4 small" style="white-space: pre-wrap;">คุณต้องการยืนยันใช่หรือไม่?</p>
     <div class="row g-2">
       <div class="col-6"><button class="btn btn-outline-secondary fw-bold px-3 py-3 w-100 rounded-pill" onclick="closeConfirm()">ยกเลิก</button></div>
-      <div class="col-6"><button class="btn btn-warning text-white fw-bold px-3 py-3 w-100 rounded-pill" onclick="executeConfirm()">ยืนยัน</button></div>
+      <div class="col-6"><button id="btnConfirmYes" class="btn btn-warning text-white fw-bold px-3 py-3 w-100 rounded-pill" onclick="executeConfirm()">ยืนยัน</button></div>
     </div>
   </div>
 </div>
@@ -125,7 +115,6 @@
 
   <div class="container" style="max-width: 600px; padding-left: 12px; padding-right: 12px;">
     
-    <!-- หน้าหลัก -->
     <div id="viewDash">
       <div class="d-flex justify-content-between align-items-center mb-2 mt-1">
         <span class="fw-bold m-0 text-dark fs-5"><span class="emoji-icon">📊</span>ยอดสายของคุณ</span>
@@ -181,7 +170,6 @@
       <div id="dashAlertContainer"></div>
     </div>
 
-    <!-- หน้ารายการสัญญา -->
     <div id="viewList" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-2">
          <h6 class="fw-bold m-0"><span class="emoji-icon">📝</span> สัญญาเงินกู้ของฉัน</h6>
@@ -201,7 +189,6 @@
       <div id="loanContainer"></div>
     </div>
     
-    <!-- หน้าลูกค้า -->
     <div id="viewUsers" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-2">
          <h6 class="fw-bold m-0"><span class="emoji-icon">👥</span> ข้อมูลลูกค้าทั้งหมด</h6>
@@ -216,7 +203,6 @@
     </div>
   </div>
 
-  <!-- Bottom Navigation -->
   <div class="bottom-nav">
     <button class="bottom-nav-item active" id="btnTabDash" onclick="switchMainTab('Dash')"><span class="emoji-icon m-0">🏠</span>หน้าแรก</button>
     <button class="bottom-nav-item" id="btnTabList" onclick="switchMainTab('List')"><span class="emoji-icon m-0">📝</span>สัญญา</button>
@@ -521,7 +507,7 @@
       
       <label class="small">แก้ไขวันที่เริ่ม</label><input type="date" id="eStartDate" class="form-control form-control-sm fw-bold">
     </div>
-    <button onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm small">บันทึกข้อมูล</button>
+    <button id="btnConfirmEdit" onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm small">บันทึกข้อมูล</button>
   </div>
 </div>
 

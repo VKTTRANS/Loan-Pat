@@ -116,14 +116,20 @@ function executeConfirm() { document.getElementById('customConfirm').style.displ
 function switchMainTab(tab) {
   ['Dash', 'System', 'Clients', 'Loans', 'Pays'].forEach(t => {
     let btn = document.getElementById('btnTab'+t);
+    let btnMb = document.getElementById('btnTab'+t+'_mb');
     let view = document.getElementById('view'+t);
+    
     if(btn) btn.classList.remove('active');
+    if(btnMb) btnMb.classList.remove('active');
     if(view) view.style.display = 'none';
   });
   
   let activeBtn = document.getElementById('btnTab'+tab);
+  let activeBtnMb = document.getElementById('btnTab'+tab+'_mb');
   let activeView = document.getElementById('view'+tab);
+  
   if(activeBtn) activeBtn.classList.add('active');
+  if(activeBtnMb) activeBtnMb.classList.add('active');
   if(activeView) activeView.style.display = 'block';
 
   const navbarCollapse = document.getElementById('adminNavbar');
@@ -339,40 +345,21 @@ function showCycleDetails(cycleName) {
     if(loans.length === 0) {
         html = '<div class="text-center text-muted py-4"><span style="font-size: 2rem; display: block; margin-bottom: 10px;">📭</span>ไม่มีสัญญากำลังกู้ (Active) ในรอบนี้</div>';
     } else {
-        html = `
-        <div class="table-responsive" style="max-height: 400px;">
-            <table class="table table-hover align-middle mb-0 border-0">
-                <thead style="position: sticky; top: 0; z-index: 1;">
-                    <tr>
-                        <th class="bg-light border-bottom">ชื่อลูกค้า</th>
-                        <th class="bg-light border-bottom text-center">ดิวชำระ</th>
-                        <th class="bg-light border-bottom">แอดมิน/สาย</th>
-                        <th class="bg-light border-bottom text-end">ยอดกู้ (฿)</th>
-                    </tr>
-                </thead>
-                <tbody>
-        `;
-        
+        html = '<div class="list-group list-group-flush">';
         loans.forEach(l => {
              html += `
-             <tr style="cursor:pointer;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
-                <td>
-                  <b class="text-dark d-block">${l.userName}</b>
-                  <span class="text-muted small" style="font-size:0.75rem;">${l.loanId}</span>
-                </td>
-                <td class="text-center">
-                  <span class="badge bg-white text-dark border shadow-sm"><span class="emoji-icon">📅</span>${l.dueDate || '-'}</span>
-                </td>
-                <td>
-                  <span class="d-block fw-bold text-primary" style="font-size:0.8rem;">${l.adminName || '-'}</span>
-                  <span class="text-muted small" style="font-size:0.75rem;">สาย: ${l.groupName}</span>
-                </td>
-                <td class="text-success fw-bold text-end">
-                  ฿${Number(l.originalPrincipal || 0).toLocaleString()}
-                </td>
-             </tr>`;
+             <div class="list-group-item list-group-item-action p-3" style="cursor:pointer; border-bottom: 1px solid #e2e8f0;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
+                    <span class="text-success fw-bold" style="font-size: 1rem;">฿${Number(l.originalPrincipal || 0).toLocaleString()}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small text-truncate" style="font-size:0.75rem; max-width: 50%;"><span class="emoji-icon">👔</span>${l.adminName || '-'} | สาย: ${l.groupName || '-'}</span>
+                    <span class="badge bg-light text-dark border shadow-sm"><span class="emoji-icon">📅</span>${l.dueDate || '-'}</span>
+                </div>
+             </div>`;
         });
-        html += '</tbody></table></div>';
+        html += '</div>';
     }
     
     document.getElementById('cycleDetailTitle').innerText = 'ข้อมูลสัญญา ' + cycleName + ' (กำลังกู้)';
@@ -380,7 +367,7 @@ function showCycleDetails(cycleName) {
     openModal('modalCycleDetails');
 }
 
-// 🟢 เพิ่มปุ่ม "คัดลอกลิงก์ NFC" ในหน้าจัดการพนักงาน 🟢
+// 🟢 อัปเกรดตารางให้รองรับมือถือด้วย data-label
 function renderSystemTable() {
   let html = '';
   windowSystemAccounts.forEach(a => {
@@ -388,23 +375,22 @@ function renderSystemTable() {
     let statusBadge = a.status === 'Active' ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Suspended</span>';
     
     let editBtn = `<button class="btn btn-sm btn-outline-secondary" onclick="triggerEditAccount('${a.id}', '${a.name}', '${a.role}', '${a.groupName}', '${a.status}')"><span class="emoji-icon">✏️</span> แก้ไข</button>`;
-    let copyBtn = `<button class="btn btn-sm btn-outline-primary ms-1" onclick="copyNfcLink('${a.id}')"><span class="emoji-icon">🔗</span> คัดลอก NFC Link</button>`;
+    let copyBtn = `<button class="btn btn-sm btn-outline-primary ms-1" onclick="copyNfcLink('${a.id}')"><span class="emoji-icon">🔗</span> ลิงก์</button>`;
     
-    let actionBtns = a.role === 'SuperAdmin' ? '-' : `<div class="d-flex justify-content-center gap-1">${editBtn}${copyBtn}</div>`;
+    let actionBtns = a.role === 'SuperAdmin' ? '-' : `<div class="d-flex justify-content-end gap-1 w-100">${editBtn}${copyBtn}</div>`;
 
     html += `<tr>
-      <td class="fw-bold text-muted">${a.id}</td>
-      <td class="fw-bold">${a.name}</td>
-      <td>${roleBadge}</td>
-      <td>${a.groupName || '-'}</td>
-      <td>${statusBadge}</td>
-      <td class="text-center">${actionBtns}</td>
+      <td data-label="รหัส ID" class="fw-bold text-muted">${a.id}</td>
+      <td data-label="ชื่อพนักงาน" class="fw-bold">${a.name}</td>
+      <td data-label="ตำแหน่ง">${roleBadge}</td>
+      <td data-label="สายงาน">${a.groupName || '-'}</td>
+      <td data-label="สถานะ">${statusBadge}</td>
+      <td data-label="จัดการ" class="text-end">${actionBtns}</td>
     </tr>`;
   });
   document.getElementById('systemTableBody').innerHTML = html || '<tr><td colspan="6" class="text-center text-muted py-3">ไม่มีข้อมูลพนักงาน</td></tr>';
 }
 
-// 🟢 ฟังก์ชันสำหรับคัดลอก NFC Link อัตโนมัติ 🟢
 function copyNfcLink(userId) {
     let currentUrl = window.location.href.split('?')[0]; 
     let baseUrl = currentUrl.substring(0, currentUrl.lastIndexOf('/'));
@@ -503,13 +489,13 @@ function renderClientsTable(data) {
     let loanBadge = totalActivePrincipal > 0 ? `<span class="text-primary fw-bold">฿${totalActivePrincipal.toLocaleString()}</span>` : `<span class="text-muted">-</span>`;
 
     html += `<tr style="cursor:pointer;" onclick="viewClientProfile('${u.id}')">
-      <td>${photoHtml}</td>
-      <td class="text-muted small">${u.id}</td>
-      <td class="fw-bold text-dark">${u.name} ${u.nickname ? `(${u.nickname})` : ''}</td>
-      <td>${u.phone || '-'}</td>
-      <td><span class="badge bg-light text-dark border">${u.groupName || '-'}</span></td>
-      <td><span class="badge bg-light text-dark border"><span class="emoji-icon">👔</span>${adminNames}</span></td>
-      <td>${loanBadge}</td>
+      <td data-label="รูปภาพ">${photoHtml}</td>
+      <td data-label="รหัสลูกค้า" class="text-muted small">${u.id}</td>
+      <td data-label="ชื่อ-นามสกุล" class="fw-bold text-dark">${u.name} ${u.nickname ? `(${u.nickname})` : ''}</td>
+      <td data-label="เบอร์โทร">${u.phone || '-'}</td>
+      <td data-label="สายงาน"><span class="badge bg-light text-dark border">${u.groupName || '-'}</span></td>
+      <td data-label="ผู้ปล่อยกู้"><span class="badge bg-light text-dark border"><span class="emoji-icon">👔</span>${adminNames}</span></td>
+      <td data-label="ยอดกู้รวม (Active)" class="text-end">${loanBadge}</td>
     </tr>`;
   });
   document.getElementById('clientsTableBody').innerHTML = html || '<tr><td colspan="7" class="text-center text-muted py-3">ไม่มีข้อมูลลูกค้า</td></tr>';
@@ -692,10 +678,10 @@ function filterLoans() {
     let shortDays = ['อาทิตย์', 'จันทร์', 'อังคาร', 'พุธ', 'พฤหัสบดี', 'ศุกร์', 'เสาร์'];
     let longDays = ['วันอาทิตย์', 'วันจันทร์', 'วันอังคาร', 'วันพุธ', 'วันพฤหัสบดี', 'วันศุกร์', 'วันเสาร์'];
 
-    str1 = `${shortDays[dayIndex]} ${d}/${m}/${y}`; // "จันทร์ 7/9/2569"
-    str2 = `${longDays[dayIndex]} ${d}/${m}/${y}`; // "วันจันทร์ 7/9/2569"
-    str3 = `${d}/${m}/${y}`; // "7/9/2569"
-    str4 = `${shortDays[dayIndex]} ${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`; // "จันทร์ 07/09/2569"
+    str1 = `${shortDays[dayIndex]} ${d}/${m}/${y}`; 
+    str2 = `${longDays[dayIndex]} ${d}/${m}/${y}`; 
+    str3 = `${d}/${m}/${y}`; 
+    str4 = `${shortDays[dayIndex]} ${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`; 
   }
 
   let filtered = allLoans.filter(l => {
@@ -727,18 +713,18 @@ function renderLoansTable(data) {
       let statusBadge = b.status === 'Active' ? '<span class="badge bg-success">กำลังกู้</span>' : '<span class="badge bg-secondary">ปิดยอดแล้ว</span>';
 
       html += `<tr style="cursor:pointer;" onclick="viewDetails('${b.loanId}')">
-          <td class="text-muted small">${b.loanId}</td>
-          <td class="fw-bold text-dark">
+          <td data-label="รหัสสัญญา" class="text-muted small">${b.loanId}</td>
+          <td data-label="ลูกค้า" class="fw-bold text-dark">
             <span class="emoji-icon">👤</span>${b.userName} ${b.nickname ? `(${b.nickname})` : ''}
           </td>
-          <td><span class="badge bg-light text-dark border"><span class="emoji-icon">👔</span>${b.adminName || '-'}</span></td>
-          <td>
+          <td data-label="ผู้ปล่อยกู้"><span class="badge bg-light text-dark border"><span class="emoji-icon">👔</span>${b.adminName || '-'}</span></td>
+          <td data-label="ประเภท / ดิวชำระ">
             <span class="d-block text-muted small mb-1">รอบ ${b.cycle === 'fixed_day' ? '7' : b.cycle} วัน</span>
             <span class="d-block fw-bold text-dark small"><span class="emoji-icon">📅</span>${b.dueDate}</span>
           </td>
-          <td class="text-primary fw-bold">฿${Number(b.originalPrincipal || 0).toLocaleString()}</td>
-          <td class="text-danger fw-bold">฿${Number(b.remainingPrincipal || 0).toLocaleString()}</td>
-          <td>${statusBadge}</td>
+          <td data-label="ยอดเงินต้น" class="text-primary fw-bold text-end">฿${Number(b.originalPrincipal || 0).toLocaleString()}</td>
+          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${Number(b.remainingPrincipal || 0).toLocaleString()}</td>
+          <td data-label="สถานะ" class="text-end">${statusBadge}</td>
       </tr>`;
   });
   document.getElementById('loansTableBody').innerHTML = html || '<tr><td colspan="7" class="text-center text-muted py-3">ไม่มีข้อมูลสัญญาตามเงื่อนไขที่เลือก</td></tr>';
@@ -786,14 +772,14 @@ function renderPaysTable(data) {
     let noText = String(p.no) === '0' ? 'ล่วงหน้า' : p.no;
 
     html += `<tr>
-      <td class="text-muted small">${p.date}</td>
-      <td class="fw-bold">${p.userName}</td>
-      <td class="text-muted small">${p.loanId}</td>
-      <td>${noText}</td>
-      <td class="text-success fw-bold text-end">฿${Number(p.totalPaid || 0).toLocaleString()}</td>
-      <td class="text-danger fw-bold text-end">${Number(p.finePaid || 0) > 0 ? '฿'+Number(p.finePaid).toLocaleString() : '-'}</td>
-      <td class="text-center">${slipBtn}</td>
-      <td class="text-center"><button class="btn btn-sm btn-outline-danger" onclick="triggerDeletePayment('${p.id}', '${p.loanId}')"><span class="emoji-icon">🗑️</span></button></td>
+      <td data-label="วันที่/เวลา" class="text-muted small">${p.date}</td>
+      <td data-label="ชื่อลูกค้า" class="fw-bold">${p.userName}</td>
+      <td data-label="รหัสสัญญา" class="text-muted small">${p.loanId}</td>
+      <td data-label="งวดที่">${noText}</td>
+      <td data-label="ยอดรับ (฿)" class="text-success fw-bold text-end">฿${Number(p.totalPaid || 0).toLocaleString()}</td>
+      <td data-label="ค่าปรับ (฿)" class="text-danger fw-bold text-end">${Number(p.finePaid || 0) > 0 ? '฿'+Number(p.finePaid).toLocaleString() : '-'}</td>
+      <td data-label="สลิป" class="text-end">${slipBtn}</td>
+      <td data-label="ยกเลิกรายการ" class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="triggerDeletePayment('${p.id}', '${p.loanId}')"><span class="emoji-icon">🗑️</span></button></td>
     </tr>`;
   });
   document.getElementById('paysTableBody').innerHTML = html || '<tr><td colspan="8" class="text-center text-muted py-3">ไม่มีประวัติรับชำระ</td></tr>';
@@ -829,15 +815,4 @@ function confirmPassword() {
   if(String(document.getElementById('authPassword').value).trim() === String(loggedInPassword).trim()) {
     closeModal('modalAuth'); if(pendingAction) pendingAction();
   } else showAlert('รหัสยืนยันตัวตนไม่ถูกต้อง!', true);
-}
-
-// ==========================================
-// ลงทะเบียน Service Worker (PWA)
-// ==========================================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js')
-      .then(reg => console.log('Service Worker ลงทะเบียนสำเร็จ: ', reg.scope))
-      .catch(err => console.log('Service Worker ลงทะเบียนไม่สำเร็จ: ', err));
-  });
 }

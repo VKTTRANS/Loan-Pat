@@ -3,597 +3,111 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <title>Fintech Admin Pro</title>
+  <title>เข้าสู่ระบบ - Fintech Pro</title>
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link rel="icon" href="logo1.svg" type="image/svg+xml">
-  <link rel="manifest" href="manifest.json">
-  <link rel="apple-touch-icon" href="logo512.png">
-  
   <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      font-family: 'Prompt', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: #ffffff;
+      border-radius: 24px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+      width: 100%;
+      max-width: 400px;
+      padding: 40px 30px;
+      text-align: center;
+    }
+    .login-icon {
+      font-size: 3.5rem;
+      margin-bottom: 10px;
+      display: inline-block;
+    }
+    .emoji-icon {
+      font-style: normal;
+      margin-right: 8px;
+    }
+  </style>
 </head>
 <body>
 
 <div id="customAlert" class="modal-overlay" style="z-index: 99999; align-items: center;">
-  <div class="pro-card p-4 text-center" style="width: 85%; max-width: 320px; border-top: 5px solid #2563eb; border-radius: 20px;">
-    <i id="alertIcon" class="fa-solid fa-circle-check text-success-corp mb-3" style="font-size: 3.5rem;"></i>
-    <h5 id="alertTitle" class="fw-bold mb-2">สำเร็จ</h5>
-    <p id="alertMsg" class="text-muted mb-4 small">ทำรายการเรียบร้อยแล้ว</p>
-    <button id="alertBtn" class="btn bg-primary-corp fw-bold px-4 py-3 w-100 rounded-pill shadow-sm" onclick="document.getElementById('customAlert').style.display='none'">ตกลง</button>
-  </div>
-</div>
-
-<div id="customConfirm" class="modal-overlay" style="z-index: 99999; align-items: center;">
-  <div class="pro-card p-4 text-center shadow-lg" style="width: 85%; max-width: 340px; border-top: 5px solid #f59e0b; border-radius: 20px;">
-    <i class="fa-solid fa-triangle-exclamation text-warning-corp mb-3" style="font-size: 3.5rem;"></i>
-    <h5 class="fw-bold mb-2 text-dark">ยืนยันทำรายการ</h5>
-    <p id="confirmMsg" class="text-muted mb-4 small" style="white-space: pre-wrap;">คุณต้องการยืนยันใช่หรือไม่?</p>
-    <div class="row g-2">
-      <div class="col-6"><button class="btn btn-outline-secondary fw-bold px-3 py-3 w-100 rounded-pill" onclick="closeConfirm()">ยกเลิก</button></div>
-      <div class="col-6"><button class="btn btn-warning text-white fw-bold px-3 py-3 w-100 rounded-pill" onclick="executeConfirm()">ยืนยัน</button></div>
-    </div>
+  <div class="pro-card p-4 text-center" style="width: 85%; max-width: 320px; border-top: 5px solid #ef4444; border-radius: 20px; background: #fff;">
+    <span style="font-size: 3.5rem; display: block; margin-bottom: 15px;">❌</span>
+    <h5 class="fw-bold mb-2 text-danger-corp">แจ้งเตือน</h5>
+    <p id="alertMsg" class="text-muted mb-4 small">เกิดข้อผิดพลาด</p>
+    <button class="btn btn-danger fw-bold px-4 py-3 w-100 rounded-pill shadow-sm" onclick="document.getElementById('customAlert').style.display='none'">ตกลง</button>
   </div>
 </div>
 
 <div class="loader" id="loader">
   <div class="spinner-border text-primary-corp mb-3" style="width: 3.5rem; height: 3.5rem;"></div>
-  <h6 class="text-primary-corp fw-bold mt-2">กำลังประมวลผล...</h6>
+  <h6 class="text-primary-corp fw-bold mt-2">กำลังเข้าสู่ระบบ...</h6>
 </div>
 
-<div id="imageViewer" class="image-viewer-overlay" onclick="closeImageViewer()">
-  <img id="fullSizeImage" src="" alt="Full Size">
-</div>
+<div class="login-card">
+  <span class="login-icon">🛡️</span>
+  <h3 class="fw-bold text-dark mb-1">Fintech Pro</h3>
+  <p class="text-muted small mb-4">ระบบบริหารจัดการสินเชื่อครบวงจร</p>
 
-<div class="container" id="logoutScreen" style="display:none; max-width: 600px; padding-top: 80px;">
-  <div class="pro-card p-4 text-center shadow-lg" style="border-top: 5px solid #ef4444; border-radius: 20px;">
-    <i class="fa-solid fa-person-falling-burst text-danger-corp mb-3" style="font-size: 5rem;"></i>
-    <h3 class="fw-bold mb-2 text-dark">ออกจากระบบแล้ว...</h3>
-    <p class="text-muted mb-4">เข้าระบบใหม่เพื่อใช้งานต่อ...</p>
-    <button class="btn btn-outline-secondary rounded-pill px-4 py-3 fw-bold w-100" onclick="location.reload()">กลับสู่หน้าแรก</button>
-  </div>
-</div>
-
-<div class="container px-3" id="loginPage" style="max-width: 600px; padding-top: 60px;">
-    <div id="noNfcWarning" class="text-center py-5">
-      <i class="fa-solid fa-lock mb-3" style="font-size: 4.5rem; color: #2563eb;"></i>
-      <h4 class="fw-bold text-primary-corp mb-2">ล็อกอยู่นะ 🔒</h4>
-      <p class="text-muted small">กรุณาสแกนเพื่อเข้าสู่ระบบ</p>
-    </div>
-  <div id="nfcLoginBox" class="pro-card p-4 text-center shadow-lg" style="display:none; border-top: 5px solid #2563eb; border-radius: 20px;">
-    <i class="fa-solid fa-lock text-primary-corp mb-3" style="font-size: 2.5rem;"></i>
-    <h4 class="fw-bold mb-1">กรอกรหัส PIN</h4>
-    <p class="text-muted small fw-bold mb-4">ยินดีต้อนรับ: <span id="nfcUserDisplay" class="text-primary-corp fs-6"></span></p>
-    
-    <div class="d-flex justify-content-center gap-4 mb-4 pb-1">
-      <div class="pin-dot" id="dot1"></div><div class="pin-dot" id="dot2"></div>
-      <div class="pin-dot" id="dot3"></div><div class="pin-dot" id="dot4"></div>
+  <!-- ใช้ tag form และ onsubmit="return false;" เพื่อดักการกระพริบ 100% -->
+  <form onsubmit="event.preventDefault(); submitLogin();" class="text-start">
+    <div class="mb-3">
+      <label class="fw-bold small text-muted mb-1"><span class="emoji-icon">👤</span>รหัสผู้ใช้งาน (ID)</label>
+      <input type="text" id="userId" class="form-control form-control-lg bg-light" placeholder="ระบุรหัสผู้ใช้งาน" required autocomplete="username">
     </div>
     
-    <div class="row g-3 mx-auto" style="max-width: 280px;">
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('1')">1</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('2')">2</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('3')">3</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('4')">4</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('5')">5</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('6')">6</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('7')">7</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('8')">8</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('9')">9</button></div>
-      <div class="col-4"><button class="btn btn-danger w-100 py-3 fw-bold fs-4 rounded-4 shadow-sm" onclick="clearPin()">C</button></div>
-      <div class="col-4"><button class="nfc-btn w-100 py-3 fw-bold fs-3" onclick="pressPin('0')">0</button></div>
-      <div class="col-4"><button class="btn btn-secondary w-100 py-3 fw-bold fs-4 rounded-4 shadow-sm" onclick="cancelNfcLogin()"><i class="fa-solid fa-arrow-left"></i></button></div>
+    <div class="mb-4">
+      <label class="fw-bold small text-muted mb-1"><span class="emoji-icon">🔒</span>รหัสผ่าน</label>
+      <input type="password" id="password" class="form-control form-control-lg bg-light" placeholder="••••••••" required autocomplete="current-password">
     </div>
+
+    <button type="submit" class="btn bg-primary-corp text-white fw-bold py-3 w-100 rounded-pill shadow-sm fs-5 mb-3">
+      เข้าสู่ระบบ
+    </button>
+  </form>
+
+  <div class="position-relative text-center my-3">
+    <hr class="text-muted opacity-25">
+    <span class="bg-white px-3 text-muted small position-absolute top-50 start-50 translate-middle">หรือ</span>
   </div>
+
+  <button onclick="openNfcLogin()" class="btn btn-outline-dark fw-bold py-3 w-100 rounded-pill shadow-sm">
+    <span class="emoji-icon">📱</span> เข้าสู่ระบบด้วย NFC
+  </button>
 </div>
 
-<div id="mainApp" style="display:none">
-  <div class="top-header">
-    <h5 class="fw-bold m-0"><i class="fa-solid fa-building-columns me-2"></i>Fintech Pro</h5>
-    <div class="d-flex gap-2 align-items-center">
-      <button id="btnManageAdmin" class="btn btn-light btn-sm rounded-pill px-3 py-2 fw-bold text-primary-corp shadow-sm" style="display:none;" onclick="openManageAdmins()">
-        <i class="fa-solid fa-users-gear me-1"></i> แอดมิน
-      </button>
-      <button onclick="logout()" class="btn btn-danger btn-sm rounded-pill px-3 py-2 fw-bold text-white shadow-sm"><i class="fa-solid fa-power-off"></i></button>
-    </div>
-  </div>
-
-  <div class="container" style="max-width: 600px; padding-left: 12px; padding-right: 12px;">
-    <div id="viewDash">
-      <div class="d-flex justify-content-between align-items-center mb-3 mt-2">
-        <span class="fw-bold m-0 text-dark fs-5"><i class="fa-solid fa-chart-pie me-2 text-primary-corp"></i>ภาพรวมระบบ</span>
-        <div class="d-flex gap-2">
-          <select id="dashFilterMonth" class="form-select form-select-sm px-2 py-1 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 8px; background-color: #f1f5f9;" onchange="updateDashMetrics()">
-            <option value="all">ทุกเดือน</option><option value="1">ม.ค.</option><option value="2">ก.พ.</option><option value="3">มี.ค.</option><option value="4">เม.ย.</option><option value="5">พ.ค.</option><option value="6">มิ.ย.</option><option value="7">ก.ค.</option><option value="8">ส.ค.</option><option value="9">ก.ย.</option><option value="10">ต.ค.</option><option value="11">พ.ย.</option><option value="12">ธ.ค.</option>
-          </select>
-          <select id="dashFilterYear" class="form-select form-select-sm px-2 py-1 fw-bold text-primary-corp bg-white shadow-sm border-0" style="border-radius: 8px; background-color: #f1f5f9;" onchange="updateDashMetrics()"></select>
-        </div>
-      </div>
-
-      <div class="pro-card p-4 mb-3 shadow-sm position-relative overflow-hidden" style="background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%); color: white; border: none; border-radius: 20px;">
-        <i class="fa-solid fa-vault position-absolute" style="font-size: 10rem; opacity: 0.1; right: -20px; bottom: -20px;"></i>
-        <div class="position-relative z-1">
-          <label class="fw-bold d-block text-light mb-1 opacity-75 fs-6"><i class="fa-solid fa-coins me-2"></i>ยอดปล่อยกู้สะสมทั้งหมด</label>
-          <h1 class="fw-bold m-0 text-white mb-3" style="font-size: 2.2rem; letter-spacing: -1px;">฿<span id="mTotalLoan">0</span></h1>
-          
-          <div class="d-flex justify-content-between bg-white bg-opacity-10 p-3 rounded-4" style="backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1);">
-             <div>
-                <span class="d-block text-light opacity-75 small fw-bold mb-1"><i class="fa-solid fa-file-invoice-dollar me-1"></i>ยอดหนี้คงค้าง</span>
-                <span class="d-block fw-bold text-warning fs-5">฿<span id="mTotalRemain">0</span></span>
-             </div>
-             <div class="text-end border-start border-light border-opacity-25 ps-3">
-                <span class="d-block text-light opacity-75 small fw-bold mb-1"><i class="fa-solid fa-users me-1"></i>ลูกค้า (คน)</span>
-                <span class="d-block fw-bold text-white fs-5" id="mTotalUsers">0</span>
-             </div>
-          </div>
-        </div>
-      </div>
-
-      <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-bolt me-2 text-warning-corp"></i> เมนูด่วน (Quick Actions)</h6>
-      <div class="row g-2 mb-4">
-        <div class="col-6">
-           <button onclick="clearForms(); openModal('modalPay')" class="btn-action bg-primary-corp py-3 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 3px solid #172554;">
-              <i class="fa-solid fa-hand-holding-dollar fs-2 mb-1 text-white opacity-75"></i> 
-              <span class="d-block fs-6 text-white fw-bold">รับชำระเงิน</span>
-           </button>
-        </div>
-        <div class="col-6">
-           <button onclick="clearForms(); openModal('modalCreate')" class="btn-action bg-success-corp py-3 w-100 rounded-4 shadow-sm" style="border: none; border-bottom: 3px solid #065f46;">
-              <i class="fa-solid fa-file-signature fs-2 mb-1 text-white opacity-75"></i> 
-              <span class="d-block fs-6 text-white fw-bold">เปิดสัญญาใหม่</span>
-           </button>
-        </div>
-      </div>
-
-      <h6 class="fw-bold text-dark mb-2"><i class="fa-solid fa-chart-column me-2 text-primary-corp"></i> สัดส่วนหนี้คงค้างตามรอบบิล</h6>
-      <div id="cycleBreakdownContainer" class="pro-card p-0 overflow-hidden mb-4 shadow-sm" style="border-radius: 16px;">
-      </div>
-
-      <span class="fw-bold d-block mb-2 text-danger-corp px-2"><i class="fa-solid fa-bell me-2"></i>รายการใกล้ครบกำหนด / ค้างชำระ</span>
-      <div id="dashAlertContainer"></div>
-    </div>
-
-    <div id="viewList" style="display:none;">
-      <div class="pro-card p-2 mb-3">
-        <div class="input-group shadow-sm rounded-3 mb-2" style="border-radius: 10px; overflow: hidden;">
-          <span class="input-group-text bg-white border-end-0 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-            </svg>
-          </span>
-          <!-- 🟢 แก้เป็น onkeyup="debouncedApplyFilters()" -->
-          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchLoan" placeholder="ค้นหาชื่อ หรือ รหัสสัญญา..." onkeyup="debouncedApplyFilters()">
-        </div>
-        <details class="mb-1">
-          <summary class="fw-bold text-primary-corp p-2 bg-light rounded-3 small" style="cursor:pointer;"><i class="fa-solid fa-filter me-2"></i> ตัวกรองขั้นสูง</summary>
-          <div class="row g-2 mt-1 pt-2 border-top stack-form">
-            <div class="col-12">
-              <label class="small">รูปแบบ</label>
-              <select id="filterCycle" class="form-select form-select-sm" onchange="applyFilters()">
-                <option value="all">ทั้งหมด</option>
-                <option value="1">1 วัน</option>
-                <option value="3">3 วัน</option>
-                <option value="5">5 วัน</option>
-                <option value="7">7 วัน (สัปดาห์)</option>
-                <option value="14">14 วัน</option>
-                <option value="21">21 วัน</option>
-                <option value="30">30 วัน (เดือน)</option>
-              </select>
-            </div>
-            <div class="col-12"><label class="small">สถานะ</label><select id="filterStatus" class="form-select form-select-sm" onchange="applyFilters()"><option value="all">ทั้งหมด</option><option value="due">ใกล้ครบดิว</option><option value="overdue">เกินกำหนด</option></select></div>
-            <div class="col-12"><label class="small">เรียงลำดับ</label><select id="filterSort" class="form-select form-select-sm" onchange="applyFilters()"><option value="due">วันที่ครบกำหนด</option><option value="amtDesc">ยอดหนี้ (มาก-น้อย)</option><option value="amtAsc">ยอดหนี้ (น้อย-มาก)</option></select></div>
-            <div class="col-12"><label class="small">แสดงผล</label><select id="filterLimit" class="form-select form-select-sm" onchange="applyFilters()"><option value="30">30 รายการ</option><option value="50">50 รายการ</option><option value="100">100 รายการ</option><option value="all">ทั้งหมด</option></select></div>
-            <div class="col-12" id="filterAdminWrap" style="display:none;"><label class="small">ค้นหาตามผู้ปล่อยกู้</label><select id="filterAdmin" class="form-select form-select-sm" onchange="applyFilters()"><option value="all">ทั้งหมด</option></select></div>
-          </div>
-        </details>
-      </div>
-      <div id="loanContainer"></div>
-    </div>
-    
-    <div id="viewUsers" style="display:none;">
-      <div class="pro-card p-2 mb-3">
-        <div class="input-group shadow-sm rounded-3 mb-2" style="border-radius: 10px; overflow: hidden;">
-          <span class="input-group-text bg-white border-end-0 py-2">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="text-muted" viewBox="0 0 16 16">
-              <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-            </svg>
-          </span>
-          <!-- 🟢 แก้เป็น onkeyup="debouncedFilterUsers()" -->
-          <input class="form-control border-start-0 ps-0 py-2 form-control-lg fs-6" type="text" id="searchUser" placeholder="ค้นหาชื่อ หรือ เบอร์โทรลูกค้า..." onkeyup="debouncedFilterUsers()">
-        </div>
-        <div class="d-flex justify-content-end align-items-center p-1">
-            <label class="mb-0 me-2 fw-bold text-muted small">แสดงผล:</label>
-            <select id="userFilterLimit" class="form-select form-select-sm w-auto" onchange="filterUsers()">
-              <option value="30">30 คน</option><option value="50">50 คน</option><option value="100">100 คน</option><option value="all">ทั้งหมด</option>
-            </select>
-        </div>
-      </div>
-      <div id="usersContainer"></div>
-    </div>
-  </div>
-
-  <div class="bottom-nav">
-    <button class="bottom-nav-item active" id="btnTabDash" onclick="switchMainTab('Dash')"><i class="fa-solid fa-house"></i>หน้าแรก</button>
-    <button class="bottom-nav-item" id="btnTabList" onclick="switchMainTab('List')"><i class="fa-solid fa-file-contract"></i>สัญญา</button>
-    <button class="bottom-nav-item" id="btnTabUsers" onclick="switchMainTab('Users')"><i class="fa-solid fa-users"></i>ลูกค้า</button>
-    <button class="bottom-nav-item" onclick="openModal('modalRecentPays')"><i class="fa-solid fa-clock-rotate-left"></i>ประวัติ</button>
-  </div>
-</div>
-
-<div id="modalManageAdmins" class="modal-overlay">
-  <div class="modal-content-custom bg-light">
+<!-- Modal NFC Login -->
+<div id="modalNfc" class="modal-overlay" style="z-index: 1000; align-items: center;">
+  <div class="pro-card p-4 text-center bg-white" style="width: 85%; max-width: 340px; border-top: 5px solid #10b981; border-radius: 20px;">
     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-users-gear me-2"></i>จัดการแอดมิน</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalManageAdmins')" style="cursor:pointer"></i>
+      <h5 class="fw-bold m-0 text-success-corp"><span class="emoji-icon">📱</span> แตะบัตร NFC</h5>
+      <span class="fs-4 text-secondary p-2" onclick="closeNfcModal()" style="cursor:pointer">❌</span>
     </div>
     
-    <div class="row g-2 mb-3">
-        <div class="col-6"><button class="btn btn-success w-100 py-2 fw-bold rounded-3 shadow-sm small" onclick="closeModal('modalManageAdmins'); clearForms(); openModal('modalCreateAdmin')"><i class="fa-solid fa-plus me-1"></i> เพิ่มแอดมิน</button></div>
-        <div class="col-6"><button class="btn btn-outline-danger w-100 py-2 fw-bold rounded-3 shadow-sm small" onclick="triggerArchive()"><i class="fa-solid fa-box-archive me-1"></i> ย้ายข้อมูลเก่า</button></div>
+    <p class="text-muted small mb-3">แตะบัตรพนักงานของคุณที่หลังโทรศัพท์เพื่ออ่านรหัส ID อัตโนมัติ</p>
+    
+    <input type="text" id="nfcId" class="form-control form-control-lg text-center mb-3 bg-light fw-bold" placeholder="รอการแตะบัตร..." readonly>
+    
+    <div id="nfcPinSection" style="display: none;">
+      <label class="fw-bold text-dark small mb-1">กรอก PIN 4 หลัก</label>
+      <input type="password" id="nfcPin" class="form-control form-control-lg text-center fw-bold mb-4 fs-3" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')" onkeypress="handleNfcEnter(event)">
+      <button class="btn bg-success-corp text-white fw-bold py-3 w-100 rounded-pill shadow-sm" onclick="submitNfcLogin()">ยืนยัน PIN</button>
     </div>
     
-    <div id="adminsListContainer"></div>
+    <button id="btnReadNfc" class="btn btn-dark fw-bold py-3 w-100 rounded-pill shadow-sm mt-2" onclick="startNfcRead()">เริ่มอ่านบัตร NFC</button>
   </div>
 </div>
 
-<div id="modalCreateAdmin" class="modal-overlay">
-  <div class="modal-content-custom stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-success-corp"><i class="fa-solid fa-user-plus me-2"></i>สร้างบัญชีแอดมิน</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalCreateAdmin')" style="cursor:pointer"></i>
-    </div>
-    <label class="small">รหัสพนักงาน (ID)</label><input type="text" id="caId" class="form-control form-control-sm mb-2" placeholder="admin01">
-    <label class="small">ชื่อที่ใช้แสดงผล</label><input type="text" id="caName" class="form-control form-control-sm mb-2">
-    <label class="text-primary-corp fw-bold small">รหัส PIN 4 หลัก (สแกน NFC)</label><input type="text" id="caPin" class="form-control form-control-sm mb-2 fw-bold text-center" maxlength="4" placeholder="••••" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <label class="small">กลุ่มดูแล</label><select id="caGroup" class="form-select form-select-sm mb-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
-    <label class="small">รหัสผ่านสำรอง</label><input type="password" id="caPass" class="form-control form-control-sm mb-3">
-    <button onclick="saveAdmin()" class="btn bg-success-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
-  </div>
-</div>
-
-<div id="modalEditAdmin" class="modal-overlay" style="z-index: 1010;">
-  <div class="modal-content-custom stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-warning-corp"><i class="fa-solid fa-user-pen me-2"></i>แก้ไขแอดมิน</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalEditAdmin')" style="cursor:pointer"></i>
-    </div>
-    <input type="hidden" id="eaId">
-    <label class="small">ชื่อที่ใช้แสดงผล</label><input type="text" id="eaName" class="form-control form-control-sm mb-2">
-    <label class="text-primary-corp fw-bold small">เปลี่ยนรหัส PIN (เว้นว่างไว้หากไม่แก้)</label><input type="text" id="eaPin" class="form-control form-control-sm mb-2 fw-bold text-center fs-4" placeholder="••••" maxlength="4" oninput="this.value=this.value.replace(/[^0-9]/g,'')">
-    <label class="small">สถานะบัญชี</label>
-    <select id="eaStatus" class="form-select form-select-sm mb-2 fw-bold">
-      <option value="Active" class="text-success-corp">เปิดใช้งาน (Active)</option>
-      <option value="Suspended" class="text-danger-corp">ระงับสิทธิ์ (Suspended)</option>
-    </select>
-    <label class="small">กลุ่มดูแล</label><select id="eaGroup" class="form-select form-select-sm mb-2"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option></select>
-    <label class="small">แก้ไขรหัสผ่าน (เว้นว่างได้)</label><input type="password" id="eaPass" class="form-control form-control-sm mb-3" placeholder="รหัสผ่านใหม่">
-    <button onclick="submitEditAdmin()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกการอัปเดต</button>
-  </div>
-</div>
-
-<div id="modalEditUser" class="modal-overlay" style="z-index: 1010;">
-  <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-warning-corp"><i class="fa-solid fa-user-pen me-2"></i>แก้ไขข้อมูลลูกค้า</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalEditUser')" style="cursor:pointer"></i>
-    </div>
-    <input type="hidden" id="euUserId">
-    <div class="pro-card p-3 mb-3">
-      <label class="small">ชื่อ-นามสกุล</label><input type="text" id="euName" class="form-control form-control-sm mb-2">
-      <label class="small">ชื่อเล่น</label><input type="text" id="euNick" class="form-control form-control-sm mb-2">
-      <label class="small">เบอร์โทร</label><input type="text" id="euPhone" class="form-control form-control-sm mb-2">
-      <label class="small">ที่อยู่/รายละเอียด</label><input type="text" id="euDetails" class="form-control form-control-sm mb-3">
-      
-      <label class="text-muted small">อัปเดตรูปหน้าตรง</label><input type="file" id="euPhoto" class="form-control form-control-sm mb-2" accept="image/*">
-      <label class="text-muted small">อัปเดตเอกสาร</label><input type="file" id="euIdCard" class="form-control form-control-sm mb-2" accept="image/*">
-      <label class="text-muted small">อัปเดตรูปเพิ่มเติม 1</label><input type="file" id="euImg3" class="form-control form-control-sm mb-2" accept="image/*">
-      <label class="text-muted small">อัปเดตรูปเพิ่มเติม 2</label><input type="file" id="euImg4" class="form-control form-control-sm mb-2" accept="image/*">
-      <label class="text-muted small">อัปเดตรูปเพิ่มเติม 3</label><input type="file" id="euImg5" class="form-control form-control-sm mb-2" accept="image/*">
-      
-      <div id="euGroupDiv" style="display:none;" class="mt-3 pt-2 border-top">
-        <label class="text-primary-corp fw-bold small mb-1">ย้ายกลุ่มดูแล</label>
-        <select id="euGroup" class="form-select form-select-sm"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
-      </div>
-    </div>
-    <button id="btnConfirmEditUser" onclick="submitEditUser()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
-  </div>
-</div>
-
-<div id="modalUserHistory" class="modal-overlay">
-  <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-folder-open me-2"></i>แฟ้มข้อมูลลูกค้า</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalUserHistory')" style="cursor:pointer"></i>
-    </div>
-    <div id="uhProfile" class="text-center mb-3 pb-2 border-bottom"></div>
-    <span class="text-primary-corp fw-bold small mb-2 d-block"><i class="fa-solid fa-list me-2"></i>ประวัติสัญญาทั้งหมด</span>
-    <div id="uhLoansList"></div>
-  </div>
-</div>
-
-<div id="modalRecentPays" class="modal-overlay">
-  <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-receipt me-2"></i>ประวัติรับเงินล่าสุด</h5>
-      <div class="d-flex align-items-center">
-        <select id="recentPaysLimit" class="form-select form-select-sm w-auto d-inline-block border-0 shadow-sm me-2 py-1 px-2 fw-bold" onchange="applyRecentPaysLimit()">
-          <option value="30">30</option><option value="50">50</option><option value="100">100</option><option value="all">ทั้งหมด</option>
-        </select>
-        <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalRecentPays')" style="cursor:pointer;"></i>
-      </div>
-    </div>
-    <div id="recentPaysContainer"></div>
-  </div>
-</div>
-
-<div id="modalDetails" class="modal-overlay" style="z-index: 1005;">
-  <div class="modal-content-custom bg-light">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-file-invoice-dollar me-2"></i>รายละเอียดสัญญา</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2 bg-white rounded-circle shadow-sm" style="cursor:pointer; width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;" onclick="closeModal('modalDetails')"></i>
-    </div>
-    
-    <div class="pro-card p-3 mb-3 shadow-sm" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px;">
-      <h6 class="fw-bold text-primary-corp mb-1 fs-5" id="dName">ชื่อผู้กู้</h6>
-      <p class="text-muted mb-3 small" id="dDetails">รายละเอียดเพิ่มเติม</p>
-
-      <div id="dInfoGrid" class="mb-3 pb-3 border-bottom"></div>
-      
-      <div class="row text-center g-2 align-items-center">
-        <div class="col-4 border-end">
-          <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">เงินต้น</label>
-          <b class="text-dark fs-6" id="dPrin">0</b>
-        </div>
-        <div class="col-4 border-end">
-          <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">ชำระแล้ว</label>
-          <b class="text-success-corp fs-6" id="dPaid">0</b>
-        </div>
-        <div class="col-4">
-          <label class="fw-bold text-warning-corp mb-1 small" style="font-size:0.75rem;">ต้นคงเหลือ</label>
-          <b class="text-warning-corp fs-6" id="dRemain">0</b>
-        </div>
-      </div>
-    </div>
-
-    <div class="row g-2 mb-3">
-      <div class="col-12"><button id="btnDetailPay" class="btn bg-success-corp w-100 fw-bold py-2 rounded-3 shadow-sm text-white"><i class="fa-solid fa-hand-holding-dollar me-2"></i>บันทึกรับชำระเงิน</button></div>
-      <div class="col-4"><button id="btnDetailHistory" class="btn btn-white border w-100 fw-bold py-2 rounded-3 text-primary-corp small"><i class="fa-solid fa-folder-open mb-1 d-block fs-6"></i>แฟ้มลูกค้า</button></div>
-      <div class="col-4"><button id="btnDetailEdit" class="btn btn-white border w-100 fw-bold py-2 rounded-3 text-warning-corp small"><i class="fa-solid fa-pen mb-1 d-block fs-6"></i>แก้ไข</button></div>
-      <div class="col-4"><button id="btnDetailDelete" class="btn btn-white border w-100 fw-bold py-2 rounded-3 text-danger-corp small"><i class="fa-solid fa-trash-can mb-1 d-block fs-6"></i>ลบสัญญา</button></div>
-    </div>
-
-    <div class="nav-tabs-custom mb-2">
-      <div id="tabBtnHistory" class="active py-2 small fw-bold" onclick="switchDetailTab('History')">ประวัติชำระ</div>
-      <div id="tabBtnSchedule" class="py-2 small fw-bold" onclick="switchDetailTab('Schedule')">ตารางงวด</div>
-    </div>
-    
-    <div id="dHistory" style="max-height: 40vh; overflow-y: auto;"></div>
-    <div id="dSchedule" style="display: none; max-height: 40vh; overflow-y: auto;"></div>
-  </div>
-</div>
-
-<div id="modalPay" class="modal-overlay">
-  <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-primary-corp"><i class="fa-solid fa-hand-holding-dollar me-2"></i>รับชำระเงิน</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalPay')" style="cursor:pointer"></i>
-    </div>
-    
-    <div class="input-group mb-3 shadow-sm rounded-3" style="border-radius: 10px; overflow: hidden;">
-      <input list="payLoanOptions" id="loanIdInput" class="form-control form-control-sm border-end-0 py-2" placeholder="รหัสสัญญา / ชื่อลูกค้า...">
-      <datalist id="payLoanOptions"></datalist>
-      <button onclick="fetchPreview()" class="btn bg-primary-corp fw-bold px-3">
-        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-          <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-        </svg>
-      </button>
-    </div>
-    
-    <div id="payDetails" style="display:none">
-      <div id="pWarning" class="alert alert-danger py-2 px-2 mb-2 fw-bold shadow-sm small" style="display:none; border-left: 4px solid #ef4444;"></div>
-      
-      <div class="pro-card p-3 mb-3">
-        <h6 class="m-0 fw-bold border-bottom pb-2 mb-2 text-primary-corp text-center" id="pName">...</h6>
-        <div class="text-center mb-2">
-            <span class="text-muted d-block fw-bold mb-1 small">เงินต้นคงเหลือ</span>
-            <b class="text-dark fs-4" id="pRemainingPrin">0</b>
-        </div>
-        <div class="row pt-2 pb-1 text-center border-top">
-          <div class="col-4 border-end"><span class="text-muted d-block small mb-1" style="font-size:0.7rem;">เงินต้น</span><b class="text-dark fs-6" id="pExpectedPrin">0</b></div>
-          <div class="col-4 border-end"><span class="text-muted d-block small mb-1" style="font-size:0.7rem;">ดอกเบี้ย</span><b class="text-warning-corp fs-6" id="pExpectedInt">0</b></div>
-          <div class="col-4"><span class="text-danger-corp fw-bold d-block small mb-1" style="font-size:0.7rem;">ค่าปรับ</span><b class="text-danger-corp fs-6" id="pFine">0</b></div>
-        </div>
-        <div class="mt-2 pt-2 border-top text-center rounded-3 py-2" style="background: linear-gradient(135deg, #f0fdf4, #ffffff);">
-            <span class="text-primary-corp fw-bold d-block mb-1 small">ยอดเรียกเก็บงวดนี้ (รวมปรับ)</span>
-            <b class="text-success-corp" style="font-size: 1.8rem;" id="pExpectedTotal">0</b>
-        </div>
-      </div>
-
-      <div class="pro-card p-3 mb-3">
-        <label class="text-danger-corp fw-bold small mb-1">จัดการค่าปรับ</label>
-        <select id="pChargeFine" class="form-select form-select-sm mb-2 fw-bold" onchange="toggleFineInput()">
-          <option value="Yes">คิดค่าปรับตามจริง</option><option value="No">ยกเว้นค่าปรับให้ลูกค้า</option>
-        </select>
-
-        <label class="text-danger-corp fw-bold mt-2 mb-1 small">หักเป็นค่าปรับ (฿)</label>
-        <input type="number" id="pFinePaidInput" class="form-control form-control-sm mb-2 fw-bold fs-5 text-danger-corp" min="0" oninput="syncTotalPay()" style="background:#fff1f2;">
-        
-        <div class="d-flex justify-content-between align-items-end mt-2 mb-1">
-            <label class="text-primary-corp fw-bold small m-0">ลูกค้าโอน/เงินสดจริง (฿)</label>
-            <span class="badge bg-danger shadow-sm cursor-pointer px-2 py-1" style="cursor: pointer; font-size: 0.75rem;" onclick="setPayoffAmount()"><i class="fa-solid fa-flag-checkered me-1"></i> ปิดยอดสัญญา</span>
-        </div>
-        <input type="number" id="pTotalPaidInput" class="form-control form-control-sm mb-1 fw-bold text-primary-corp text-center" min="0" style="font-size: 1.5rem; background:#eff6ff; border:2px solid #2563eb !important; height: 50px;">
-      </div>
-      
-      <div class="row g-2 mb-3">
-        <div class="col-12"><label class="fw-bold text-muted mb-1 small">วันที่รับชำระ</label><input type="date" id="pPayDate" class="form-control form-control-sm bg-white fw-bold" onchange="recalculatePayPreview()"></div>
-        <div class="col-6"><label class="fw-bold text-muted mb-1 small">ช่องทางชำระ</label><select id="pMethod" class="form-select form-select-sm bg-white fw-bold"><option value="เงินโอน">โอนเข้าบัญชี</option><option value="เงินสด">รับเงินสด</option></select></div>
-        <div class="col-6"><label class="fw-bold text-muted mb-1 small">แนบสลิป</label><input type="file" id="pSlip" class="form-control form-control-sm bg-white" style="padding: 5px;" accept="image/*"></div>
-      </div>
-      
-      <button id="btnConfirmPay" onclick="submitPay()" class="btn bg-primary-corp w-100 fw-bold py-2 shadow-sm rounded-pill"><i class="fa-solid fa-check-circle me-2"></i> ยืนยันทำรายการ</button>
-    </div>
-  </div>
-</div>
-
-<div id="modalCreate" class="modal-overlay">
-  <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-success-corp"><i class="fa-solid fa-file-signature me-2"></i>เปิดสัญญาใหม่</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalCreate')" style="cursor:pointer"></i>
-    </div>
-    
-    <label class="fw-bold text-primary-corp small mb-1">เลือกลูกค้า</label>
-    <select id="cUserSelect" class="form-select form-select-sm mb-3 shadow-sm fw-bold" style="border-color: #2563eb;" onchange="toggleNewUserForm()"><option value="NEW">➕ สร้างประวัติใหม่ (ระบุด้านล่าง)</option></select>
-    
-    <div id="newUserFormBox" class="pro-card p-3 mb-3 border-start border-4" style="border-color: #2563eb !important;">
-      <h6 class="fw-bold text-dark mb-2 small"><i class="fa-solid fa-user-plus me-2"></i>ประวัติลูกค้าใหม่</h6>
-      <label class="small">ชื่อ-นามสกุล</label><input type="text" id="cName" class="form-control form-control-sm mb-2">
-      <label class="small">ชื่อเล่น</label><input type="text" id="cNick" class="form-control form-control-sm mb-2">
-      <label class="small">เบอร์โทรศัพท์</label><input type="text" id="cPhone" class="form-control form-control-sm mb-2">
-      <label class="small">ที่อยู่/รายละเอียด</label><input type="text" id="cDetails" class="form-control form-control-sm mb-3">
-      
-      <div class="row g-2">
-          <div class="col-12"><label class="text-muted fw-bold small">รูปภาพหน้าตรง</label><input type="file" id="cPhoto" class="form-control form-control-sm" accept="image/*"></div>
-          <div class="col-12"><label class="text-muted fw-bold small">เอกสาร/บัตร ปชช.</label><input type="file" id="cIdCard" class="form-control form-control-sm" accept="image/*"></div>
-          <div class="col-12 col-md-4"><label class="text-muted fw-bold small">รูปที่ 3</label><input type="file" id="cImg3" class="form-control form-control-sm" accept="image/*"></div>
-          <div class="col-12 col-md-4"><label class="text-muted fw-bold small">รูปที่ 4</label><input type="file" id="cImg4" class="form-control form-control-sm" accept="image/*"></div>
-          <div class="col-12 col-md-4"><label class="text-muted fw-bold small">รูปที่ 5</label><input type="file" id="cImg5" class="form-control form-control-sm" accept="image/*"></div>
-      </div>
-      
-      <div id="cGroupDiv" style="display:none;" class="mt-3 pt-2 border-top">
-        <label class="fw-bold text-primary-corp small mb-1">กลุ่มดูแล</label><select id="cGroup" class="form-select form-select-sm fw-bold"><option value="A">Group A</option><option value="B">Group B</option><option value="C">Group C</option><option value="Private">🔒 ลับเฉพาะ (เฉพาะ SuperAdmin)</option></select>
-      </div>
-    </div>
-
-    <h6 class="fw-bold text-primary-corp mt-1 mb-2 pb-2 border-bottom small"><i class="fa-solid fa-file-lines me-2"></i>รายละเอียดสัญญา</h6>
-    <div class="row g-2 mb-2">
-      <div class="col-12"><label class="fw-bold small">ยอดเงินต้น (฿)</label><input type="number" id="cAmount" class="form-control form-control-sm fw-bold text-primary-corp" style="font-size: 1.5rem; height: 50px;" min="0" placeholder="10000" oninput="generateSchedulePreview()"></div>
-      <div class="col-12"><label class="small">ดอกเบี้ย (%)</label><input type="number" id="cRate" class="form-control form-control-sm" min="0" value="5" oninput="generateSchedulePreview()"></div>
-      
-      <div class="col-12">
-        <label class="small">รูปแบบการเก็บเงิน</label>
-        <select id="cCycleMode" class="form-select form-select-sm fw-bold" onchange="toggleCycleMode(); generateSchedulePreview()">
-          <option value="preset">ตามรอบที่กำหนด</option>
-          <option value="fixed_day">ระบุวันในสัปดาห์</option>
-          <option value="custom">กำหนดจำนวนวันเอง</option>
-        </select>
-      </div>
-      
-      <div class="col-12" id="cPresetContainer">
-        <label class="small">เลือกรอบการส่ง</label>
-        <select id="cPresetInterval" class="form-select form-select-sm fw-bold" onchange="generateSchedulePreview()">
-          <option value="1">1 วัน</option>
-          <option value="3">3 วัน</option>
-          <option value="5">5 วัน</option>
-          <option value="7">7 วัน</option>
-          <option value="14">14 วัน</option>
-          <option value="21">21 วัน</option>
-          <option value="30">30 วัน</option>
-        </select>
-      </div>
-      
-      <div class="col-12" id="cDayOfWeekContainer" style="display:none;">
-        <label class="text-primary-corp fw-bold small">เลือกวันเก็บเงิน</label>
-        <select id="cDayOfWeek" class="form-select form-select-sm fw-bold" onchange="generateSchedulePreview()">
-          <option value="1">วันจันทร์</option>
-          <option value="2">วันอังคาร</option>
-          <option value="3">วันพุธ</option>
-          <option value="4">วันพฤหัสบดี</option>
-          <option value="5">วันศุกร์</option>
-          <option value="6">วันเสาร์</option>
-          <option value="0">วันอาทิตย์</option>
-        </select>
-      </div>
-
-      <div class="col-12" id="cCustomContainer" style="display:none;">
-        <label class="small">ระบุจำนวนวัน (1-120)</label>
-        <input type="number" id="cCustomInterval" class="form-control form-control-sm fw-bold" min="1" max="120" value="1" oninput="generateSchedulePreview()">
-      </div>
-      
-      <div class="col-6"><label class="small">จำนวนงวด</label><input type="number" id="cInstallments" class="form-control form-control-sm fw-bold" min="1" value="1" oninput="generateSchedulePreview()"></div>
-      <div class="col-6"><label class="small">วันที่เริ่มสัญญา</label><input type="date" id="cStartDate" class="form-control form-control-sm fw-bold" oninput="generateSchedulePreview()"></div>
-    </div>
-    
-    <label class="d-flex align-items-center mt-2 mb-3 bg-white p-2 rounded-3 border shadow-sm" style="cursor: pointer;">
-      <input class="form-check-input m-0 flex-shrink-0" type="checkbox" id="cUpfrontInt" style="width: 20px; height: 20px; cursor: pointer;" onchange="generateSchedulePreview()">
-      <span class="text-danger-corp fw-bold ms-2 mb-0 small">หักดอกเบี้ยล่วงหน้า (ณ วันทำสัญญา)</span>
-    </label>
-    
-    <label class="fw-bold text-muted small mb-1">ตารางประมาณการชำระ</label>
-    <div id="cSchedulePreview" class="pro-card p-2 mb-3 bg-white" style="max-height: 200px; overflow-y:auto; font-size: 0.85rem;"></div>
-    
-    <button id="btnConfirmCreate" onclick="saveLoan()" class="btn bg-success-corp w-100 py-2 fw-bold shadow-sm rounded-pill"><i class="fa-solid fa-check me-2"></i> อนุมัติสัญญา</button>
-  </div>
-</div>
-
-<div id="modalEdit" class="modal-overlay">
-  <div class="modal-content-custom bg-light stack-form">
-    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
-      <h5 class="fw-bold m-0 text-warning-corp"><i class="fa-solid fa-pen-to-square me-2"></i>แก้ไขสัญญา</h5>
-      <i class="fa-solid fa-xmark fs-4 text-secondary p-2" onclick="closeModal('modalEdit')" style="cursor:pointer"></i>
-    </div>
-    <input type="hidden" id="eLoanId"><input type="hidden" id="eUserId">
-    <div class="pro-card p-3 mb-3">
-      <label class="small">ยอดเงินต้น</label><input type="number" id="eAmount" class="form-control form-control-sm mb-2 fw-bold text-primary-corp" min="0">
-      <label class="small">ดอกเบี้ย (%)</label><input type="number" id="eRate" class="form-control form-control-sm mb-2" min="0" readonly>
-      
-      <label class="small">รูปแบบการเก็บเงิน</label>
-      <select id="eCycleMode" class="form-select form-select-sm mb-2 fw-bold" onchange="toggleEditCycleMode()">
-        <option value="preset">ตามรอบที่กำหนด</option>
-        <option value="fixed_day">ระบุวันในสัปดาห์</option>
-        <option value="custom">กำหนดจำนวนวันเอง</option>
-      </select>
-      
-      <div id="ePresetContainer">
-        <label class="small">เลือกรอบการส่ง</label>
-        <select id="ePresetInterval" class="form-select form-select-sm mb-2 fw-bold">
-          <option value="1">1 วัน</option>
-          <option value="3">3 วัน</option>
-          <option value="5">5 วัน</option>
-          <option value="7">7 วัน</option>
-          <option value="14">14 วัน</option>
-          <option value="21">21 วัน</option>
-          <option value="30">30 วัน</option>
-        </select>
-      </div>
-      
-      <div id="eDayOfWeekContainer" style="display:none;">
-        <label class="text-primary-corp fw-bold small mb-1">เลือกวันเก็บเงินใหม่</label>
-        <select id="eDayOfWeek" class="form-select form-select-sm mb-2 fw-bold">
-          <option value="1">วันจันทร์</option>
-          <option value="2">วันอังคาร</option>
-          <option value="3">วันพุธ</option>
-          <option value="4">วันพฤหัสบดี</option>
-          <option value="5">วันศุกร์</option>
-          <option value="6">วันเสาร์</option>
-          <option value="0">วันอาทิตย์</option>
-        </select>
-      </div>
-
-      <div id="eCustomContainer" style="display:none;">
-        <label class="small">ระบุจำนวนวัน (1-120)</label>
-        <input type="number" id="eCustomInterval" class="form-control form-control-sm mb-2 fw-bold" min="1" max="120" value="1">
-      </div>
-      
-      <label class="small">แก้ไขวันที่เริ่ม</label><input type="date" id="eStartDate" class="form-control form-control-sm fw-bold">
-    </div>
-    <button id="btnConfirmEdit" onclick="submitEdit()" class="btn bg-primary-corp w-100 py-2 fw-bold rounded-pill shadow-sm">บันทึกข้อมูล</button>
-  </div>
-</div>
-
-<div id="modalAuth" class="modal-overlay" style="z-index: 10000; align-items: center;">
-  <div class="pro-card p-4 text-center" style="width: 85%; max-width: 320px; border-top: 5px solid #ef4444; border-radius: 20px;">
-    <h5 class="text-dark fw-bold mb-3"><i class="fa-solid fa-lock text-danger-corp me-2"></i>ยืนยันตัวตน</h5>
-    <input type="password" id="authPassword" class="form-control form-control-lg text-center mb-4 fw-bold" placeholder="รหัสผ่าน Admin / PIN">
-    <div class="row g-2">
-      <div class="col-6"><button class="btn btn-secondary w-100 fw-bold py-3 rounded-pill" onclick="closeModal('modalAuth')">ยกเลิก</button></div>
-      <div class="col-6"><button class="btn btn-danger w-100 fw-bold py-3 rounded-pill" onclick="confirmPassword()">ยืนยัน</button></div>
-    </div>
-  </div>
-</div>
-
-<script src="script.js"></script>
-
+<script src="index.js"></script>
 </body>
 </html>

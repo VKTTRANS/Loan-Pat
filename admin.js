@@ -215,6 +215,32 @@ async function loadAdminDash() {
   }
 }
 
+// 🟢 เพิ่มฟังก์ชันคำนวณยอดหนี้แบบ Dynamic เหมือนฝั่ง User
+function getDynamicInstallmentInfo(loan) {
+    let remainAmt = loan.remainingPrincipal !== undefined ? Number(loan.remainingPrincipal) : Number(loan.amount || 0);
+    let rate = Number(loan.rate || 0);
+    let cInst = Number(loan.currentInst) || 1;
+    let tInst = Number(loan.totalInst) || 1;
+    
+    if (cInst > tInst) {
+        tInst = cInst; 
+    }
+    
+    let remainingInst = tInst - (cInst - 1);
+    if (remainingInst < 1) remainingInst = 1;
+    
+    let prinPerInst = remainAmt / remainingInst;
+    let intPerInst = remainAmt * (rate / 100);
+    let expectedPay = prinPerInst + intPerInst;
+    
+    return {
+        remainAmt: remainAmt,
+        cInst: cInst,
+        tInst: tInst,
+        expectedPay: expectedPay
+    };
+}
+
 function updateDashMetrics() {
   let fDay = document.getElementById('dashFilterDay') ? document.getElementById('dashFilterDay').value : 'all';
   let fMonth = document.getElementById('dashFilterMonth') ? document.getElementById('dashFilterMonth').value : 'all';
@@ -249,7 +275,9 @@ function updateDashMetrics() {
 
       if (matchDay && matchMonth && matchYear && matchGroup && matchAdmin) {
         let orig = Number(l.originalPrincipal) || 0; 
-        let remain = Number(l.remainingPrincipal) || 0;
+        
+        // 🟢 ใช้การคำนวณยอดเหลือให้แม่นยำ
+        let remain = Number(l.remainingPrincipal !== undefined ? l.remainingPrincipal : (l.amount || 0));
         
         metrics.TotalLoan += orig; 
         
@@ -347,11 +375,13 @@ function showCycleDetails(cycleName) {
     } else {
         html = '<div class="list-group list-group-flush">';
         loans.forEach(l => {
+             // 🟢 ดึงข้อมูลจากการคำนวณสด
+             let info = getDynamicInstallmentInfo(l);
              html += `
              <div class="list-group-item list-group-item-action p-3" style="cursor:pointer; border-bottom: 1px solid #e2e8f0;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
-                    <span class="text-success fw-bold" style="font-size: 1rem;">฿${Number(l.originalPrincipal || 0).toLocaleString()}</span>
+                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${info.remainAmt.toLocaleString()}</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-muted small text-truncate" style="font-size:0.75rem; max-width: 50%;"><span class="emoji-icon">👔</span>${l.adminName || '-'} | สาย: ${l.groupName || '-'}</span>
@@ -367,7 +397,6 @@ function showCycleDetails(cycleName) {
     openModal('modalCycleDetails');
 }
 
-// 🟢 อัปเกรดตารางให้รองรับมือถือด้วย data-label
 function renderSystemTable() {
   let html = '';
   windowSystemAccounts.forEach(a => {
@@ -481,7 +510,8 @@ function renderClientsTable(data) {
     let admins = new Set();
     
     clientActiveLoans.forEach(l => {
-        totalActivePrincipal += Number(l.originalPrincipal || 0);
+        let info = getDynamicInstallmentInfo(l); // 🟢 ใช้สมการใหม่
+        totalActivePrincipal += info.remainAmt; 
         if (l.adminName) admins.add(l.adminName);
     });
     
@@ -545,11 +575,13 @@ function viewClientProfile(userId) {
       else if(l.status === 'Deleted') statusBadge = '<span class="badge bg-danger">ยกเลิก/ลบสัญญา</span>';
       else statusBadge = `<span class="badge bg-danger">${l.status}</span>`;
 
+      let info = getDynamicInstallmentInfo(l); // 🟢 ใช้สมการใหม่
+
       lHtml += `
         <div class="pro-card p-3 mb-2 border-0 shadow-sm bg-white" style="cursor:pointer; border-left: 4px solid #3b82f6 !important;" onclick="closeModal('modalViewClient'); viewDetails('${l.loanId}')">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <b class="text-dark d-block mb-1">ยอดกู้: ฿${Number(l.originalPrincipal || 0).toLocaleString()}</b>
+              <b class="text-dark d-block mb-1">ยอดกู้: ฿${Number(l.originalPrincipal || 0).toLocaleString()} <span class="ms-2 text-danger" style="font-size:0.85rem;">ค้าง: ฿${info.remainAmt.toLocaleString()}</span></b>
               <span class="text-muted d-block small"><span class="emoji-icon">📅</span>${formatDateWithDayName(l.startDate)}</span>
             </div>
             <div class="text-end">
@@ -711,6 +743,8 @@ function renderLoansTable(data) {
   let html = '';
   data.forEach(b => {
       let statusBadge = b.status === 'Active' ? '<span class="badge bg-success">กำลังกู้</span>' : '<span class="badge bg-secondary">ปิดยอดแล้ว</span>';
+      
+      let info = getDynamicInstallmentInfo(b); // 🟢 ใช้สมการใหม่
 
       html += `<tr style="cursor:pointer;" onclick="viewDetails('${b.loanId}')">
           <td data-label="รหัสสัญญา" class="text-muted small">${b.loanId}</td>
@@ -723,7 +757,7 @@ function renderLoansTable(data) {
             <span class="d-block fw-bold text-dark small"><span class="emoji-icon">📅</span>${b.dueDate}</span>
           </td>
           <td data-label="ยอดเงินต้น" class="text-primary fw-bold text-end">฿${Number(b.originalPrincipal || 0).toLocaleString()}</td>
-          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${Number(b.remainingPrincipal || 0).toLocaleString()}</td>
+          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${info.remainAmt.toLocaleString()}</td>
           <td data-label="สถานะ" class="text-end">${statusBadge}</td>
       </tr>`;
   });

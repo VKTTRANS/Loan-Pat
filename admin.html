@@ -238,17 +238,26 @@
       </div>
     </div>
 
+    <!-- ปุ่มเช็คยอดดิวตามวันที่ -->
+    <div class="pro-card p-3 mb-4 shadow-sm bg-white" style="border-radius: 12px; border-left: 4px solid #3b82f6 !important;">
+      <h6 class="fw-bold text-dark mb-2"><span class="emoji-icon text-primary-corp">📅</span> เช็คยอดเก็บตามวันครบกำหนด</h6>
+      <div class="d-flex gap-2 align-items-center">
+          <input type="date" id="adminDashFilterDue" class="form-control border shadow-sm fw-bold text-primary-corp bg-light" style="border-radius: 8px; max-width: 250px;">
+          <button class="btn bg-primary-corp text-white rounded-2 shadow-sm px-4 fw-bold text-nowrap" onclick="showAdminDueByDate()">เช็คยอด</button>
+      </div>
+    </div>
+
     <div class="row g-3 mb-4">
       <div class="col-md-3 col-sm-6">
         <div class="pro-card p-3 shadow-sm border-0 bg-white" style="border-left: 5px solid #2563eb !important;">
           <span class="text-muted small fw-bold">ยอดปล่อยกู้สะสม</span>
-          <h3 class="fw-bold text-dark mt-1">฿<span id="mTotalLoan">0.00</span></h3>
+          <h3 class="fw-bold text-dark mt-1">฿<span id="mTotalLoan">0</span></h3>
         </div>
       </div>
       <div class="col-md-3 col-sm-6">
         <div class="pro-card p-3 shadow-sm border-0 bg-white" style="border-left: 5px solid #f59e0b !important;">
           <span class="text-muted small fw-bold">ยอดหนี้คงค้าง</span>
-          <h3 class="fw-bold text-warning mt-1">฿<span id="mTotalRemain">0.00</span></h3>
+          <h3 class="fw-bold text-warning mt-1">฿<span id="mTotalRemain">0</span></h3>
         </div>
       </div>
       <div class="col-md-3 col-sm-6">
@@ -277,6 +286,7 @@
       <h5 class="fw-bold m-0"><span class="emoji-icon">👔</span>รายชื่อพนักงานระบบ</h5>
       <button class="btn btn-primary fw-bold shadow-sm" onclick="clearForms(); openModal('modalCreateAccount')"><span class="emoji-icon">➕</span>เพิ่มพนักงาน</button>
     </div>
+    <div class="alert alert-info py-2 px-3 small fw-bold mb-3 shadow-sm" style="border-left: 4px solid #0dcaf0;">💡 ทริค: แตะที่ชื่อพนักงาน (สีน้ำเงิน) เพื่อดูสรุปยอดเงินและสัญญาที่พนักงานคนนั้นดูแลอยู่ได้เลยครับ</div>
     <div class="table-container">
       <table class="table align-middle mb-0">
         <thead>
@@ -418,6 +428,51 @@
   <img id="fullSizeImage" src="" alt="Full Size">
 </div>
 
+<div id="modalAdminDueByDate" class="modal-overlay" style="display: none;">
+  <div class="modal-content-custom bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-2 border-bottom pb-2">
+      <h5 class="fw-bold m-0 text-primary-corp"><span class="emoji-icon">📅</span>ยอดดิวประจำวันที่ <span id="adminDueDetailDate">...</span></h5>
+      <span class="fs-4 text-secondary p-2 bg-white rounded-circle shadow-sm" style="cursor:pointer; width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;" onclick="closeModal('modalAdminDueByDate')">❌</span>
+    </div>
+    
+    <div class="pro-card p-3 mb-3 text-center shadow-sm" style="background: linear-gradient(135deg, #eff6ff, #ffffff); border-radius: 12px; border: 1px solid #bfdbfe;">
+       <span class="d-block text-muted small fw-bold mb-1">ยอดรวมที่ต้องเก็บทั้งระบบ (ประเมิน)</span>
+       <h3 class="fw-bold text-primary-corp m-0" id="adminDueDetailTotal">฿0</h3>
+    </div>
+    
+    <div id="adminDueDetailBody" class="bg-white rounded-3 shadow-sm border p-0 overflow-hidden" style="max-height: 50vh; overflow-y: auto;"></div>
+  </div>
+</div>
+
+<div id="modalEmployeeStats" class="modal-overlay" style="display: none;">
+  <div class="modal-content-custom bg-light">
+    <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+      <h5 class="fw-bold m-0 text-primary-corp"><span class="emoji-icon">👔</span>ข้อมูลผลงานพนักงาน</h5>
+      <span class="fs-4 text-secondary p-2 bg-white rounded-circle shadow-sm" style="cursor:pointer; width: 32px; height: 32px; display:flex; align-items:center; justify-content:center;" onclick="closeModal('modalEmployeeStats')">❌</span>
+    </div>
+    <div class="text-center mb-3">
+       <h4 class="fw-bold text-dark m-0" id="empStatName">ชื่อพนักงาน</h4>
+       <span class="badge bg-primary mt-1 px-3" id="empStatRole">Role</span>
+    </div>
+    <div class="row g-2 mb-3">
+      <div class="col-6">
+         <div class="pro-card p-3 shadow-sm border-0 text-center bg-white" style="border-bottom: 4px solid #10b981 !important;">
+            <span class="d-block text-muted small fw-bold">ปล่อยกู้สะสม (Active)</span>
+            <h5 class="fw-bold text-success m-0 mt-1" id="empStatTotalLoan">฿0</h5>
+         </div>
+      </div>
+      <div class="col-6">
+         <div class="pro-card p-3 shadow-sm border-0 text-center bg-white" style="border-bottom: 4px solid #f59e0b !important;">
+            <span class="d-block text-muted small fw-bold">หนี้คงเหลือที่ต้องเก็บ</span>
+            <h5 class="fw-bold text-warning m-0 mt-1" id="empStatTotalRemain">฿0</h5>
+         </div>
+      </div>
+    </div>
+    <h6 class="fw-bold text-dark small mb-2"><span class="emoji-icon">📋</span> สัญญาที่ดูแล (กำลังกู้)</h6>
+    <div id="empStatLoansList" style="max-height: 40vh; overflow-y: auto;"></div>
+  </div>
+</div>
+
 <div id="modalCycleDetails" class="modal-overlay" style="display: none;">
   <div class="modal-content-custom bg-light">
     <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
@@ -557,15 +612,15 @@
       <div class="row text-center g-2 align-items-center">
         <div class="col-4 border-end">
           <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">เงินต้นเริ่มแรก</label>
-          <b class="text-dark fs-6" id="dPrin">0.00</b>
+          <b class="text-dark fs-6" id="dPrin">0</b>
         </div>
         <div class="col-4 border-end">
           <label class="text-muted fw-bold mb-1 small" style="font-size:0.75rem;">ชำระแล้ว</label>
-          <b class="text-success-corp fs-6" id="dPaid">0.00</b>
+          <b class="text-success-corp fs-6" id="dPaid">0</b>
         </div>
         <div class="col-4">
           <label class="fw-bold text-warning-corp mb-1 small" style="font-size:0.75rem;">ต้นคงเหลือ</label>
-          <b class="text-warning-corp fs-6" id="dRemain">0.00</b>
+          <b class="text-warning-corp fs-6" id="dRemain">0</b>
         </div>
       </div>
     </div>

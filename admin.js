@@ -21,7 +21,14 @@ if (document.getElementById('dashFilterYear')) {
   document.getElementById('dashFilterYear').innerHTML = yearHtml;
 }
 
-// 🟢 ตัวช่วยจัดการปุ่มล็อคและแสดงการโหลด
+const tzOffsetDate = new Date();
+tzOffsetDate.setMinutes(tzOffsetDate.getMinutes() - tzOffsetDate.getTimezoneOffset());
+let todayIsoStr = tzOffsetDate.toISOString().split('T')[0];
+
+if (document.getElementById('adminDashFilterDue')) {
+  document.getElementById('adminDashFilterDue').value = todayIsoStr;
+}
+
 function toggleBtnLoading(btnId, isLoading) {
   let btn = document.getElementById(btnId);
   if (!btn) return;
@@ -125,7 +132,6 @@ function showConfirm(msg, callback) {
   document.getElementById('customConfirm').style.display = 'flex';
 }
 
-// 🟢 อัปเกรดให้ปุ่ม Yes มี Loading ด้วยเวลาลบ
 async function executeConfirm() {
   toggleBtnLoading('btnConfirmYes', true);
   try {
@@ -268,6 +274,7 @@ function getDynamicInstallmentInfo(loan) {
     };
 }
 
+// 🟢 อัปเดตการนับยอดสะสมให้มีเฉพาะ Active เท่านั้น
 function updateDashMetrics() {
   let fDay = document.getElementById('dashFilterDay') ? document.getElementById('dashFilterDay').value : 'all';
   let fMonth = document.getElementById('dashFilterMonth') ? document.getElementById('dashFilterMonth').value : 'all';
@@ -304,44 +311,41 @@ function updateDashMetrics() {
         let orig = Number(l.originalPrincipal) || 0; 
         let remain = Number(l.remainingPrincipal !== undefined ? l.remainingPrincipal : (l.amount || 0));
         
-        metrics.TotalLoan += orig; 
-        
+        // 🟢 ย้ายให้คำนวณทั้งหมดเฉพาะเวลา Active
         if(l.status === 'Active') {
+          metrics.TotalLoan += orig; 
           metrics.TotalRemain += remain;
           metrics.TotalUsers.add(l.userId);
-        }
-        
-        if (!groupMetrics[g]) groupMetrics[g] = { loan: 0, remain: 0 };
-        groupMetrics[g].loan += orig;
-        if (l.status === 'Active') groupMetrics[g].remain += remain;
 
-        let c = String(l.cycle || 'ไม่ระบุ');
-        let cycleName = c;
-        if(c === '1' || c.toLowerCase() === 'daily') cycleName = 'รายวัน';
-        else if(c === '7' || c === 'fixed_day') cycleName = 'รายสัปดาห์ (7 วัน)';
-        else if(c === '15') cycleName = 'ราย 15 วัน';
-        else if(c === '30' || c.toLowerCase() === 'monthly') cycleName = 'รายเดือน';
-        else if(c !== 'ไม่ระบุ') cycleName = 'รอบ ' + c + ' วัน';
+          if (!groupMetrics[g]) groupMetrics[g] = { loan: 0, remain: 0 };
+          groupMetrics[g].loan += orig;
+          groupMetrics[g].remain += remain;
 
-        if (!typeMetrics[cycleName]) typeMetrics[cycleName] = { count: 0, loan: 0, remain: 0 };
-        typeMetrics[cycleName].count += 1;
-        typeMetrics[cycleName].loan += orig;
-        
-        if (l.status === 'Active') {
-            typeMetrics[cycleName].remain += remain;
-            
-            if(!window.currentCycleLoans[cycleName]) window.currentCycleLoans[cycleName] = [];
-            window.currentCycleLoans[cycleName].push({
-                ...l,
-                groupName: g
-            });
+          let c = String(l.cycle || 'ไม่ระบุ');
+          let cycleName = c;
+          if(c === '1' || c.toLowerCase() === 'daily') cycleName = 'รายวัน';
+          else if(c === '7' || c === 'fixed_day') cycleName = 'รายสัปดาห์ (7 วัน)';
+          else if(c === '15') cycleName = 'ราย 15 วัน';
+          else if(c === '30' || c.toLowerCase() === 'monthly') cycleName = 'รายเดือน';
+          else if(c !== 'ไม่ระบุ') cycleName = 'รอบ ' + c + ' วัน';
+
+          if (!typeMetrics[cycleName]) typeMetrics[cycleName] = { count: 0, loan: 0, remain: 0 };
+          typeMetrics[cycleName].count += 1;
+          typeMetrics[cycleName].loan += orig;
+          typeMetrics[cycleName].remain += remain;
+          
+          if(!window.currentCycleLoans[cycleName]) window.currentCycleLoans[cycleName] = [];
+          window.currentCycleLoans[cycleName].push({
+              ...l,
+              groupName: g
+          });
         }
       }
     }
   });
 
-  document.getElementById('mTotalLoan').innerText = metrics.TotalLoan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
-  document.getElementById('mTotalRemain').innerText = metrics.TotalRemain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}); 
+  document.getElementById('mTotalLoan').innerText = Math.round(metrics.TotalLoan).toLocaleString(); 
+  document.getElementById('mTotalRemain').innerText = Math.round(metrics.TotalRemain).toLocaleString(); 
   document.getElementById('mTotalClients').innerText = metrics.TotalUsers.size.toLocaleString();
   document.getElementById('mTotalStaff').innerText = metrics.TotalStaff;
   
@@ -361,8 +365,8 @@ function updateDashMetrics() {
            <span class="d-block text-muted small" style="font-size: 0.75rem;">จำนวน: ${data.count} สัญญา</span>
         </div>
         <div class="text-end">
-           <span class="d-block fw-bold text-primary-corp" style="font-size: 0.85rem;">ปล่อย: ฿${data.loan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
-           <span class="d-block fw-bold text-warning-corp" style="font-size: 0.85rem;">ค้าง: ฿${data.remain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+           <span class="d-block fw-bold text-primary-corp" style="font-size: 0.85rem;">ปล่อย: ฿${Math.round(data.loan).toLocaleString()}</span>
+           <span class="d-block fw-bold text-warning-corp" style="font-size: 0.85rem;">ค้าง: ฿${Math.round(data.remain).toLocaleString()}</span>
         </div>
      </div>
     </div>`;
@@ -380,15 +384,117 @@ function updateDashMetrics() {
              <span class="emoji-icon text-muted">🗂️</span>
              <span class="fw-bold text-dark">${g}</span>
            </div>
-           <span class="d-block text-muted small" style="font-size: 0.75rem;">กู้สะสม: ฿${data.loan.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+           <span class="d-block text-muted small" style="font-size: 0.75rem;">กู้สะสม: ฿${Math.round(data.loan).toLocaleString()}</span>
         </div>
         <div class="text-end">
-           <span class="d-block fw-bold text-warning-corp fs-6">ค้าง: ฿${data.remain.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+           <span class="d-block fw-bold text-warning-corp fs-6">ค้าง: ฿${Math.round(data.remain).toLocaleString()}</span>
         </div>
      </div>
     </div>`;
   });
   document.getElementById('groupBreakdownContainer').innerHTML = groupHtml || `<div class="col-12 text-center text-muted">ยังไม่มีข้อมูลตามตัวกรอง</div>`;
+}
+
+function showAdminDueByDate() {
+    let dateVal = document.getElementById('adminDashFilterDue').value;
+    if (!dateVal) return showAlert('กรุณาเลือกวันที่', true);
+
+    let parts = dateVal.split('-');
+    let selectedDate = new Date(parts[0], parts[1] - 1, parts[2]);
+
+    let y = parseInt(parts[0]) + 543;
+    let m = parseInt(parts[1]); 
+    let d = parseInt(parts[2]); 
+    let dayIndex = selectedDate.getDay();
+
+    let str1 = `${DAY_NAMES[dayIndex]} ${d}/${m}/${y}`; 
+    let str2 = `วัน${DAY_NAMES[dayIndex]} ${d}/${m}/${y}`; 
+    let str3 = `${d}/${m}/${y}`; 
+    let str4 = `${DAY_NAMES[dayIndex]} ${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}/${y}`; 
+
+    let targetLoans = allLoans.filter(l => {
+        if (l.status !== 'Active' || !l.dueDate) return false;
+        let due = String(l.dueDate).trim();
+        return due === str1 || due === str2 || due === str4 || due.includes(str3);
+    });
+
+    let html = '';
+    let totalExpected = 0;
+
+    if(targetLoans.length === 0) {
+        html = '<div class="text-center text-muted py-4"><span style="font-size: 2rem; display: block; margin-bottom: 10px;">📭</span>ไม่มีรายการครบกำหนดในวันนี้</div>';
+    } else {
+        html = '<div class="list-group list-group-flush">';
+        targetLoans.forEach(l => {
+             let info = getDynamicInstallmentInfo(l);
+             totalExpected += info.expectedPay;
+             html += `
+             <div class="list-group-item px-3 py-3" style="border-bottom: 1px solid #e2e8f0; cursor:pointer;" onclick="closeModal('modalAdminDueByDate'); viewDetails('${l.loanId}')">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                    <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;"><span class="emoji-icon">👤</span>${l.userName}</b>
+                    <span class="text-success fw-bold" style="font-size: 1rem;">฿${Math.round(info.expectedPay).toLocaleString()}</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center">
+                    <span class="text-muted small"><span class="emoji-icon">👔</span>${l.adminName || '-'}</span>
+                    <span class="text-muted small"><span class="emoji-icon">🏷️</span>${l.loanId}</span>
+                </div>
+             </div>`;
+        });
+        html += '</div>';
+    }
+
+    document.getElementById('adminDueDetailDate').innerText = `วัน${DAY_NAMES[dayIndex]} ${d}/${m}/${y}`; 
+    document.getElementById('adminDueDetailTotal').innerText = `฿${Math.round(totalExpected).toLocaleString()}`;
+    document.getElementById('adminDueDetailBody').innerHTML = html;
+
+    openModal('modalAdminDueByDate');
+}
+
+function viewEmployeeStats(adminId) {
+    let emp = windowSystemAccounts.find(a => String(a.id) === String(adminId));
+    if(!emp) return;
+
+    document.getElementById('empStatName').innerText = emp.name;
+    document.getElementById('empStatRole').innerText = emp.role;
+    document.getElementById('empStatRole').className = emp.role === 'SuperAdmin' ? 'badge bg-danger mt-1 px-3' : (emp.role === 'Admin' ? 'badge bg-primary mt-1 px-3' : 'badge bg-info text-dark mt-1 px-3');
+
+    let empLoansAll = rawAllTimeLoans.filter(l => (String(l.operatorId) === String(adminId) || String(l.adminName) === String(emp.name)) && l.status !== 'Deleted');
+    
+    let totalLoan = 0;
+    let totalRemain = 0;
+    let activeLoans = [];
+
+    empLoansAll.forEach(l => {
+        if(l.status === 'Active') {
+            totalLoan += Number(l.originalPrincipal) || 0;
+            let info = getDynamicInstallmentInfo(l);
+            totalRemain += info.remainAmt;
+            activeLoans.push(l);
+        }
+    });
+
+    document.getElementById('empStatTotalLoan').innerText = `฿${Math.round(totalLoan).toLocaleString()}`;
+    document.getElementById('empStatTotalRemain').innerText = `฿${Math.round(totalRemain).toLocaleString()}`;
+
+    let html = '';
+    if(activeLoans.length === 0) {
+        html = '<div class="text-center text-muted p-4 bg-white border rounded">ไม่มีสัญญาที่กำลังดูแล</div>';
+    } else {
+        activeLoans.forEach(l => {
+            let info = getDynamicInstallmentInfo(l);
+            html += `
+            <div class="pro-card p-3 mb-2 shadow-sm bg-white border-0 clickable-card" style="border-left: 4px solid #3b82f6 !important;" onclick="closeModal('modalEmployeeStats'); viewDetails('${l.loanId}')">
+                <div class="d-flex justify-content-between align-items-center">
+                    <b class="text-dark fs-6 text-truncate" style="max-width: 60%;"><span class="emoji-icon">👤</span>${l.userName}</b>
+                    <b class="text-danger-corp small">ค้าง ฿${Math.round(info.remainAmt).toLocaleString()}</b>
+                </div>
+                <div class="text-muted small mt-1"><span class="emoji-icon">🏷️</span>${l.loanId}</div>
+            </div>`;
+        });
+    }
+    document.getElementById('empStatLoansList').innerHTML = html;
+
+    openModal('modalEmployeeStats');
 }
 
 function showCycleDetails(cycleName) {
@@ -405,7 +511,7 @@ function showCycleDetails(cycleName) {
              <div class="list-group-item list-group-item-action p-3" style="cursor:pointer; border-bottom: 1px solid #e2e8f0;" onclick="closeModal('modalCycleDetails'); viewDetails('${l.loanId}')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
                     <b class="text-dark text-truncate pe-2" style="font-size: 0.95rem; max-width: 65%;">${l.userName}</b>
-                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>
+                    <span class="text-danger-corp fw-bold" style="font-size: 1rem;">ค้าง ฿${Math.round(info.remainAmt).toLocaleString()}</span>
                 </div>
                 <div class="d-flex justify-content-between align-items-center">
                     <span class="text-muted small text-truncate" style="font-size:0.75rem; max-width: 50%;"><span class="emoji-icon">👔</span>${l.adminName || '-'} | สาย: ${l.groupName || '-'}</span>
@@ -427,14 +533,15 @@ function renderSystemTable() {
     let roleBadge = a.role === 'SuperAdmin' ? '<span class="badge bg-danger">SuperAdmin</span>' : (a.role === 'Admin' ? '<span class="badge bg-primary">Admin</span>' : '<span class="badge bg-info text-dark">User</span>');
     let statusBadge = a.status === 'Active' ? '<span class="badge bg-success">Active</span>' : '<span class="badge bg-secondary">Suspended</span>';
     
-    let editBtn = `<button class="btn btn-sm btn-outline-secondary" onclick="triggerEditAccount('${a.id}', '${a.name}', '${a.role}', '${a.groupName}', '${a.status}')"><span class="emoji-icon">✏️</span> แก้ไข</button>`;
-    let copyBtn = `<button class="btn btn-sm btn-outline-primary ms-1" onclick="copyNfcLink('${a.id}')"><span class="emoji-icon">🔗</span> ลิงก์</button>`;
+    let editBtn = `<button class="btn btn-sm btn-outline-secondary" onclick="triggerEditAccount('${a.id}', '${a.name}', '${a.role}', '${a.groupName}', '${a.status}')" title="แก้ไข"><span class="emoji-icon">✏️</span> แก้ไข</button>`;
+    let copyBtn = `<button class="btn btn-sm btn-outline-primary ms-1" onclick="copyNfcLink('${a.id}')" title="คัดลอกลิงก์ NFC"><span class="emoji-icon">🔗</span> ลิงก์</button>`;
+    let deleteBtn = `<button class="btn btn-sm btn-outline-danger ms-1" onclick="triggerDeleteAccount('${a.id}', '${a.name}')" title="ลบพนักงาน"><span class="emoji-icon">🗑️</span></button>`;
     
-    let actionBtns = a.role === 'SuperAdmin' ? '-' : `<div class="d-flex justify-content-end gap-1 w-100">${editBtn}${copyBtn}</div>`;
+    let actionBtns = a.role === 'SuperAdmin' ? '-' : `<div class="d-flex justify-content-end gap-1 w-100">${editBtn}${copyBtn}${deleteBtn}</div>`;
 
     html += `<tr>
       <td data-label="รหัส ID" class="fw-bold text-muted">${a.id}</td>
-      <td data-label="ชื่อพนักงาน" class="fw-bold">${a.name}</td>
+      <td data-label="ชื่อพนักงาน" class="fw-bold text-primary" style="cursor:pointer; text-decoration: underline;" onclick="viewEmployeeStats('${a.id}')">${a.name}</td>
       <td data-label="ตำแหน่ง">${roleBadge}</td>
       <td data-label="สายงาน">${a.groupName || '-'}</td>
       <td data-label="สถานะ">${statusBadge}</td>
@@ -442,6 +549,16 @@ function renderSystemTable() {
     </tr>`;
   });
   document.getElementById('systemTableBody').innerHTML = html || '<tr><td colspan="6" class="text-center text-muted py-3">ไม่มีข้อมูลพนักงาน</td></tr>';
+}
+
+function triggerDeleteAccount(userId, name) {
+  promptPassword(async () => {
+    showConfirm(`คุณต้องการลบพนักงาน "${name}" ถาวรใช่หรือไม่?\n(สถานะจะถูกเปลี่ยนเป็น Deleted)`, async () => {
+      let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
+      const res = await api({ action: 'deleteSystemAccount', targetUserId: userId, operatorId: authData.userId });
+      if(res.success) { showAlert('ลบพนักงานสำเร็จ'); loadAdminDash(); } else showAlert(res.error, true);
+    });
+  });
 }
 
 function copyNfcLink(userId) {
@@ -550,7 +667,7 @@ function renderClientsTable(data) {
     });
     
     let adminNames = admins.size > 0 ? Array.from(admins).join(', ') : '-';
-    let loanBadge = totalActivePrincipal > 0 ? `<span class="text-primary fw-bold">฿${totalActivePrincipal.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>` : `<span class="text-muted">-</span>`;
+    let loanBadge = totalActivePrincipal > 0 ? `<span class="text-primary fw-bold">฿${Math.round(totalActivePrincipal).toLocaleString()}</span>` : `<span class="text-muted">-</span>`;
 
     html += `<tr style="cursor:pointer;" onclick="viewClientProfile('${u.id}')">
       <td data-label="รูปภาพ">${photoHtml}</td>
@@ -615,7 +732,7 @@ function viewClientProfile(userId) {
         <div class="pro-card p-3 mb-2 border-0 shadow-sm bg-white" style="cursor:pointer; border-left: 4px solid #3b82f6 !important;" onclick="closeModal('modalViewClient'); viewDetails('${l.loanId}')">
           <div class="d-flex justify-content-between align-items-center">
             <div>
-              <b class="text-dark d-block mb-1">ยอดกู้: ฿${Number(l.originalPrincipal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} <span class="ms-2 text-danger" style="font-size:0.85rem;">ค้าง: ฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span></b>
+              <b class="text-dark d-block mb-1">ยอดกู้: ฿${Math.round(Number(l.originalPrincipal || 0)).toLocaleString()} <span class="ms-2 text-danger" style="font-size:0.85rem;">ค้าง: ฿${Math.round(info.remainAmt).toLocaleString()}</span></b>
               <span class="text-muted d-block small"><span class="emoji-icon">📅</span>${formatDateWithDayName(l.startDate)}</span>
             </div>
             <div class="text-end">
@@ -798,8 +915,8 @@ function renderLoansTable(data) {
             <span class="d-block text-muted small mb-1">รอบ ${b.cycle === 'fixed_day' ? '7' : b.cycle} วัน</span>
             <span class="d-block fw-bold text-dark small"><span class="emoji-icon">📅</span>${b.dueDate}</span>
           </td>
-          <td data-label="ยอดเงินต้น" class="text-primary fw-bold text-end">฿${Number(b.originalPrincipal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${info.remainAmt.toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
+          <td data-label="ยอดเงินต้น" class="text-primary fw-bold text-end">฿${Math.round(Number(b.originalPrincipal || 0)).toLocaleString()}</td>
+          <td data-label="หนี้คงเหลือ" class="text-danger fw-bold text-end">฿${Math.round(info.remainAmt).toLocaleString()}</td>
           <td data-label="สถานะ" class="text-end">${statusBadge}</td>
       </tr>`;
   });
@@ -822,9 +939,9 @@ async function viewDetails(id) {
     `;
     document.getElementById('dInfoGrid').innerHTML = infoHtml;
     
-    document.getElementById('dPrin').innerText = `฿${Number(res.principal || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
-    document.getElementById('dPaid').innerText = `฿${Number(res.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`; 
-    document.getElementById('dRemain').innerText = `฿${Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0)).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}`;
+    document.getElementById('dPrin').innerText = `฿${Math.round(Number(res.principal || 0)).toLocaleString()}`; 
+    document.getElementById('dPaid').innerText = `฿${Math.round(Number(res.totalPaid || 0)).toLocaleString()}`; 
+    document.getElementById('dRemain').innerText = `฿${Math.round(Number(res.remaining !== undefined ? res.remaining : (res.remainingPrincipal || 0))).toLocaleString()}`;
     
     document.getElementById('btnDetailDelete').onclick = () => { closeModal('modalDetails'); triggerDeleteLoan(id); };
     
@@ -832,7 +949,7 @@ async function viewDetails(id) {
     if(!res.payments || res.payments.length === 0) hHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ยังไม่มีประวัติการรับชำระ</div>';
     else {
       res.payments.forEach(p => {
-        let fineText = Number(p.finePaid || 0) > 0 ? `<br><span class="text-danger-corp fw-bold">ค่าปรับ: ฿${Number(p.finePaid).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</span>` : '';
+        let fineText = Number(p.finePaid || 0) > 0 ? `<br><span class="text-danger-corp fw-bold">ค่าปรับ: ฿${Math.round(Number(p.finePaid)).toLocaleString()}</span>` : '';
         let receiver = p.receiverName || p.operatorName || p.adminName || 'ไม่ระบุ';
         
         let titleRow = '';
@@ -847,11 +964,11 @@ async function viewDetails(id) {
             <div class="d-flex justify-content-between align-items-center">
               <div>
                 ${titleRow}
-                <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Number(p.prinPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} | ตัดดอก ฿${Number(p.intPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})} ${fineText}</span>
+                <span class="text-muted d-block mt-1 small" style="font-size:0.75rem;">ตัดต้น ฿${Math.round(Number(p.prinPaid || 0)).toLocaleString()} | ตัดดอก ฿${Math.round(Number(p.intPaid || 0)).toLocaleString()} ${fineText}</span>
                 <span class="text-primary-corp d-block mt-1 small fw-bold" style="font-size:0.75rem;"><span class="emoji-icon">👔</span>รับโดย: ${receiver}</span>
               </div>
               <div class="text-end">
-                <b class="text-success-corp d-block mb-1" style="font-size:1rem;">฿${Number(p.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b>
+                <b class="text-success-corp d-block mb-1" style="font-size:1rem;">฿${Math.round(Number(p.totalPaid || 0)).toLocaleString()}</b>
                 <div class="d-flex gap-2 justify-content-end align-items-center mt-1">
                    ${p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fw-bold text-decoration-none fs-5"><span class="emoji-icon">🧾</span></a>` : ''}
                 </div>
@@ -865,7 +982,7 @@ async function viewDetails(id) {
     let sHtml = '';
     if(!res.schedule || res.schedule.length === 0) sHtml = '<div class="text-center text-muted p-4 border rounded bg-white">ไม่มีข้อมูลตารางชำระ</div>';
     else {
-      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Number(s.amount || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</b></div>`; });
+      res.schedule.forEach(s => { sHtml += `<div class="d-flex justify-content-between text-muted border-bottom py-2 small"><span class="fw-bold text-dark">งวดที่ ${s.no}: <span class="text-muted fw-normal ms-2">${s.date}</span></span><b class="text-primary-corp">฿${Math.round(Number(s.amount || 0)).toLocaleString()}</b></div>`; });
     }
     document.getElementById('dSchedule').innerHTML = sHtml;
 
@@ -896,8 +1013,8 @@ function renderPaysTable(data) {
       <td data-label="รหัสสัญญา" class="text-muted small">${p.loanId}</td>
       <td data-label="งวดที่">${noText}</td>
       <td data-label="ผู้รับเงิน"><span class="badge bg-light text-dark border"><span class="emoji-icon">👔</span>${receiver}</span></td>
-      <td data-label="ยอดรับ (฿)" class="text-success fw-bold text-end">฿${Number(p.totalPaid || 0).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2})}</td>
-      <td data-label="ค่าปรับ (฿)" class="text-danger fw-bold text-end">${Number(p.finePaid || 0) > 0 ? '฿'+Number(p.finePaid).toLocaleString('th-TH', {minimumFractionDigits: 2, maximumFractionDigits: 2}) : '-'}</td>
+      <td data-label="ยอดรับ (฿)" class="text-success fw-bold text-end">฿${Math.round(Number(p.totalPaid || 0)).toLocaleString()}</td>
+      <td data-label="ค่าปรับ (฿)" class="text-danger fw-bold text-end">${Number(p.finePaid || 0) > 0 ? '฿'+Math.round(Number(p.finePaid)).toLocaleString() : '-'}</td>
       <td data-label="สลิป" class="text-end">${slipBtn}</td>
       <td data-label="ยกเลิกรายการ" class="text-end"><button class="btn btn-sm btn-outline-danger" onclick="triggerDeletePayment('${p.id}', '${p.loanId}')"><span class="emoji-icon">🗑️</span></button></td>
     </tr>`;

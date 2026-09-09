@@ -277,31 +277,30 @@ function updateDashMetrics() {
   
   rawAllTimeLoans.forEach(l => {
     if (l.status === 'Deleted') return; 
-    let orig = Number(l.originalPrincipal) || 0; let remain = Number(l.remainingPrincipal) || 0;
-    metrics.TotalLoan += orig; 
+    let orig = Number(l.originalPrincipal) || 0; 
+    let remain = Number(l.remainingPrincipal !== undefined ? l.remainingPrincipal : (l.amount || 0));
     
+    // 🟢 ย้ายการนับ "ยอดปล่อยกู้สะสม" เข้ามาเฉพาะสัญญา Active เท่านั้น
     if(l.status === 'Active') {
+      metrics.TotalLoan += orig; 
       metrics.TotalRemain += remain;
       metrics.TotalUsers.add(l.userId);
-    }
 
-    let c = String(l.cycle || 'ไม่ระบุ');
-    let cycleName = c;
-    if(c === '1' || c.toLowerCase() === 'daily') cycleName = 'รายวัน';
-    else if(c === '7' || c === 'fixed_day') cycleName = 'รายสัปดาห์ (7 วัน)';
-    else if(c === '15') cycleName = 'ราย 15 วัน';
-    else if(c === '30' || c.toLowerCase() === 'monthly') cycleName = 'รายเดือน';
-    else if(c !== 'ไม่ระบุ') cycleName = 'รอบ ' + c + ' วัน';
+      let c = String(l.cycle || 'ไม่ระบุ');
+      let cycleName = c;
+      if(c === '1' || c.toLowerCase() === 'daily') cycleName = 'รายวัน';
+      else if(c === '7' || c === 'fixed_day') cycleName = 'รายสัปดาห์ (7 วัน)';
+      else if(c === '15') cycleName = 'ราย 15 วัน';
+      else if(c === '30' || c.toLowerCase() === 'monthly') cycleName = 'รายเดือน';
+      else if(c !== 'ไม่ระบุ') cycleName = 'รอบ ' + c + ' วัน';
 
-    if (!typeMetrics[cycleName]) typeMetrics[cycleName] = { count: 0, loan: 0, remain: 0 };
-    typeMetrics[cycleName].count += 1;
-    typeMetrics[cycleName].loan += orig;
-    
-    if (l.status === 'Active') {
-        typeMetrics[cycleName].remain += remain;
-        
-        if(!window.currentCycleLoans[cycleName]) window.currentCycleLoans[cycleName] = [];
-        window.currentCycleLoans[cycleName].push(l);
+      if (!typeMetrics[cycleName]) typeMetrics[cycleName] = { count: 0, loan: 0, remain: 0 };
+      typeMetrics[cycleName].count += 1;
+      typeMetrics[cycleName].loan += orig;
+      typeMetrics[cycleName].remain += remain;
+      
+      if(!window.currentCycleLoans[cycleName]) window.currentCycleLoans[cycleName] = [];
+      window.currentCycleLoans[cycleName].push(l);
     }
   });
 
@@ -716,7 +715,7 @@ function renderRecentPays(data) {
   else {
     data.forEach(p => {
       let slipBtn = p.slipUrl && p.slipUrl !== 'ไม่มี' ? `<a href="${getSafeImgUrl(p.slipUrl)}" target="_blank" class="text-primary-corp fs-3 mt-2 me-3 text-decoration-none"><span class="emoji-icon">🧾</span></a>` : ``;
-      let receiver = p.receiverName || p.operatorName || p.adminName || 'ไม่ระบุ';
+      let receiver = p.receiverName || p.operatorName || p.adminName || p.receiver || 'ไม่ระบุ';
       
       html += `
         <div class="pro-card p-3 mb-2 border-0 shadow-sm" style="border-left: 4px solid #10b981 !important;">
@@ -836,7 +835,7 @@ async function viewDetails(id) {
     else {
       res.payments.forEach(p => {
         let fineText = Number(p.finePaid || 0) > 0 ? `<br><span class="text-danger-corp fw-bold">ค่าปรับ: ฿${Math.round(Number(p.finePaid)).toLocaleString()}</span>` : '';
-        let receiver = p.receiverName || p.operatorName || p.adminName || 'ไม่ระบุ';
+        let receiver = p.receiverName || p.operatorName || p.adminName || p.receiver || 'ไม่ระบุ';
         
         let titleRow = '';
         if(String(p.no) === '0') {
@@ -941,7 +940,7 @@ function generateSchedulePreview() {
 
 function openBlankPayModal() {
   clearForms();
-  document.getElementById('paySearchGroup').style.display = 'flex';
+  document.getElementById('paySearchGroup').style.display = 'flex'; 
   document.getElementById('payLoading').style.display = 'none';
   document.getElementById('payDetails').style.display = 'none';
   openModal('modalPay');
@@ -1026,7 +1025,6 @@ function quickPay(id) {
   fetchPreview(true); 
 }
 
-// 🟢 อัปเกรดระบบปัดเศษใหม่: ปัดเศษหลักหน่วย (ทศนิยม) ให้เป็นจำนวนเต็ม
 function recalculatePayPreview() {
   if (!curPay) return;
 
@@ -1071,8 +1069,6 @@ function recalculatePayPreview() {
   }
 
   let rawTotal = expectedPrin + expectedInt + suggestedFine;
-  
-  // ปัดทศนิยมให้เป็นจำนวนเต็ม (หลักหน่วย)
   let suggestedTotal = Math.round(rawTotal);
 
   curPay.expectedPrin = expectedPrin;
@@ -1107,7 +1103,6 @@ function setPayoffAmount() {
   let fine = Number(fineInput.value) || 0;
   let rawPayoff = Number(curPay.remainingPrincipal || 0) + Number(curPay.expectedInt || 0) + fine;
   
-  // ปัดเศษตอนปิดยอดเป็นจำนวนเต็ม
   let roundedPayoff = Math.round(rawPayoff);
   totalInput.value = roundedPayoff;
 }
@@ -1218,7 +1213,20 @@ async function submitPay() {
     let slipBase64 = document.getElementById('pSlip').files[0] ? await compressImage(document.getElementById('pSlip').files[0]) : ''; 
     let authData = JSON.parse(sessionStorage.getItem('fintechAuthData'));
     
-    const res = await api({ action: 'submitPay', loanId: String(curPay.loanId).trim(), userId: authData.userId, nextNo: curPay.nextNo, totalPaidAmount: totalPaidVal, fineAmount: finePaidVal, payDate: document.getElementById('pPayDate').value, method: document.getElementById('pMethod').value, slipBase64: slipBase64 }, false);
+    const res = await api({ 
+        action: 'submitPay', 
+        loanId: String(curPay.loanId).trim(), 
+        userId: authData.userId, 
+        operatorName: authData.name,
+        adminName: authData.name,
+        receiverName: authData.name,
+        nextNo: curPay.nextNo, 
+        totalPaidAmount: totalPaidVal, 
+        fineAmount: finePaidVal, 
+        payDate: document.getElementById('pPayDate').value, 
+        method: document.getElementById('pMethod').value, 
+        slipBase64: slipBase64 
+    }, false);
     
     if(res.success) {
       clearForms(); showAlert('บันทึกการชำระเงินเสร็จสมบูรณ์!'); closeModal('modalPay'); loadDash();

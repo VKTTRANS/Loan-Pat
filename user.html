@@ -115,6 +115,7 @@
 
   <div class="container" style="max-width: 600px; padding-left: 12px; padding-right: 12px;">
     
+    <!-- หน้าหลัก -->
     <div id="viewDash">
       <div class="d-flex justify-content-between align-items-center mb-2 mt-1">
         <span class="fw-bold m-0 text-dark fs-5"><span class="emoji-icon">📊</span>ยอดสายของคุณ</span>
@@ -155,21 +156,23 @@
         </div>
       </div>
 
-      <h6 class="fw-bold text-dark mb-2 small"><span class="emoji-icon text-primary-corp">📅</span> เช็คยอดตามวันครบกำหนด</h6>
-      <div class="pro-card p-2 mb-3 shadow-sm bg-white" style="border-radius: 12px;">
+      <!-- 🟢 เช็คยอดตามวัน ถูกย้ายขึ้นมาตรงนี้และปรับ UI ให้เด่นขึ้น -->
+      <div class="pro-card p-3 mb-3 shadow-sm bg-white" style="border-radius: 12px; border-left: 4px solid #3b82f6 !important;">
+          <h6 class="fw-bold text-dark mb-2 small"><span class="emoji-icon text-primary-corp">📅</span> เช็คยอดเก็บตามวันครบกำหนด</h6>
           <div class="d-flex gap-2">
               <input type="date" id="dashFilterDue" class="form-control form-control-sm border shadow-sm fw-bold text-primary-corp bg-light" style="border-radius: 8px;">
               <button class="btn bg-primary-corp text-white rounded-2 shadow-sm px-3 fw-bold flex-shrink-0" style="font-size: 0.85rem;" onclick="showDueByDate()">เช็คยอด</button>
           </div>
       </div>
 
-      <h6 class="fw-bold text-dark mb-2 small"><span class="emoji-icon text-success-corp">⏱️</span> สรุปตามประเภทการกู้ (Cycle)</h6>
+      <h6 class="fw-bold text-dark mb-2 small"><span class="emoji-icon text-success-corp">⏱️</span> สรุปตามประเภทการกู้ (Active)</h6>
       <div class="row g-2 mb-3" id="typeBreakdownContainer"></div>
 
       <span class="fw-bold d-block mb-2 text-danger-corp px-2 small"><span class="emoji-icon">🔔</span>รายการใกล้ครบกำหนด / ค้างชำระ</span>
       <div id="dashAlertContainer"></div>
     </div>
 
+    <!-- หน้ารายการสัญญา -->
     <div id="viewList" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-2">
          <h6 class="fw-bold m-0"><span class="emoji-icon">📝</span> สัญญาเงินกู้ของฉัน</h6>
@@ -182,13 +185,14 @@
           </div>
           <div class="d-flex gap-2 w-100">
             <select id="filterCycle" class="form-select form-select-sm shadow-sm w-50" onchange="applyFilters()"><option value="all">ทุกรูปแบบ</option><option value="1">รายวัน</option><option value="7">รายสัปดาห์</option><option value="30">รายเดือน</option></select>
-            <select id="filterStatus" class="form-select form-select-sm shadow-sm w-50" onchange="applyFilters()"><option value="all">ทุกสถานะ</option><option value="due">ใกล้ดิว</option><option value="overdue">เกินกำหนด</option></select>
+            <select id="filterStatus" class="form-select form-select-sm shadow-sm w-50" onchange="applyFilters()"><option value="all">ทุกสถานะ</option><option value="Active" selected>กำลังกู้</option><option value="Closed">ปิดยอดแล้ว</option></select>
           </div>
         </div>
       </div>
       <div id="loanContainer"></div>
     </div>
     
+    <!-- หน้าลูกค้า -->
     <div id="viewUsers" style="display:none;">
       <div class="d-flex justify-content-between align-items-center mb-2">
          <h6 class="fw-bold m-0"><span class="emoji-icon">👥</span> ข้อมูลลูกค้าทั้งหมด</h6>
@@ -203,6 +207,7 @@
     </div>
   </div>
 
+  <!-- Bottom Navigation -->
   <div class="bottom-nav">
     <button class="bottom-nav-item active" id="btnTabDash" onclick="switchMainTab('Dash')"><span class="emoji-icon m-0">🏠</span>หน้าแรก</button>
     <button class="bottom-nav-item" id="btnTabList" onclick="switchMainTab('List')"><span class="emoji-icon m-0">📝</span>สัญญา</button>
